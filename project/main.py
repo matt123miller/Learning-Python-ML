@@ -1,31 +1,31 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import requests
 import matplotlib.pyplot as plt
 
-# Lets make some REST
+import csv
+import scipy.io as io
+import h5py 
 
-apiRoot = "http://pokeapi.co/api/v2/"
+#import hdf5
 
-response = requests.get(apiRoot + "pokemon")
-rawOutput = response.json()
-results = rawOutput["results"]
 
-pokemon = [r for r in results]
-names = [p["name"] for p in results]
-chars = np.array([len(n) for n in names]) 
+mat = io.loadmat('0708 Trial1 TE.mat')
 
-##print(pokemon)
-print (names)
-print(chars)
-print(x)
+data = np.array(mat['data6']).astype(float)
 
-# Make my graph axis
-chars = np.sort(chars)          
-x = np.array(range(0, len(chars)))     
 
-#"""
-plt.hist(chars)
-plt.show()
-#"""
+
+csvFile = open('Participant20.csv', newline='\n')
+
+file = csv.reader(csvFile)
+
+rows = {} 
+i = 0
+
+for row in file:
+    rowdata = np.array(row[1:]).astype(float)
+    rows[row[0]] = rowdata
+    i += 1 # Couldn't work out how to range with the file       
+             
+print(rows.keys())
