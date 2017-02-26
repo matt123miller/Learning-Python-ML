@@ -22,6 +22,11 @@ BL = back left
 BR = back right
 """
 
+def loadMatlabFile(filename, singlekey):
+    matlab = io.loadmat(filename)
+    
+    return np.array(matlab[singlekey])
+
 def centreOfPressureX(xy):
     tl = xy[0]
     tr = xy[1]
@@ -35,11 +40,6 @@ def centreOfPressureY(xy):
     bl = xy[2]
     br = xy[3]
     return ((tl + tr - bl - br)/(tr+br+tl+bl)) * (plateWidth * 0.5)
-
-def loadMatlabFile(filename, singlekey):
-    matlab = io.loadmat(filename)
-    
-    return np.array(matlab[singlekey])
     
 def extractCopFrom(rawData):
     
@@ -52,14 +52,31 @@ def extractCopFrom(rawData):
     
     return copX, copY
 
+def plotTimeSeriesFrom(rawData):
+    tl = np.array([])
+    tr = np.array([])
+    bl = np.array([])
+    br = np.array([])
 
+    for data in rawData:
+        tl = np.append(tl, data[0])
+        tr = np.append(tr, data[1])
+        bl = np.append(bl, data[2])
+        br = np.append(br, data[3])
+
+    axisX = np.arange(len(rawData))
+
+    plt.plot(axisX, tl)
+    plt.plot(axisX, tr)
+    plt.plot(axisX, bl)
+    plt.plot(axisX, br)
+
+    plt.show()
 
 rawData = loadMatlabFile(filename = '0708 Trial1 TE.mat', singlekey = 'data6')
-copX, copY = extractCopFrom(rawData)
+#copX, copY = extractCopFrom(rawData)
+plotTimeSeriesFrom(rawData)
 
-
-plt.plot(np.arange(len(copX)), copX) # Give it the x and y axis values
-plt.show()
 
 #plt.plot(copY, len(copY))
 #plt.show()
