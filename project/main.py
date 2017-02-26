@@ -9,23 +9,60 @@ import h5py
 
 #import hdf5
 
+"""
+variables
+"""
+plateWidth = 100
+plateLength = 100
 
-mat = io.loadmat('0708 Trial3 TE.mat')
+"""
+TL = front left
+TR = front right
+BL = back left
+BR = back right
+"""
 
-data = np.array(mat['data6']).astype(float)
+def centreOfPressureX(xy):
+    tl = xy[0]
+    tr = xy[1]
+    bl = xy[2]
+    br = xy[3]
+    return ((tr + br - tl - bl)/(tr+br+tl+bl)) * (plateLength * 0.5)
+    
+def centreOfPressureY(xy):
+    tl = xy[0]
+    tr = xy[1]
+    bl = xy[2]
+    br = xy[3]
+    return ((tl + tr - bl - br)/(tr+br+tl+bl)) * (plateWidth * 0.5)
 
-print(np.shape(data))
+def loadMatlabFile(filename, singlekey):
+    matlab = io.loadmat(filename)
+    
+    return np.array(matlab[singlekey])
+    
+def extractCopFrom(rawData):
+    
+    copX = np.array([])
+    copY = np.array([])
+    
+    for data in rawData:
+        copX = np.append(copX, centreOfPressureX(data))
+        copY = np.append(copY, centreOfPressureY(data))
+    
+    return copX, copY
 
-#csvFile = open('Participant20.csv', newline='\n')
-#
-#file = csv.reader(csvFile)
-#
-#rows = {} 
-#i = 0
-#
-#for row in file:
-#    rowdata = np.array(row[1:]).astype(float)
-#    rows[row[0]] = rowdata
-#    i += 1 # Couldn't work out how to range with the file       
-#             
-#print(rows.keys())
+
+
+rawData = loadMatlabFile(filename = '0708 Trial1 TE.mat', singlekey = 'data6')
+copX, copY = extractCopFrom(rawData)
+
+
+plt.plot(np.arange(len(copX)), copX) # Give it the x and y axis values
+plt.show()
+
+#plt.plot(copY, len(copY))
+#plt.show()
+
+print(len(copX))
+print(len(copY))
