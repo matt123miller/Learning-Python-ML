@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import csv
-import scipy.io as io
+import scipy.io
 import h5py 
 
 #import hdf5
@@ -22,29 +22,32 @@ BL = back left
 BR = back right
 """
 
-def loadMatlabFile(filename, singlekey):
-    matlab = io.loadmat(filename)
-    
-    return np.array(matlab[singlekey])
+def loadMatlabFile(filename, singlekey, printfile = False):
+    matlabFile = scipy.io.loadmat(filename)
+    if printfile:
+        print(matlabFile)
+    return np.array(matlabFile[singlekey])
 
 def centreOfPressureX(xy):
     tl = xy[0]
     tr = xy[1]
     bl = xy[2]
     br = xy[3]
-    return ((tr + br - tl - bl)/(tr+br+tl+bl)) * (plateLength * 0.5)
+    x = ((tr + br - tl - bl)/(tr+br+tl+bl)) * (plateLength * 0.5)
+    return x
     
 def centreOfPressureY(xy):
     tl = xy[0]
     tr = xy[1]
     bl = xy[2]
     br = xy[3]
-    return ((tl + tr - bl - br)/(tr+br+tl+bl)) * (plateWidth * 0.5)
+    y = ((tl + tr - bl - br)/(tr+br+tl+bl)) * (plateWidth * 0.5)
+    return y
     
 def extractCopFrom(rawData):
     
-    copX = np.array([])
-    copY = np.array([])
+    copX = np.array([]).astype(float)
+    copY = np.array([]).astype(float)
     
     for data in rawData:
         copX = np.append(copX, centreOfPressureX(data))
@@ -73,13 +76,29 @@ def plotTimeSeriesFrom(rawData):
 
     plt.show()
 
-rawData = loadMatlabFile(filename = '0708 Trial1 TE.mat', singlekey = 'data6')
-#copX, copY = extractCopFrom(rawData)
-plotTimeSeriesFrom(rawData)
+def plotCopLine(rawData):
+    copX, copY = extractCopFrom(rawData)
+    
+    length = np.arange(len(rawData))
+    plt.plot(length, copX)
+    plt.plot(length, copY)
+    plt.show()
+
+    print(copX[2500])
+
+rawData = loadMatlabFile(filename = '0708 Trial3 te.mat', singlekey = 'data6')
 
 
-#plt.plot(copY, len(copY))
-#plt.show()
+# Plot the whole file to see the differences
+#plotTimeSeriesFrom(rawData)
 
-print(len(copX))
-print(len(copY))
+# Trying to plot a line graph showing the movement taken
+plotCopLine(rawData)
+
+# Testing random new shit
+#
+#print(rawData[4000])
+#x, y = extractCopFrom(rawData)
+#print(np.shape(x))
+#print(np.shape(y))
+# Graph 
