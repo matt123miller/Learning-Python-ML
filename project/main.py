@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 import csv
 import scipy.io
@@ -77,8 +78,11 @@ def plotCopLine(rawData):
     copX, copY = extractCopFrom(rawData)
     
     length = np.arange(len(rawData))
-    plt.plot(length, copX)
-    plt.plot(length, copY)
+#    fig = plt.figure()
+#    ax = fig.add_subplot(111, projection = '3d')
+#    plt.plot(length, copX)
+#    plt.plot(length, copY)
+    plt.plot(copX, copY)
     plt.show()
 
     print(copX[2500])
