@@ -29,43 +29,40 @@ def loadMatlabFile(filename, singlekey, printfile = False):
     return np.array(matlabFile[singlekey])
 
 def centreOfPressureX(xy):
-    tl = xy[0]
-    tr = xy[1]
-    bl = xy[2]
-    br = xy[3]
+    tl = xy[:,0]
+    tr = xy[:,1]
+    bl = xy[:,2]
+    br = xy[:,3]
     x = ((tr + br - tl - bl)/(tr+br+tl+bl)) * (plateLength * 0.5)
     return x
     
 def centreOfPressureY(xy):
-    tl = xy[0]
-    tr = xy[1]
-    bl = xy[2]
-    br = xy[3]
+    tl = xy[:,0]
+    tr = xy[:,1]
+    bl = xy[:,2]
+    br = xy[:,3]
     y = ((tl + tr - bl - br)/(tr+br+tl+bl)) * (plateWidth * 0.5)
     return y
     
 def extractCopFrom(rawData):
+
+    copX = centreOfPressureX(rawData)
+    copY = centreOfPressureY(rawData)
     
-    copX = np.array([]).astype(float)
-    copY = np.array([]).astype(float)
-    
-    for data in rawData:
-        copX = np.append(copX, centreOfPressureX(data))
-        copY = np.append(copY, centreOfPressureY(data))
-    
+    copX = copX[np.logical_not(np.isnan(copX))]
+    copY = copY[np.logical_not(np.isnan(copY))]
+      
+    copX = copX[np.logical_not(np.isinf(copX))]
+    copY = copY[np.logical_not(np.isinf(copY))]
+                
     return copX, copY
 
 def plotTimeSeriesFrom(rawData):
-    tl = np.array([])
-    tr = np.array([])
-    bl = np.array([])
-    br = np.array([])
-
-    for data in rawData:
-        tl = np.append(tl, data[0])
-        tr = np.append(tr, data[1])
-        bl = np.append(bl, data[2])
-        br = np.append(br, data[3])
+    
+    tl = np.array(rawData[:,0])
+    tr = np.array(rawData[:,1])
+    bl = np.array(rawData[:,2])
+    br = np.array(rawData[:,3])
 
     axisX = np.arange(len(rawData))
 
