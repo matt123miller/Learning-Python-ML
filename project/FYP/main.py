@@ -84,19 +84,24 @@ def plotCopLine(rawData):
 #    plt.plot(length, copY)
     plt.plot(copX, copY)
     plt.show()
+    
+    print(length)
+    print(len(copX))
+    print(len(copY))
 
-    print(copX[2500])
+    
 
 rawData = loadMatlabFile(filename = '0708 Trial3 te.mat', singlekey = 'data6')
 
 
 # Plot the whole file to see the differences
-#plotTimeSeriesFrom(rawData)
+plotTimeSeriesFrom(rawData)
 
 # Trying to plot a line graph showing the movement taken
-plotCopLine(rawData)
+#plotCopLine(rawData)
 
 # Testing random new shit
+
 #
 #print(rawData[4000])
 #x, y = extractCopFrom(rawData)
