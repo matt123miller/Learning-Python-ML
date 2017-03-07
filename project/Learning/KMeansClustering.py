@@ -17,18 +17,17 @@ class KMeansClustering():
 
 def main():
     
-    
-    p = Participant(name = "0708 Trial1 TE", fileType = ".mat")
+    # Load some data in
+    p = Participant(name = "0708 Trial1 TE")
     print(p.filename)
     print(p.dataBlob)
+    
+    # Do the magic
     k = KMeansClustering(k=2)
-    
-    
     
     
     
 
 if __name__ == "__main__":
     main()
-    
     
