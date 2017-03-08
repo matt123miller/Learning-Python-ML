@@ -26,27 +26,23 @@ BL = back left = data6[[:,2]]
 BR = back right = data6[[:,3]]
 """
 
-def loadMatlabFile(filename, singlekey, printfile = False):
-    matlabFile = scipy.io.loadmat(filename)
-    if printfile:
-        print(matlabFile)
-    return np.array(matlabFile[singlekey])
-
-def centreOfPressureX(xy):
-    tl = xy[:,0]
-    tr = xy[:,1]
-    bl = xy[:,2]
-    br = xy[:,3]
-    x = ((tr + br - tl - bl)/(tr+br+tl+bl)) * (plateLength * 0.5)
-    return x
-    
-def centreOfPressureY(xy):
-    tl = xy[:,0]
-    tr = xy[:,1]
-    bl = xy[:,2]
-    br = xy[:,3]
-    y = ((tl + tr - bl - br)/(tr+br+tl+bl)) * (plateWidth * 0.5)
-    return y
+"""
+Trying to move to the participant, it seems appropriate
+#def centreOfPressureX(xy):
+#    tl = xy[:,0]
+#    tr = xy[:,1]
+#    bl = xy[:,2]
+#    br = xy[:,3]
+#    x = ((tr + br - tl - bl)/(tr+br+tl+bl)) * (plateLength * 0.5)
+#    return x
+#    
+#def centreOfPressureY(xy):
+#    tl = xy[:,0]
+#    tr = xy[:,1]
+#    bl = xy[:,2]
+#    br = xy[:,3]
+#    y = ((tl + tr - bl - br)/(tr+br+tl+bl)) * (plateWidth * 0.5)
+#    return y
     
 def extractCopFrom(rawData):
 
@@ -60,23 +56,9 @@ def extractCopFrom(rawData):
     copY = copY[np.logical_not(np.isinf(copY))]
                 
     return copX, copY
+"""
 
-def plotTimeSeriesFrom(rawData):
-    
-    tl = np.array(rawData[2000:4000,0])
-    tr = np.array(rawData[2000:4000,1])
-    bl = np.array(rawData[2000:4000,2])
-    br = np.array(rawData[2000:4000,3])
-
-    axisX = np.arange(len(tl))
-
-    plt.plot(axisX, tl, color = 'b')
-    plt.plot(axisX, tr, color = 'c')
-    plt.plot(axisX, bl, color = 'r')
-    plt.plot(axisX, br, color = 'y')
-
-    plt.show()
-
+#Works less great
 def plotCopLine(rawData):
     copX, copY = extractCopFrom(rawData)
     
@@ -86,11 +68,31 @@ def plotCopLine(rawData):
 #    plt.plot(length, copX)
 #    plt.plot(length, copY)
     plt.plot(copX, copY)
+    plt.label
     plt.show()
     
     print(length)
     print(len(copX))
     print(len(copY))
+    
+## Works great!
+def plotTimeSeriesFrom(rawData, title = ''):
+    
+    tl = np.array(rawData[2000:4000,0])
+    tr = np.array(rawData[2000:4000,1])
+    bl = np.array(rawData[2000:4000,2])
+    br = np.array(rawData[2000:4000,3])
+
+    axisX = np.arange(len(tl))
+
+    plt.title(title)
+    plt.plot(axisX, tl, color = 'b')
+    plt.plot(axisX, tr, color = 'c')
+    plt.plot(axisX, bl, color = 'r')
+    plt.plot(axisX, br, color = 'y')
+
+    plt.show()
+
 
 
 def loadParticipants():
@@ -111,7 +113,7 @@ def main():
     
     for p in participants:
         data6 = p.dataBlob[dataKey]
-        plotTimeSeriesFrom(data6)
+        plotTimeSeriesFrom(data6, title = p.name)
 #    
 #    rawData = p.dataBlob[dataKey]
 #    print(rawData)
