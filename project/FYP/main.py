@@ -4,9 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-import csv
-import scipy.io
-import h5py 
+from participant import Participant
 
 #import hdf5
 
@@ -15,12 +13,17 @@ variables
 """
 plateWidth = 100
 plateLength = 100
+participantNames = ['wy','xd','te'] # Not case sensitive
+trialNames = ['Trial1','Trial2','Trial3'] # not case sensitive
+date = "0708"
+dataKey = 'data6'
+
 
 """
-TL = front left
-TR = front right
-BL = back left
-BR = back right
+TL = front left = data6[[:,0]]
+TR = front right = data6[[:,1]]
+BL = back left = data6[[:,2]]
+BR = back right = data6[[:,3]]
 """
 
 def loadMatlabFile(filename, singlekey, printfile = False):
@@ -60,17 +63,17 @@ def extractCopFrom(rawData):
 
 def plotTimeSeriesFrom(rawData):
     
-    tl = np.array(rawData[:,0])
-    tr = np.array(rawData[:,1])
-    bl = np.array(rawData[:,2])
-    br = np.array(rawData[:,3])
+    tl = np.array(rawData[2000:4000,0])
+    tr = np.array(rawData[2000:4000,1])
+    bl = np.array(rawData[2000:4000,2])
+    br = np.array(rawData[2000:4000,3])
 
-    axisX = np.arange(len(rawData))
+    axisX = np.arange(len(tl))
 
-    plt.plot(axisX, tl)
-    plt.plot(axisX, tr)
-    plt.plot(axisX, bl)
-    plt.plot(axisX, br)
+    plt.plot(axisX, tl, color = 'b')
+    plt.plot(axisX, tr, color = 'c')
+    plt.plot(axisX, bl, color = 'r')
+    plt.plot(axisX, br, color = 'y')
 
     plt.show()
 
@@ -89,22 +92,44 @@ def plotCopLine(rawData):
     print(len(copX))
     print(len(copY))
 
+
+def loadParticipants():
+    outParticipants = []
+
+    for name in participantNames:
+        for trial in trialNames:
+            p = Participant(name = date + ' ' + trial + ' ' + name, fileType = '.mat')
+            outParticipants.append(p)
+    
+    return outParticipants
+  
+    
+def main():
+        
+    # pass this to all methods
+    participants = loadParticipants()
+    
+    for p in participants:
+        data6 = p.dataBlob[dataKey]
+        plotTimeSeriesFrom(data6)
+#    
+#    rawData = p.dataBlob[dataKey]
+#    print(rawData)
+#    # Plot the whole file to see the differences
+#    plotTimeSeriesFrom(rawData)
+    
+    # Trying to plot a line graph showing the movement taken
+    #plotCopLine(rawData)
+    
+    # Testing random new shit
+    
+    #
+    #print(rawData[4000])
+    #x, y = extractCopFrom(rawData)
+    #print(np.shape(x))
+    #print(np.shape(y))
+    # Graph 
     
 
-rawData = loadMatlabFile(filename = '0708 Trial3 te.mat', singlekey = 'data6')
-
-
-# Plot the whole file to see the differences
-plotTimeSeriesFrom(rawData)
-
-# Trying to plot a line graph showing the movement taken
-#plotCopLine(rawData)
-
-# Testing random new shit
-
-#
-#print(rawData[4000])
-#x, y = extractCopFrom(rawData)
-#print(np.shape(x))
-#print(np.shape(y))
-# Graph 
+if __name__ == "__main__":
+    main()
