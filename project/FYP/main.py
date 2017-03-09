@@ -20,10 +20,10 @@ dataKey = 'data6'
 
 
 """
-TL = front left = data6[[:,0]]
-TR = front right = data6[[:,1]]
-BL = back left = data6[[:,2]]
-BR = back right = data6[[:,3]]
+TL = front left = data6[[:,0]] = b
+TR = front right = data6[[:,1]] = c
+BL = back left = data6[[:,2]] = r
+BR = back right = data6[[:,3]] = y
 """
 
 """
@@ -59,29 +59,27 @@ def extractCopFrom(rawData):
 """
 
 #Works less great
-def plotCopLine(rawData):
-    copX, copY = extractCopFrom(rawData)
+def plotCopLine(copX, copY, title = ''):
     
-    length = np.arange(len(rawData))
+    print(len(copX))
+    print(len(copY))
+    #length = np.arange(len(rawData))
 #    fig = plt.figure()
 #    ax = fig.add_subplot(111, projection = '3d')
 #    plt.plot(length, copX)
 #    plt.plot(length, copY)
     plt.plot(copX, copY)
-    plt.label
+    plt.title(title)
     plt.show()
     
-    print(length)
-    print(len(copX))
-    print(len(copY))
     
 ## Works great!
 def plotTimeSeriesFrom(rawData, title = ''):
     
-    tl = np.array(rawData[2000:4000,0])
-    tr = np.array(rawData[2000:4000,1])
-    bl = np.array(rawData[2000:4000,2])
-    br = np.array(rawData[2000:4000,3])
+    tl = np.array(rawData[:,0])
+    tr = np.array(rawData[:,1])
+    bl = np.array(rawData[:,2])
+    br = np.array(rawData[:,3])
 
     axisX = np.arange(len(tl))
 
@@ -95,11 +93,11 @@ def plotTimeSeriesFrom(rawData, title = ''):
 
 
 
-def loadParticipants():
+def loadParticipants(trials, names):
     outParticipants = []
 
-    for trial in trialNames:
-        for name in participantNames:
+    for trial in trials:
+        for name in names:
             p = Participant(name = date + ' ' + trial + ' ' + name, fileType = '.mat')
             outParticipants.append(p)
     
@@ -109,14 +107,20 @@ def loadParticipants():
 def main():
         
     # pass this to all methods
-    participants = loadParticipants()
+    participants = loadParticipants(trials = trialNames, names = participantNames)
     
-#    print(participants[4].dataBlob)
-    for p in participants[0:6]:
+    for p in participants[:6]:
         data6 = p.dataBlob[dataKey]
+#        p.removeJunkData()
         
-        plotTimeSeriesFrom(data6, title = p.name)
-#    
+
+#        print(len(dataX))
+#        print(len(dataY))
+#        print(len(data6))
+
+        plotCopLine(p.copX, p.copY, title = p.name) 
+#        plotTimeSeriesFrom(data6, title = p.name)
+    
 
 
 
