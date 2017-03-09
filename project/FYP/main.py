@@ -26,37 +26,6 @@ BL = back left = data6[[:,2]] = r
 BR = back right = data6[[:,3]] = y
 """
 
-"""
-Trying to move to the participant, it seems appropriate
-#def centreOfPressureX(xy):
-#    tl = xy[:,0]
-#    tr = xy[:,1]
-#    bl = xy[:,2]
-#    br = xy[:,3]
-#    x = ((tr + br - tl - bl)/(tr+br+tl+bl)) * (plateLength * 0.5)
-#    return x
-#    
-#def centreOfPressureY(xy):
-#    tl = xy[:,0]
-#    tr = xy[:,1]
-#    bl = xy[:,2]
-#    br = xy[:,3]
-#    y = ((tl + tr - bl - br)/(tr+br+tl+bl)) * (plateWidth * 0.5)
-#    return y
-    
-def extractCopFrom(rawData):
-
-    copX = centreOfPressureX(rawData)
-    copY = centreOfPressureY(rawData)
-    
-    copX = copX[np.logical_not(np.isnan(copX))]
-    copY = copY[np.logical_not(np.isnan(copY))]
-      
-    copX = copX[np.logical_not(np.isinf(copX))]
-    copY = copY[np.logical_not(np.isinf(copY))]
-                
-    return copX, copY
-"""
 
 #Works less great
 def plotCopLine(copX, copY, title = ''):
@@ -106,48 +75,24 @@ def loadParticipants(trials, names):
     
 def main():
         
+    # Do I want a specific subset of files for some reason?
+#    trialNames = []
+#    participantNames = ['mm'] # e.g. just my data
     # pass this to all methods
     participants = loadParticipants(trials = trialNames, names = participantNames)
     
-    for p in participants[:6]:
-        data6 = p.dataBlob[dataKey]
-#        p.removeJunkData()
-        
+    for p in participants[:]:
+        data6 = p.data6
 
-#        print(len(dataX))
-#        print(len(dataY))
-#        print(len(data6))
-
-        plotCopLine(p.copX, p.copY, title = p.name) 
-#        plotTimeSeriesFrom(data6, title = p.name)
+#        plotCopLine(p.copX, p.copY, title = p.name) 
+        plotTimeSeriesFrom(data6, title = p.name)
     
 
+#    p = participants[4]
+#    print(len(p.data6))
+#    nans = p.copY[np.isinf(p.copY)]
+#    print(len(nans))
 
-
-
-
-
-
-
-
-
-
-#    rawData = p.dataBlob[dataKey]
-#    print(rawData)
-#    # Plot the whole file to see the differences
-#    plotTimeSeriesFrom(rawData)
-    
-    # Trying to plot a line graph showing the movement taken
-    #plotCopLine(rawData)
-    
-    # Testing random new shit
-    
-    #
-    #print(rawData[4000])
-    #x, y = extractCopFrom(rawData)
-    #print(np.shape(x))
-    #print(np.shape(y))
-    # Graph 
     
 
 if __name__ == "__main__":

@@ -14,9 +14,9 @@ class Participant:
     def __init__(self, name = "", fileType = ".mat", dataKey = 'data6'):
         self.name = name
         self.dataBlob = None
-        self.copX = None
-        self.copY = None
-        self.data6 = None
+        self.copX = np.array([]).astype(float)
+        self.copY = np.array([]).astype(float)
+        self.data6 = np.array([[]]).astype(float)
         self.beginIndex = 0
         self.endIndex = 0
         
@@ -27,15 +27,16 @@ class Participant:
             matlab = io.loadmat(self.filename)
             # atm I use data6 as that's what's in the files I was given
             self.dataBlob = matlab
-        elif fileType == ".csv":
-            csvFile = open(self.filename, newline='\n')
-            file = csv.reader(csvFile)
-            self.dataBlob = file["whatever the hell goes here for the magic"]
-        
+        # Not gonna use csv for now, too much extra complexity.
+#        elif fileType == ".csv":
+#            csvFile = open(self.filename, newline='\n')
+#            file = csv.reader(csvFile)
+#            self.dataBlob = file["whatever the hell goes here for the magic"]
+#        
+        self.data6 = self.dataBlob[dataKey]
         
         self.stripOutEnds(minimumThreshold = 400)
-        print("")
-    
+        self.removeJunkData()    
     
     def removeJunkData(self):
         
@@ -87,11 +88,6 @@ class Participant:
         self.copX = self.dataBlob['result_x'][self.beginIndex-1:self.endIndex+1]
         self.copY = self.dataBlob['result_y'][self.beginIndex-1:self.endIndex+1]
         
-#        print(len(self.data6))
-#        print(len(self.copX))
-#        print(len(self.copY))
-        print(self.beginIndex)
-        print(self.endIndex)
 
     def runningAvgAlgo(self,avgThreshold = 5):
         
