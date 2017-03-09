@@ -40,20 +40,29 @@ class Participant:
     
     def removeJunkData(self):
         
-        self.copX = self.dataBlob['result_x']
-        self.copY = self.dataBlob['result_y']
-
-        # Remove NaN's and infinites
-        ## Used to be 2 separate operations but I pass 2 booleans with and instead now, Hopefully it works.
-        self.copX = self.copX[np.logical_not(np.isnan(self.copX)) and np.logical_not(np.isinf(self.copX))]
-        self.copY = self.copY[np.logical_not(np.isnan(self.copY)) and np.logical_not(np.isinf(self.copY))]
+        tempDict = {'copX' : [], 'copY' : [], 'data6' : []}
+        
+        for i in range(len(self.data6)):
+            dataX = self.copX[i]
+            dataY = self.copY[i]
+            dataSix = self.data6[i]
             
-        return self.copX, self.copY 
+            xisgood = np.logical_not(np.isnan(dataX)) or np.logical_not(np.isinf(dataX))
+            yisgood = np.logical_not(np.isnan(dataY)) or np.logical_not(np.isinf(dataY))
+            
+            if xisgood and yisgood:
+                tempDict['copX'].append(dataX)
+                tempDict['copY'].append(dataY)
+                tempDict['data6'].append(dataSix)
+
+               
+        self.copX = np.array(tempDict['copX'])
+        self.copY = np.array(tempDict['copY'])
+        self.data6 = np.array(tempDict['data6'])
+       
         
     def stripOutEnds(self, minimumThreshold):
-        
-        self.data6 = np.array(self.dataBlob[self.dataKey])
-        
+                
         # I could try some list comprehension magic but I'd rather keep it clear to my noob python brain
         # And I also need some numbers saved along with the lists themselves
         beginFound = False
