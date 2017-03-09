@@ -13,9 +13,9 @@ variables
 """
 plateWidth = 100
 plateLength = 100
-participantNames = ['wy','xd','te'] # Not case sensitive
-trialNames = ['Trial1','Trial2','Trial3'] # not case sensitive
-date = "0708"
+participantNames = ['ac', 'an', 'gd', 'gp', 'hm', 'lh', 'mb', 'mm', 'te', 'wy', 'xd', 'yz'] # Not case sensitive
+trialNames = ['Trial1a','Trial1b','Trial2a','Trial2b','Trial3a','Trial3b'] # not case sensitive
+date = "170306"
 dataKey = 'data6'
 
 
@@ -98,8 +98,8 @@ def plotTimeSeriesFrom(rawData, title = ''):
 def loadParticipants():
     outParticipants = []
 
-    for name in participantNames:
-        for trial in trialNames:
+    for trial in trialNames:
+        for name in participantNames:
             p = Participant(name = date + ' ' + trial + ' ' + name, fileType = '.mat')
             outParticipants.append(p)
     
@@ -111,10 +111,23 @@ def main():
     # pass this to all methods
     participants = loadParticipants()
     
-    for p in participants:
+#    print(participants[4].dataBlob)
+    for p in participants[0:6]:
         data6 = p.dataBlob[dataKey]
+        
         plotTimeSeriesFrom(data6, title = p.name)
 #    
+
+
+
+
+
+
+
+
+
+
+
 #    rawData = p.dataBlob[dataKey]
 #    print(rawData)
 #    # Plot the whole file to see the differences
