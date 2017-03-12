@@ -4,6 +4,8 @@ import csv
 import numpy as np
 import scipy.io as io
 
+from point import Point
+
 # Just learnt you have to still use self to make sure you're setting
 # The version of the variable that's public to the creator of this object
 class Participant:
@@ -16,6 +18,7 @@ class Participant:
         self.dataBlob = None
         self.copX = np.array([]).astype(float)
         self.copY = np.array([]).astype(float)
+        self.copPoints = np.array([]).astype(Point) # will hold points
         self.data6 = np.array([[]]).astype(float)
         self.beginIndex = 0
         self.endIndex = 0
@@ -37,6 +40,10 @@ class Participant:
         
         self.stripOutEnds(minimumThreshold = 400)
         self.removeJunkData()    
+        
+        for i in range(len(self.copX)):
+            self.copPoints = np.append(self.copPoints, Point(x = self.copX[i], y = self.copY[i]))
+         
     
     def removeJunkData(self):
         
@@ -97,45 +104,27 @@ class Participant:
         self.copX = self.dataBlob['result_x'][self.beginIndex-1:self.endIndex+1]
         self.copY = self.dataBlob['result_y'][self.beginIndex-1:self.endIndex+1]
         
-
-    def runningAvgAlgo(self,avgThreshold = 5):
-        
-        
-        return None
-        
     
-#    def centreOfPressureX(xy, plateLength = 100):
-#        tl = xy[:,0]
-#        tr = xy[:,1]
-#        bl = xy[:,2]
-#        br = xy[:,3]
-#        x = ((tr + br - tl - bl)/(tr+br+tl+bl)) * (plateLength * 0.5)
-#        return x
-#    
-#    def centreOfPressureY(xy, plateWidth = 100):
-#        tl = xy[:,0]
-#        tr = xy[:,1]
-#        bl = xy[:,2]
-#        br = xy[:,3]
-#        y = ((tl + tr - bl - br)/(tr+br+tl+bl)) * (plateWidth * 0.5)
-#        return y
-#        
-#    
-#    def extractCopFrom(data, plateWidth = 100, plateHeight = 100):
-#
-#        tl = data[:,0]
-#        tr = data[:,1]
-#        bl = data[:,2]
-#        br = data[:,3]
-#        copX = ((tr + br - tl - bl)/(tr+br+tl+bl)) * (plateWidth * 0.5)
-#        copY = ((tl + tr - bl - br)/(tr+br+tl+bl)) * (plateWidth * 0.5)
 
-        # Remove NaN's and infinites
-        ## Used to be 2 separate operations but I pass 2 booleans with and instead now, Hopefully it works.
-#        copX = copX[np.logical_not(np.isnan(copX)) and np.logical_not(np.isinf(copX))]
-#        copY = copY[np.logical_not(np.isnan(copY)) and np.logical_not(np.isinf(copY))]
-##        copX = copX[]
-##        copY = copY[]
-#            
-#        return copX, copY   
+    def averageMagnitudeLookAhead(self, by = 5, varianceThreshold = 1):
+        
+        length = len(self.copPoints)
+        plateaus = []
+        sqrVar = varianceThreshold ** 2
+        
+        for i in range(length):
+            nextIndex = i + by
+            if nextIndex >= length:
+                # We've reached the end, maybe just return
+                continue
+            
+            nextItem = self.copPoints[nextIndex]
+            diff = nextItem.sqrMagnitude() - self.copPoints[i].sqrMagnitude()
+            
+            if diff < sqrVar and diff > -sqrVar:
+                plateaus.append(i)
+        
+        return plateaus
+       
+       
     

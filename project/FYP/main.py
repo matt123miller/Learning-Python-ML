@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 from participant import Participant
+from point import Point
+
 
 #import hdf5
 
@@ -76,22 +78,18 @@ def loadParticipants(trials, names):
 def main():
         
     # Do I want a specific subset of files for some reason?
-#    trialNames = []
 #    participantNames = ['mm'] # e.g. just my data
     # pass this to all methods
     participants = loadParticipants(trials = trialNames, names = participantNames)
     
-    for p in participants[:]:
+    for p in participants[:6]:
         data6 = p.data6
-
+        plateaus = p.averageMagnitudeLookAhead(by = 10)
+        print(plateaus)
+        print(p.copPoints[230])
 #        plotCopLine(p.copX, p.copY, title = p.name) 
-        plotTimeSeriesFrom(data6, title = p.name)
+#        plotTimeSeriesFrom(data6, title = p.name)
     
-
-#    p = participants[4]
-#    print(len(p.data6))
-#    nans = p.copY[np.isinf(p.copY)]
-#    print(len(nans))
 
     
 
