@@ -119,12 +119,14 @@ class Participant:
                 continue
             
             nextItem = self.copPoints[nextIndex]
-            diff = nextItem.sqrMagnitude() - self.copPoints[i].sqrMagnitude()
+            diff = (nextItem - self.copPoints[i]).sqrMagnitude()
             
             if diff < sqrVar and diff > -sqrVar:
                 plateaus.append(i)
+            else:
+                plateaus.append(0)
         
-        return plateaus
+        return np.array(plateaus)
        
        
     

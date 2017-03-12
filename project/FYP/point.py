@@ -14,4 +14,19 @@ class Point:
         return (self.x ** 2 + self.y ** 2)
         
     def __str__(self):
-        return "Point(%s,%s)"%(self.X,self.Y)
+        return "Point(%s,%s)"%(self.x,self.y)
+        
+    def __add__(self,other):
+        x = self.x + other.x
+        y = self.y + other.y
+        return Point(x,y)
+        
+    def __sub__(self,other):
+        x = self.x - other.x
+        y = self.y - other.y
+        return Point(x,y)
+        
+    def __mul__(self,other):
+        x = self.x * other.x
+        y = self.y * other.y
+        return Point(x,y)

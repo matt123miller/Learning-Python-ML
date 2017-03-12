@@ -45,14 +45,15 @@ def plotCopLine(copX, copY, title = ''):
     
     
 ## Works great!
-def plotTimeSeriesFrom(rawData, title = ''):
+def lineTimeSeriesFrom(rawData, title = ''):
     
     tl = np.array(rawData[:,0])
     tr = np.array(rawData[:,1])
     bl = np.array(rawData[:,2])
     br = np.array(rawData[:,3])
 
-    axisX = np.arange(len(tl))
+    axisX = np.arange(len(rawData))
+    plt.xlim([-50, len(rawData) + 50])
 
     plt.title(title)
     plt.plot(axisX, tl, color = 'b')
@@ -60,7 +61,23 @@ def plotTimeSeriesFrom(rawData, title = ''):
     plt.plot(axisX, bl, color = 'r')
     plt.plot(axisX, br, color = 'y')
 
-    plt.show()
+    
+def scatterTimeSeriesFrom(rawData, title = ''):
+    
+    tl = np.array(rawData[:,0])
+    tr = np.array(rawData[:,1])
+    bl = np.array(rawData[:,2])
+    br = np.array(rawData[:,3])
+
+    axisX = np.arange(len(rawData))
+    plt.xlim([-50, len(rawData) + 50])
+
+    plt.title(title)
+#    
+    plt.scatter(axisX, tl, color = 'b')
+    plt.scatter(axisX, tr, color = 'c')
+    plt.scatter(axisX, bl, color = 'r')
+    plt.scatter(axisX, br, color = 'y')
 
 
 
@@ -74,6 +91,10 @@ def loadParticipants(trials, names):
     
     return outParticipants
   
+def compoundScatterLine(data6 = [], plateaus = [], title = ''):
+    scatterTimeSeriesFrom(data6[plateaus], title = title)
+    lineTimeSeriesFrom(data6, title = title)
+    plt.show()
     
 def main():
         
@@ -82,14 +103,13 @@ def main():
     # pass this to all methods
     participants = loadParticipants(trials = trialNames, names = participantNames)
     
-    for p in participants[:6]:
+    for p in participants[:5]:
         data6 = p.data6
-        plateaus = p.averageMagnitudeLookAhead(by = 10)
-        print(plateaus)
-        print(p.copPoints[230])
-#        plotCopLine(p.copX, p.copY, title = p.name) 
-#        plotTimeSeriesFrom(data6, title = p.name)
-    
+        plateaus = p.averageMagnitudeLookAhead(by = 30)
+        print(sum(plateaus >= 1))
+        
+        compoundScatterLine(data6, plateaus, p.name)
+        
 
     
 
