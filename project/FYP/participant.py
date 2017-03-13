@@ -128,5 +128,14 @@ class Participant:
         
         return np.array(plateaus)
        
-       
+    # Should give 1 value for each plateau area. These values will be part of the ML Model
+    def averagePlateauSteps(plateaus):
+        '''
+        array to hold each flat part of the palteaus
+        rturn array
+        loop through range of plateaus array
+        append to flat parts array UNLESS a 0 is found:
+            then average the flat parts array and append to return array
+        return array
+        '''
     
