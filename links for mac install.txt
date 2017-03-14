@@ -1,0 +1,7 @@
+http://tullo.ch/articles/svm-py/
+
+http://cvxopt.org/install/index.html#macos
+
+https://www.khanacademy.org/math/multivariable-calculus/applications-of-multivariable-derivatives#lagrange-multipliers-and-constrained-optimization
+
+https://docs.continuum.io/anaconda/pkg-docs
