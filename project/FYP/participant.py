@@ -3,6 +3,7 @@
 import csv
 import numpy as np
 import scipy.io as io
+import math
 
 from point import Point
 
@@ -129,7 +130,7 @@ class Participant:
         return np.array(plateaus)
        
     # Should give 1 value for each plateau area. These values will be part of the ML Model
-    def averagePlateauSteps(plateaus):
+    def averagePlateauSteps(self, plateaus):
         '''
         array to hold each flat part of the palteaus
         rturn array
@@ -138,4 +139,16 @@ class Participant:
             then average the flat parts array and append to return array
         return array
         '''
-    
+        avgFlat, returnArray = [],[]
+        for i in plateaus:
+            if i == 0:
+                if len(avgFlat) != 0:
+                    returnArray.append(np.mean(avgFlat))
+                    avgFlat.clear()
+                continue
+            avgFlat.append(self.copPoints[i].magnitude())
+        # Consider the code reaching the end of the list with items not yet averaged
+        if len(avgFlat) != 0:
+            returnArray.append(np.mean(avgFlat))
+        
+        return returnArray
