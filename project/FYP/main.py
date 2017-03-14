@@ -96,21 +96,30 @@ def compoundScatterLine(data6 = [], plateaus = [], title = ''):
     lineTimeSeriesFrom(data6, title = title)
     plt.show()
     
+def showAvgHighLows(participant, plateaus):
+    avgPlateauValues = participant.averagePlateauSteps(plateaus)
+    
+    axisX = np.arange(len(avgPlateauValues))
+    plt.title(participant.name)
+    plt.scatter(axisX, avgPlateauValues)
+    plt.show()
+    
 def main():
         
+    pCount = len(participantNames)
+    tCount = len(trialNames)
     # Do I want a specific subset of files for some reason?
 #    participantNames = ['mm'] # e.g. just my data
     # pass this to all methods
     participants = loadParticipants(trials = trialNames, names = participantNames)
     
-    for p in participants[:5]:
+    for p in participants[:1]:
         data6 = p.data6
-        plateaus = p.averageMagnitudeLookAhead(by = 30)
-        print(sum(plateaus >= 1))
-        
-        compoundScatterLine(data6, plateaus, p.name)
-        
+        plateaus = p.averageMagnitudeLookAhead(by = 30, varianceThreshold = 0.5)
 
+        compoundScatterLine(data6, plateaus, p.name)
+        showAvgHighLows(p, plateaus)
+    
     
 
 if __name__ == "__main__":

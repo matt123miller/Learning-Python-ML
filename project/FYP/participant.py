@@ -107,7 +107,7 @@ class Participant:
         
     
 
-    def averageMagnitudeLookAhead(self, by = 5, varianceThreshold = 1):
+    def averageMagnitudeLookAhead(self, by = 30, varianceThreshold = 0.5):
         
         length = len(self.copPoints)
         plateaus = []
@@ -134,9 +134,11 @@ class Participant:
         '''
         array to hold each flat part of the palteaus
         rturn array
-        loop through range of plateaus array
-        append to flat parts array UNLESS a 0 is found:
-            then average the flat parts array and append to return array
+        loop through through plateaus array
+        if i is 0, then we save the mean of avgFlat, then clear avgFlat and move on
+        else we save the length of the point to avgFlat
+        
+        then average any flat parts and append to return array
         return array
         '''
         avgFlat, returnArray = [],[]
