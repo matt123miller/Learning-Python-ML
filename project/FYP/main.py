@@ -52,9 +52,13 @@ def main():
     
     for p in participants[4:5]:
         data6 = p.data6
-        plateaus = p.averageMagnitudeLookAhead(by = 30, varianceThreshold = 0.5)
-        p.showAvgHighLows(plateaus)
+        byValue = 15
+        threshold = 0.5
+        plateaus = p.averageMagnitudeLookAhead(by = byValue, varianceThreshold = threshold)
+        print('The plateaus were computed by looking {} values ahead and saving values below {}'.format(byValue, threshold))
+        p.showAvgHighLows(plateaus, show = True)
         p.compoundScatterLine(plateaus)
+        
     
     
 

@@ -22,6 +22,8 @@ class Participant:
         self.copY = np.array([]).astype(float)
         self.copPoints = np.array([]).astype(Point) # will hold points
         self.data6 = np.array([[]]).astype(float)
+        self.plateaus = []
+        self.meanPlateauValue = 0.0
         self.beginIndex = 0
         self.endIndex = 0
         
@@ -128,7 +130,8 @@ class Participant:
             else:
                 plateaus.append(0)
         
-        return np.array(plateaus)
+        self.plateaus = np.array(plateaus)
+        return self.plateaus
        
     # Should give 1 value for each plateau area. These values will be part of the ML Model
     def averagePlateauSteps(self, plateaus):
@@ -156,20 +159,22 @@ class Participant:
         
         return returnArray
 
-    def showAvgHighLows(self, plateaus):
+    def showAvgHighLows(self, plateaus, show = False):
         avgPlateauValues = self.averagePlateauSteps(plateaus)
         
         axisX = np.arange(len(avgPlateauValues))
-        mean = np.mean(avgPlateauValues)
+        self.meanPlateauValue = np.mean(avgPlateauValues)
         
         plt.title(self.name)
         plt.scatter(axisX, avgPlateauValues)
-        plt.show()
-        print(mean)
+        if show:
+            plt.show()
+            
+        return self.meanPlateauValue
             
         
-    #Works less great
-    def plotCopLine(self, show = False):
+    
+    def plotCopLine(self, show = True):
         
         print(len(self.copX))
         print(len(self.copY))
@@ -180,11 +185,12 @@ class Participant:
     #    plt.plot(length, copY)
         plt.plot(self.copX, self.copY)
         plt.title(self.name)
-        plt.show()
+        if show:
+            plt.show()
         
          
         ## Works great!
-    def lineTimeSeriesFrom(self, modifiedData = [], show = False):
+    def lineTimeSeriesFrom(self, modifiedData = [], show = True):
        
         data = []
         if len(modifiedData) == 0:
@@ -210,7 +216,7 @@ class Participant:
         if show:
             plt.show()
         
-    def scatterTimeSeriesFrom(self, modifiedData = [], show = False):
+    def scatterTimeSeriesFrom(self, modifiedData = [], show = True):
         
         data = []
         if len(modifiedData) == 0:
@@ -238,8 +244,7 @@ class Participant:
            
     
     def compoundScatterLine(self, plateaus = []):
-        self.scatterTimeSeriesFrom(modifiedData = self.data6[plateaus])
-        self.lineTimeSeriesFrom()
+        self.scatterTimeSeriesFrom(modifiedData = self.data6[plateaus], show = False)
+        self.lineTimeSeriesFrom(show = False)
         plt.show()
-    
   
