@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from math import sqrt
 
-class Point:
+class Point(object):
     
     def __init__(self, x, y):
         self.x = x
@@ -14,7 +14,7 @@ class Point:
         return (self.x ** 2 + self.y ** 2)
         
     def __str__(self):
-        return "Point(%s,%s)"%(self.x,self.y)
+        return "Point{}{}".format(self.x,self.y)
         
     def __add__(self,other):
         x = self.x + other.x
@@ -30,3 +30,6 @@ class Point:
         x = self.x * other.x
         y = self.y * other.y
         return Point(x,y)
+    
+    def divideBy(self,scalar):
+        return Point(self.x / scalar, self.y / scalar)

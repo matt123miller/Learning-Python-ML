@@ -6,7 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 from participant import Participant
 from point import Point
-
+from HelperFile import Helper
 
 #import hdf5
 
@@ -45,22 +45,60 @@ def main():
         
     pCount = len(participantNames)
     tCount = len(trialNames)
+    byValue = 15
+    threshold = 0.5
+    returnType = 'p'
     # Do I want a specific subset of files for some reason?
 #    participantNames = ['mm'] # e.g. just my data
+
     # pass this to all methods
+    # use a slice on trialnames or participant names!
     participants = loadParticipants(trials = trialNames, names = participantNames)
+    highMeans = np.array([])
+    lowMeans = np.array([])
+    diffMeans = np.array([])
     
-    for p in participants[4:5]:
-        data6 = p.data6
-        byValue = 15
-        threshold = 0.5
-        plateaus = p.averageMagnitudeLookAhead(by = byValue, varianceThreshold = threshold)
-        print('The plateaus were computed by looking {} values ahead and saving values below {}'.format(byValue, threshold))
-        p.showAvgHighLows(plateaus, show = True)
-        p.compoundScatterLine(plateaus)
+    print('The plateaus were computed by looking {0} values ahead and saving values below {1}'.format(byValue, threshold))
+
+    for p in participants:
         
-    
-    
+        plateaus = p.lookAheadForPlateau(by = byValue, varianceThreshold = threshold)
+        
+        avgPlateaus = p.averagePlateauSections(plateaus, returnType)
+        #returns numpy arrays
+        highs, lows = Helper.splitDataAboveBelowMean(avgPlateaus, returnType) 
+        
+        if returnType == 'p':
+            plt.scatter([p.x for p in highs], [p.y for p in highs], color = 'r')
+            plt.scatter([p.x for p in lows], [p.y for p in lows], color = 'g')
+            plt.title(p.name)
+            plt.show()
+        
+            highMeans = np.append(highMeans, Helper.averagePoints(highs))
+            lowMeans = np.append(lowMeans, Helper.averagePoints(lows))
+            
+        else:
+            highMean = np.mean(highs)
+            lowMean = np.mean(lows)
+            print('The highs are {} with a mean of {}'.format(highs, highMean))
+            print('the lows are{} with a mean of {}'.format(lows, lowMean))
+            print('') #empty row
+            highMeans = np.append(highMeans, highMean)
+            lowMeans = np.append(lowMeans, lowMean)
+        
+#        p.compoundScatterLine(plateaus)
+#        p.showAvgHighLows(avgPlateaus, show = True)
+#        plt.scatter(np.arange(len(avgPlateaus)), avgPlateaus)
+        
+    print('{}'.format(highMeans))
+    print('{}'.format(lowMeans))
+    diffMeans = highMeans - lowMeans
+    print(diffMeans)
+#    axis = np.arange(len(meanDiffs))
+#    plt.scatter(axis, highMeans, color= 'r')
+#    plt.scatter(highMeans, lowMeans, color = 'g')
+#    plt.show()
+
 
 if __name__ == "__main__":
     main()

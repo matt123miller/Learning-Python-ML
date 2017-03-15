@@ -7,10 +7,11 @@ import scipy.io as io
 import math
 
 from point import Point
+from HelperFile import Helper
 
 # Just learnt you have to still use self to make sure you're setting
 # The version of the variable that's public to the creator of this object
-class Participant:
+class Participant(object):
     
     '''
     name and filetype aren't case sensitive
@@ -23,7 +24,7 @@ class Participant:
         self.copPoints = np.array([]).astype(Point) # will hold points
         self.data6 = np.array([[]]).astype(float)
         self.plateaus = []
-        self.meanPlateauValue = 0.0
+        self.meanAllPlateaus = 0.0
         self.beginIndex = 0
         self.endIndex = 0
         
@@ -47,6 +48,8 @@ class Participant:
         
         for i in range(len(self.copX)):
             self.copPoints = np.append(self.copPoints, Point(x = self.copX[i], y = self.copY[i]))
+            
+        
          
     
     def removeJunkData(self):
@@ -109,8 +112,12 @@ class Participant:
         self.copY = self.dataBlob['result_y'][self.beginIndex-1:self.endIndex+1]
         
     
-
-    def averageMagnitudeLookAhead(self, by = 30, varianceThreshold = 0.5):
+    
+    
+    '''
+    Returns an array of length data6.count containing zeroes or an index where a flat point is.
+    '''
+    def lookAheadForPlateau(self, by = 30, varianceThreshold = 0.5):
         
         length = len(self.copPoints)
         plateaus = []
@@ -133,8 +140,11 @@ class Participant:
         self.plateaus = np.array(plateaus)
         return self.plateaus
        
-    # Should give 1 value for each plateau area. These values will be part of the ML Model
-    def averagePlateauSteps(self, plateaus):
+    '''
+    Should give 1 value for each plateau area. These values will be part of the ML Model
+    returnTypes: m is magnitudes, p is points
+    '''
+    def averagePlateauSections(self, plateaus, returnType = 'm'):
         '''
         array to hold each flat part of the palteaus
         rturn array
@@ -148,31 +158,37 @@ class Participant:
         avgFlat, returnArray = [],[]
         for i in plateaus:
             if i == 0:
-                if len(avgFlat) != 0:
-                    returnArray.append(np.mean(avgFlat))
+                if len(avgFlat) != 0: #we've reached the end of a plateau
+                    if returnType == 'm':
+                        returnArray.append(np.mean(avgFlat))
+                    else:
+                        returnArray.append(Helper.averagePoints(avgFlat))
                     avgFlat.clear()
                 continue
-            avgFlat.append(self.copPoints[i].magnitude())
+            if returnType == 'm': 
+                avgFlat.append(self.copPoints[i].magnitude())
+            else:
+                avgFlat.append(self.copPoints[i])
+
         # Consider the code reaching the end of the list with items not yet averaged
         if len(avgFlat) != 0:
-            returnArray.append(np.mean(avgFlat))
-        
-        return returnArray
+            if returnType == 'm':
+                returnArray.append(np.mean(avgFlat))
+            else:
+                returnArray.append(Helper.averagePoints(avgFlat))
 
-    def showAvgHighLows(self, plateaus, show = False):
-        avgPlateauValues = self.averagePlateauSteps(plateaus)
         
+        return np.array(returnArray)
+
+    def showAvgHighLows(self, avgPlateauValues, show = False):
+                
         axisX = np.arange(len(avgPlateauValues))
-        self.meanPlateauValue = np.mean(avgPlateauValues)
         
         plt.title(self.name)
         plt.scatter(axisX, avgPlateauValues)
         if show:
             plt.show()
-            
-        return self.meanPlateauValue
-            
-        
+ 
     
     def plotCopLine(self, show = True):
         
