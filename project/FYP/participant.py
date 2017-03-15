@@ -2,6 +2,7 @@
 
 import csv
 import numpy as np
+import matplotlib.pyplot as plt
 import scipy.io as io
 import math
 
@@ -154,3 +155,91 @@ class Participant:
             returnArray.append(np.mean(avgFlat))
         
         return returnArray
+
+    def showAvgHighLows(self, plateaus):
+        avgPlateauValues = self.averagePlateauSteps(plateaus)
+        
+        axisX = np.arange(len(avgPlateauValues))
+        mean = np.mean(avgPlateauValues)
+        
+        plt.title(self.name)
+        plt.scatter(axisX, avgPlateauValues)
+        plt.show()
+        print(mean)
+            
+        
+    #Works less great
+    def plotCopLine(self, show = False):
+        
+        print(len(self.copX))
+        print(len(self.copY))
+        #length = np.arange(len(rawData))
+    #    fig = plt.figure()
+    #    ax = fig.add_subplot(111, projection = '3d')
+    #    plt.plot(length, copX)
+    #    plt.plot(length, copY)
+        plt.plot(self.copX, self.copY)
+        plt.title(self.name)
+        plt.show()
+        
+         
+        ## Works great!
+    def lineTimeSeriesFrom(self, modifiedData = [], show = False):
+       
+        data = []
+        if len(modifiedData) == 0:
+            data = self.data6
+        else:
+            data = modifiedData
+            
+        tl = np.array(data[:,0])
+        tr = np.array(data[:,1])
+        bl = np.array(data[:,2])
+        br = np.array(data[:,3])
+    
+        axisX = np.arange(len(data))
+        plt.xlim([-50, len(data) + 50])
+    
+        plt.title(self.name)
+        
+        plt.plot(axisX, tl, color = 'b')
+        plt.plot(axisX, tr, color = 'c')
+        plt.plot(axisX, bl, color = 'r')
+        plt.plot(axisX, br, color = 'y')
+    
+        if show:
+            plt.show()
+        
+    def scatterTimeSeriesFrom(self, modifiedData = [], show = False):
+        
+        data = []
+        if len(modifiedData) == 0:
+            data = self.data6
+        else:
+            data = modifiedData
+            
+        tl = np.array(data[:,0])
+        tr = np.array(data[:,1])
+        bl = np.array(data[:,2])
+        br = np.array(data[:,3])
+    
+        axisX = np.arange(len(data))
+        plt.xlim([-50, len(data) + 50])
+    
+        plt.title(self.name)
+    #    
+        plt.scatter(axisX, tl, color = 'b')
+        plt.scatter(axisX, tr, color = 'c')
+        plt.scatter(axisX, bl, color = 'r')
+        plt.scatter(axisX, br, color = 'y')
+        
+        if show:
+            plt.show()
+           
+    
+    def compoundScatterLine(self, plateaus = []):
+        self.scatterTimeSeriesFrom(modifiedData = self.data6[plateaus])
+        self.lineTimeSeriesFrom()
+        plt.show()
+    
+  

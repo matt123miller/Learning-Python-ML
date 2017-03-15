@@ -29,57 +29,6 @@ BR = back right = data6[[:,3]] = y
 """
 
 
-#Works less great
-def plotCopLine(copX, copY, title = ''):
-    
-    print(len(copX))
-    print(len(copY))
-    #length = np.arange(len(rawData))
-#    fig = plt.figure()
-#    ax = fig.add_subplot(111, projection = '3d')
-#    plt.plot(length, copX)
-#    plt.plot(length, copY)
-    plt.plot(copX, copY)
-    plt.title(title)
-    plt.show()
-    
-    
-## Works great!
-def lineTimeSeriesFrom(rawData, title = ''):
-    
-    tl = np.array(rawData[:,0])
-    tr = np.array(rawData[:,1])
-    bl = np.array(rawData[:,2])
-    br = np.array(rawData[:,3])
-
-    axisX = np.arange(len(rawData))
-    plt.xlim([-50, len(rawData) + 50])
-
-    plt.title(title)
-    plt.plot(axisX, tl, color = 'b')
-    plt.plot(axisX, tr, color = 'c')
-    plt.plot(axisX, bl, color = 'r')
-    plt.plot(axisX, br, color = 'y')
-
-    
-def scatterTimeSeriesFrom(rawData, title = ''):
-    
-    tl = np.array(rawData[:,0])
-    tr = np.array(rawData[:,1])
-    bl = np.array(rawData[:,2])
-    br = np.array(rawData[:,3])
-
-    axisX = np.arange(len(rawData))
-    plt.xlim([-50, len(rawData) + 50])
-
-    plt.title(title)
-#    
-    plt.scatter(axisX, tl, color = 'b')
-    plt.scatter(axisX, tr, color = 'c')
-    plt.scatter(axisX, bl, color = 'r')
-    plt.scatter(axisX, br, color = 'y')
-
-
 
 def loadParticipants(trials, names):
     outParticipants = []
@@ -90,19 +39,7 @@ def loadParticipants(trials, names):
             outParticipants.append(p)
     
     return outParticipants
-  
-def compoundScatterLine(data6 = [], plateaus = [], title = ''):
-    scatterTimeSeriesFrom(data6[plateaus], title = title)
-    lineTimeSeriesFrom(data6, title = title)
-    plt.show()
-    
-def showAvgHighLows(participant, plateaus):
-    avgPlateauValues = participant.averagePlateauSteps(plateaus)
-    
-    axisX = np.arange(len(avgPlateauValues))
-    plt.title(participant.name)
-    plt.scatter(axisX, avgPlateauValues)
-    plt.show()
+
     
 def main():
         
@@ -113,12 +50,11 @@ def main():
     # pass this to all methods
     participants = loadParticipants(trials = trialNames, names = participantNames)
     
-    for p in participants[:1]:
+    for p in participants[4:5]:
         data6 = p.data6
         plateaus = p.averageMagnitudeLookAhead(by = 30, varianceThreshold = 0.5)
-
-        compoundScatterLine(data6, plateaus, p.name)
-        showAvgHighLows(p, plateaus)
+        p.showAvgHighLows(plateaus)
+        p.compoundScatterLine(plateaus)
     
     
 
