@@ -13,8 +13,8 @@ class Point(object):
     def sqrMagnitude(self):
         return (self.x ** 2 + self.y ** 2)
         
-    def __str__(self):
-        return "Point{}{}".format(self.x,self.y)
+    def __repr__(self):
+        return "Point x {0} and y {1}".format(self.x,self.y)
         
     def __add__(self,other):
         x = self.x + other.x
