@@ -25,6 +25,8 @@ class Participant(object):
         self.data6 = np.array([[]]).astype(float)
         self.plateaus = []
         self.meanAllPlateaus = 0.0
+        self.aboveMean = np.array([])
+        self.belowMean = np.array([])
         self.beginIndex = 0
         self.endIndex = 0
         
@@ -189,6 +191,11 @@ class Participant(object):
         if show:
             plt.show()
  
+    def plotCopHighLows(self):
+        plt.scatter([c.x for c in self.aboveMean], [c.y for c in self.aboveMean], color = 'r')
+        plt.scatter([c.x for c in self.belowMean], [c.y for c in self.belowMean], color = 'g')
+        plt.title(self.name)
+        plt.show()
     
     def plotCopLine(self, show = True):
         

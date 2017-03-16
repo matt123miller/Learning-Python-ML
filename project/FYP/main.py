@@ -8,7 +8,6 @@ from participant import Participant
 from point import Point
 from HelperFile import Helper
 
-#import hdf5
 
 """
 variables
@@ -17,6 +16,7 @@ plateWidth = 100
 plateLength = 100
 participantNames = ['ac', 'an', 'gd', 'gp', 'hm', 'lh', 'mb', 'mm', 'te', 'wy', 'xd', 'yz'] # Not case sensitive
 trialNames = ['Trial1a','Trial1b','Trial2a','Trial2b','Trial3a','Trial3b'] # not case sensitive
+trialDescriptions = ['Leaning right in a pendulum movement', 'Leaning right in a hinge movement','Leaning forward in a pendulum movement', 'Leaning forward in a hinge movement','Leaning backward in a pendulum movement', 'Leaning backward in a hinge movement']
 date = "170306"
 dataKey = 'data6'
 
@@ -50,38 +50,36 @@ def main():
     returnType = 'p'
     # Do I want a specific subset of files for some reason?
 #    participantNames = ['mm'] # e.g. just my data
-
+#    trialNames = [trialNames[:1]]
     # pass this to all methods
     # use a slice on trialnames or participant names!
-    participants = loadParticipants(trials = trialNames, names = participantNames)
+    participants = loadParticipants(trials = trialNames[0:1], names = participantNames[0:pCount])
     highMeans = np.array([])
     lowMeans = np.array([])
     diffMeans = np.array([])
     
     print('The plateaus were computed by looking {0} values ahead and saving values below {1}'.format(byValue, threshold))
 
-    for p in participants:
+    for p in participants[:]:
         
         plateaus = p.lookAheadForPlateau(by = byValue, varianceThreshold = threshold)
         
         avgPlateaus = p.averagePlateauSections(plateaus, returnType)
         #returns numpy arrays
-        highs, lows = Helper.splitDataAboveBelowMean(avgPlateaus, returnType) 
+        p.aboveMean, p.belowMean = Helper.splitDataAboveBelowMean(avgPlateaus, returnType) 
+        
         
         if returnType == 'p':
-            plt.scatter([p.x for p in highs], [p.y for p in highs], color = 'r')
-            plt.scatter([p.x for p in lows], [p.y for p in lows], color = 'g')
-            plt.title(p.name)
-            plt.show()
+            p.plotCopHighLows()
         
-            highMeans = np.append(highMeans, Helper.averagePoints(highs))
-            lowMeans = np.append(lowMeans, Helper.averagePoints(lows))
+            highMeans = np.append(highMeans, Helper.averagePoints(p.aboveMean))
+            lowMeans = np.append(lowMeans, Helper.averagePoints(p.belowMean))
             
         else:
-            highMean = np.mean(highs)
-            lowMean = np.mean(lows)
-            print('The highs are {} with a mean of {}'.format(highs, highMean))
-            print('the lows are{} with a mean of {}'.format(lows, lowMean))
+            highMean = np.mean(p.aboveMean)
+            lowMean = np.mean(p.belowMean)
+            print('The highs are {} with a mean of {}'.format(p.aboveMean, highMean))
+            print('the lows are{} with a mean of {}'.format(p.belowMean, lowMean))
             print('') #empty row
             highMeans = np.append(highMeans, highMean)
             lowMeans = np.append(lowMeans, lowMean)
@@ -89,11 +87,29 @@ def main():
 #        p.compoundScatterLine(plateaus)
 #        p.showAvgHighLows(avgPlateaus, show = True)
 #        plt.scatter(np.arange(len(avgPlateaus)), avgPlateaus)
+     
+
+    if returnType == 'p':
+        # make a graph of the points, cartesian style
+
+        xDataLow = [cp.x for cp in lowMeans]
+        xDataHigh = [cp.x for cp in highMeans]
+        yDataLow = [cp.y for cp in lowMeans]
+        yDataHigh = [cp.y for cp in highMeans]
+        plt.scatter(xDataLow, yDataLow, color = 'g')
+        plt.scatter(xDataHigh, yDataHigh, color = 'r')
+        plt.title('Shows the average CoP values when at rest (in green)\nand extension (in red) for all participants during test 1a')
+        plt.xlabel('CoP values on the x axis')
+        plt.ylabel('CoP values on the y axis')
+        plt.show()
         
-    print('{}'.format(highMeans))
-    print('{}'.format(lowMeans))
-    diffMeans = highMeans - lowMeans
-    print(diffMeans)
+    elif returnType == 'm':
+        
+        print('{}'.format(highMeans))
+        print('{}'.format(lowMeans))
+        diffMeans = highMeans - lowMeans
+        print(diffMeans)
+        
 #    axis = np.arange(len(meanDiffs))
 #    plt.scatter(axis, highMeans, color= 'r')
 #    plt.scatter(highMeans, lowMeans, color = 'g')
