@@ -27,6 +27,7 @@ class Participant(object):
         self.meanAllPlateaus = 0.0
         self.aboveMean = np.array([])
         self.belowMean = np.array([])
+        self.meanRestPoint = Point(0,0)
         self.beginIndex = 0
         self.endIndex = 0
         

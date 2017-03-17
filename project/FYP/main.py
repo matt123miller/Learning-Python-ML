@@ -60,35 +60,57 @@ def main():
     
     print('The plateaus were computed by looking {0} values ahead and saving values below {1}'.format(byValue, threshold))
 
-    for p in participants[:]:
+    '''
+    This loop is what creates all the data required for later steps
+    '''
+
+    for p in participants[:3]:
         
         plateaus = p.lookAheadForPlateau(by = byValue, varianceThreshold = threshold)
         
         avgPlateaus = p.averagePlateauSections(plateaus, returnType)
         #returns numpy arrays
         p.aboveMean, p.belowMean = Helper.splitDataAboveBelowMean(avgPlateaus, returnType) 
+        p.meanRestPoint = Helper.averagePoints(p.belowMean)
+                
+        '''
+        Now that I've got a somewhat normalised value for each plateau above the 
+        mean rest point I can graph each participant for their differences between 
+        tests a and b for each direction. Then SVM that to get an actual project?
+        '''
+        aboveMean = Helper.pointListMinusPoint(p.aboveMean, p.meanRestPoint)
         
-        
-        if returnType == 'p':
-            p.plotCopHighLows()
-        
-            highMeans = np.append(highMeans, Helper.averagePoints(p.aboveMean))
-            lowMeans = np.append(lowMeans, Helper.averagePoints(p.belowMean))
-            
-        else:
-            highMean = np.mean(p.aboveMean)
-            lowMean = np.mean(p.belowMean)
-            print('The highs are {} with a mean of {}'.format(p.aboveMean, highMean))
-            print('the lows are{} with a mean of {}'.format(p.belowMean, lowMean))
-            print('') #empty row
-            highMeans = np.append(highMeans, highMean)
-            lowMeans = np.append(lowMeans, lowMean)
+#        if returnType == 'p':
+#            p.plotCopHighLows()
+#        
+#            highMeans = np.append(highMeans, Helper.averagePoints(p.aboveMean))
+#            lowMeans = np.append(lowMeans, Helper.averagePoints(p.belowMean))
+#            
+#        else:
+#            highMean = np.mean(p.aboveMean)
+#            lowMean = np.mean(p.belowMean)
+#            print('The highs are {} with a mean of {}'.format(p.aboveMean, highMean))
+#            print('the lows are{} with a mean of {}'.format(p.belowMean, lowMean))
+#            print('') #empty row
+#            highMeans = np.append(highMeans, highMean)
+#            lowMeans = np.append(lowMeans, lowMean)
         
 #        p.compoundScatterLine(plateaus)
 #        p.showAvgHighLows(avgPlateaus, show = True)
 #        plt.scatter(np.arange(len(avgPlateaus)), avgPlateaus)
      
+    '''
+    Introduce a loop here that will create graphs and whatnot out of each individual Participant
+    Much cleaner
+      
+        for i in whatever:
+            do things
+    '''  
 
+
+    '''
+    Finally a section for making any graphics out of ALL data
+    '''
     if returnType == 'p':
         # make a graph of the points, cartesian style
 

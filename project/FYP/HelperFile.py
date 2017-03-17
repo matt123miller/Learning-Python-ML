@@ -35,3 +35,10 @@ class Helper():
             above = [p for p in npIn if p.sqrMagnitude() > mean]
             below = [p for p in npIn if p.sqrMagnitude() < mean]
         return above, below
+    
+    @staticmethod
+    def pointListMinusPoint(points, point):
+        rlist = []
+        for p in points:
+             rlist.append(p - point)
+        return np.array(rlist)
