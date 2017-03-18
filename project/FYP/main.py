@@ -19,7 +19,8 @@ trialNames = ['Trial1a','Trial1b','Trial2a','Trial2b','Trial3a','Trial3b'] # not
 trialDescriptions = ['Leaning right in a pendulum movement', 'Leaning right in a hinge movement','Leaning forward in a pendulum movement', 'Leaning forward in a hinge movement','Leaning backward in a pendulum movement', 'Leaning backward in a hinge movement']
 date = "170306"
 dataKey = 'data6'
-
+xCopLabel = 'Anteroposterior weight distribution'
+yCopLabel = 'Mediolateral weight distribution'
 
 """
 TL = front left = data6[[:,0]] = b
@@ -53,10 +54,11 @@ def main():
 #    trialNames = [trialNames[:1]]
     # pass this to all methods
     # use a slice on trialnames or participant names!
-    participants = loadParticipants(trials = trialNames[0:1], names = participantNames[0:pCount])
+    participants = loadParticipants(trials = trialNames[0:tCount], names = participantNames[0:pCount])
     highMeans = np.array([])
     lowMeans = np.array([])
     diffMeans = np.array([])
+    normalisedAboveMean = np.array([])
     
     print('The plateaus were computed by looking {0} values ahead and saving values below {1}'.format(byValue, threshold))
 
@@ -64,7 +66,7 @@ def main():
     This loop is what creates all the data required for later steps
     '''
 
-    for p in participants[:3]:
+    for p in participants[:]:
         
         plateaus = p.lookAheadForPlateau(by = byValue, varianceThreshold = threshold)
         
@@ -79,6 +81,7 @@ def main():
         tests a and b for each direction. Then SVM that to get an actual project?
         '''
         aboveMean = Helper.pointListMinusPoint(p.aboveMean, p.meanRestPoint)
+        p.normalisedAboveMean = np.append(normalisedAboveMean, aboveMean)
         
 #        if returnType == 'p':
 #            p.plotCopHighLows()
@@ -98,7 +101,8 @@ def main():
 #        p.compoundScatterLine(plateaus)
 #        p.showAvgHighLows(avgPlateaus, show = True)
 #        plt.scatter(np.arange(len(avgPlateaus)), avgPlateaus)
-     
+   
+  
     '''
     Introduce a loop here that will create graphs and whatnot out of each individual Participant
     Much cleaner
@@ -106,31 +110,63 @@ def main():
         for i in whatever:
             do things
     '''  
+    
+    print('All data manipulation is hopefully done now \nNow to make graphs and things out of each participant')
+    
+    # 0 for trial 1a and 1b, 2 for 2a and 2b, 4 for 3a and 3b
+    rfrom = pCount * 4 
+    rto = rfrom + pCount
+    
+    for i in range(rfrom, rto):
+        testA = participants[i]
+        testB = participants[i + pCount] # This will fetch the same participants alternate movement test.
+        
+        ''' Data '''
+        aX = [cp.x for cp in testA.normalisedAboveMean]
+        aY = [cp.y for cp in testA.normalisedAboveMean]
+        bX = [cp.x for cp in testB.normalisedAboveMean]
+        bY = [cp.y for cp in testB.normalisedAboveMean]
+        
+        ''' Labels and things '''
+        testAName = testA.name.split()[1]
+        testBName = testB.name.split()[1]
+        pName = testA.name.split()[2].upper()
+        title = 'CoP values during extension for\n{} (green) vs {} (red) for participant {}'.format(testAName, testBName, pName)
+        
+        ''' Graph all the thing '''
+        plt.scatter(aX, aY, color = 'g')
+        plt.scatter(bX, bY, color = 'r')
+#        plt.xlim([-1,3])a
+#        plt.ylim([-6,6])
+        plt.xlabel(xCopLabel)
+        plt.ylabel(yCopLabel)
+        plt.title(title)
+        plt.show()
 
 
     '''
     Finally a section for making any graphics out of ALL data
     '''
-    if returnType == 'p':
-        # make a graph of the points, cartesian style
-
-        xDataLow = [cp.x for cp in lowMeans]
-        xDataHigh = [cp.x for cp in highMeans]
-        yDataLow = [cp.y for cp in lowMeans]
-        yDataHigh = [cp.y for cp in highMeans]
-        plt.scatter(xDataLow, yDataLow, color = 'g')
-        plt.scatter(xDataHigh, yDataHigh, color = 'r')
-        plt.title('Shows the average CoP values when at rest (in green)\nand extension (in red) for all participants during test 1a')
-        plt.xlabel('CoP values on the x axis')
-        plt.ylabel('CoP values on the y axis')
-        plt.show()
-        
-    elif returnType == 'm':
-        
-        print('{}'.format(highMeans))
-        print('{}'.format(lowMeans))
-        diffMeans = highMeans - lowMeans
-        print(diffMeans)
+#    if returnType == 'p':
+#        # make a graph of the points, cartesian style
+#
+#        xDataLow = [cp.x for cp in lowMeans]
+#        xDataHigh = [cp.x for cp in highMeans]
+#        yDataLow = [cp.y for cp in lowMeans]
+#        yDataHigh = [cp.y for cp in highMeans]
+#        plt.scatter(xDataLow, yDataLow, color = 'g')
+#        plt.scatter(xDataHigh, yDataHigh, color = 'r')
+#        plt.title('Shows the average CoP values when at rest (in green)\nand extension (in red) for all participants during test 1a')
+#        plt.xlabel('CoP values on the x axis')
+#        plt.ylabel('CoP values on the y axis')
+#        plt.show()
+#        
+#    elif returnType == 'm':
+#        
+#        print('{}'.format(highMeans))
+#        print('{}'.format(lowMeans))
+#        diffMeans = highMeans - lowMeans
+#        print(diffMeans)
         
 #    axis = np.arange(len(meanDiffs))
 #    plt.scatter(axis, highMeans, color= 'r')
