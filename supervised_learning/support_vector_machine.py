@@ -15,13 +15,16 @@ from data_operation import accuracy_score
 from kernels import *
 sys.path.insert(0, dir_path + "/../unsupervised_learning/")
 from principal_component_analysis import PCA
+#sys.path.insert(0, dir_path + "/../FYP/")
+#from kernels import Kernel
+
 
 # Hide cvxopt output
 cvxopt.solvers.options['show_progress'] = False
 
 
 class SupportVectorMachine(object):
-    def __init__(self, C=1, kernel=rbf_kernel, power=4, gamma=None, coef=4):
+    def __init__(self, kernel, C=1, power=4, gamma=None, coef=4):
         self.C = C
         self.kernel = kernel
         self.power = power

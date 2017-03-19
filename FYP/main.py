@@ -11,12 +11,14 @@ from mpl_toolkits.mplot3d import Axes3D
 from point import Point
 from HelperFile import Helper
 from SupportVectorMachine import SVMTrainer
-from kernels import *
+from participant import Participant
+#from kernels import *
 
 
 # Import helper functions
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, dir_path + "/../utils")
+from data_manipulation import train_test_split
 from kernels import *
 sys.path.insert(0, dir_path + "/../supervised_learning")
 from support_vector_machine import SupportVectorMachine as SVM
@@ -138,7 +140,10 @@ def main():
         testA = participants[i]
         testB = participants[i + pCount] # This will fetch the same participants alternate movement test.
         
-        ''' Data '''
+        ''' 
+        Data 
+        Maybe I should normalise all values here (ideally between -1 and 1)
+        '''
 #        aX = Helper.normaliseOverHighestValue([cp.x for cp in testA.normalisedAboveMean])
 #        aY = Helper.normaliseOverHighestValue([cp.y for cp in testA.normalisedAboveMean])
 #        bX = Helper.normaliseOverHighestValue([cp.x for cp in testB.normalisedAboveMean])
@@ -149,6 +154,15 @@ def main():
         bX = [cp.x for cp in testB.normalisedAboveMean]
         bY = [cp.y for cp in testB.normalisedAboveMean]
        
+        X = np.append(aX, bX)
+        y = np.append(aY, bY)
+        
+        '''
+        What is the actual difference between X and y in this scenario?
+        Because the SVM seems to ask for numpy data of a certain shape, so what am I doing wrong?
+        '''
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
+
         
         ''' Labels and things '''
         testAName = testA.name.split()[1]
@@ -156,8 +170,9 @@ def main():
         pName = testA.name.split()[2].upper()
         title = 'CoP values during extension for\n{} (green) vs {} (red) for participant {}'.format(testAName, testBName, pName)
         
-        svm = SVM(kernel=Kernel.linear, power=4, coef=1)
-        
+        svm = SVM(kernel=linear_kernel, power=4, coef=1)
+        svm.fit(X_train, Y_train)
+        return
 #        ''' Graph all the things '''
 #        plt.scatter(aX, aY, color = 'g')
 #        plt.scatter(bX, bY, color = 'r')
