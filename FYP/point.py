@@ -12,6 +12,12 @@ class Point(object):
         
     def sqrMagnitude(self):
         return (self.x ** 2 + self.y ** 2)
+    
+    def normalise(self):
+        mag = self.magnitude()
+        self.x = self.x / mag
+        self.y = self.y / mag
+        return self
         
     def __repr__(self):
         return "Point x:{0}, y:{1}".format(self.x,self.y)

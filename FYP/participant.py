@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import sys
+import os
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,6 +10,10 @@ import math
 
 from point import Point
 from HelperFile import Helper
+
+#dir_path = os.path.dirname(os.path.realpath(__file__))
+#sys.path.insert(0, dir_path + "/Data")
+#from Data import *
 
 # Just learnt you have to still use self to make sure you're setting
 # The version of the variable that's public to the creator of this object
@@ -116,7 +122,10 @@ class Participant(object):
         self.copY = self.dataBlob['result_y'][self.beginIndex-1:self.endIndex+1]
         
     
-    
+    def normaliseData(self):
+        self.copX = Helper.normaliseOverHighestValue(self.copX)
+        self.copY = Helper.normaliseOverHighestValue(self.copY)
+        self.copPoints = [p.normalise() for p in self.copPoints]
     
     '''
     Returns an array of length data6.count containing zeroes or an index where a flat point is.

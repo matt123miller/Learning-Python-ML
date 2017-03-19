@@ -1,13 +1,25 @@
 # -*- coding: utf-8 -*-
 
+
+import sys
+import os
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 
-from participant import Participant
 from point import Point
 from HelperFile import Helper
+from SupportVectorMachine import SVMTrainer
+from kernels import *
 
+
+# Import helper functions
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, dir_path + "/../utils")
+from kernels import *
+sys.path.insert(0, dir_path + "/../supervised_learning")
+from support_vector_machine import SupportVectorMachine as SVM
 
 """
 variables
@@ -65,12 +77,16 @@ def main():
     '''
     This loop is what creates all the data required for later steps
     '''
+    
 
     for p in participants[:]:
         
         plateaus = p.lookAheadForPlateau(by = byValue, varianceThreshold = threshold)
         
+#        p.normaliseData() #As in the vector normalise
+        
         avgPlateaus = p.averagePlateauSections(plateaus, returnType)
+        
         #returns numpy arrays
         p.aboveMean, p.belowMean = Helper.splitDataAboveBelowMean(avgPlateaus, returnType) 
         p.meanRestPoint = Helper.averagePoints(p.belowMean)
@@ -113,6 +129,7 @@ def main():
     
     print('All data manipulation is hopefully done now \nNow to make graphs and things out of each participant')
     
+    
     # 0 for trial 1a and 1b, 2 for 2a and 2b, 4 for 3a and 3b
     rfrom = pCount * 4 
     rto = rfrom + pCount
@@ -122,10 +139,16 @@ def main():
         testB = participants[i + pCount] # This will fetch the same participants alternate movement test.
         
         ''' Data '''
+#        aX = Helper.normaliseOverHighestValue([cp.x for cp in testA.normalisedAboveMean])
+#        aY = Helper.normaliseOverHighestValue([cp.y for cp in testA.normalisedAboveMean])
+#        bX = Helper.normaliseOverHighestValue([cp.x for cp in testB.normalisedAboveMean])
+#        bY = Helper.normaliseOverHighestValue([cp.y for cp in testB.normalisedAboveMean])
+        
         aX = [cp.x for cp in testA.normalisedAboveMean]
         aY = [cp.y for cp in testA.normalisedAboveMean]
         bX = [cp.x for cp in testB.normalisedAboveMean]
         bY = [cp.y for cp in testB.normalisedAboveMean]
+       
         
         ''' Labels and things '''
         testAName = testA.name.split()[1]
@@ -133,15 +156,17 @@ def main():
         pName = testA.name.split()[2].upper()
         title = 'CoP values during extension for\n{} (green) vs {} (red) for participant {}'.format(testAName, testBName, pName)
         
-        ''' Graph all the thing '''
-        plt.scatter(aX, aY, color = 'g')
-        plt.scatter(bX, bY, color = 'r')
-#        plt.xlim([-1,3])a
-#        plt.ylim([-6,6])
-        plt.xlabel(xCopLabel)
-        plt.ylabel(yCopLabel)
-        plt.title(title)
-        plt.show()
+        svm = SVM(kernel=Kernel.linear, power=4, coef=1)
+        
+#        ''' Graph all the things '''
+#        plt.scatter(aX, aY, color = 'g')
+#        plt.scatter(bX, bY, color = 'r')
+##        plt.xlim([-1,3])
+##        plt.ylim([-6,6])
+#        plt.xlabel(xCopLabel)
+#        plt.ylabel(yCopLabel)
+#        plt.title(title)
+#        plt.show()
 
 
     '''

@@ -42,3 +42,14 @@ class Helper():
         for p in points:
              rlist.append(p - point)
         return np.array(rlist)
+    
+    @staticmethod
+    def normaliseOverHighestValue(values):
+        outValues = []
+        highest = np.max(values)
+#        for v in values:
+#            outValues.append(v / highest)
+        return np.array([v / highest for v in values]) 
+    
+    
+        

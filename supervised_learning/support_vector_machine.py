@@ -31,6 +31,7 @@ class SupportVectorMachine(object):
         self.support_vectors = None
         self.support_vector_labels = None
         self.intercept = None
+        print('Hello! I imported!')
 
     def fit(self, X, y):
 
