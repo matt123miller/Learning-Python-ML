@@ -37,6 +37,7 @@ class Participant(object):
         self.normalisedAboveMean = np.array([])
         self.beginIndex = 0
         self.endIndex = 0
+        self.movement = ''
         
         self.filename = name + fileType
         self.dataKey = dataKey
@@ -121,6 +122,10 @@ class Participant(object):
         self.copX = self.dataBlob['result_x'][self.beginIndex-1:self.endIndex+1]
         self.copY = self.dataBlob['result_y'][self.beginIndex-1:self.endIndex+1]
         
+    
+    
+            
+    
     
     def normaliseData(self):
         self.copX = Helper.normaliseOverHighestValue(self.copX)
