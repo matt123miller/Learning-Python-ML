@@ -18,10 +18,14 @@ from participant import Participant
 # Import helper functions
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, dir_path + "/../utils")
-from data_manipulation import train_test_split, shuffle_data
+from data_manipulation import train_test_split, shuffle_data, normalize
+from data_operation import accuracy_score
 from kernels import *
 sys.path.insert(0, dir_path + "/../supervised_learning")
-from support_vector_machine import SupportVectorMachine as SVM
+from support_vector_machine import SupportVectorMachine # as SVM
+from kernels import *
+sys.path.insert(0, dir_path + "/../unsupervised_learning/")
+from principal_component_analysis import PCA
 
 """
 variables
@@ -220,60 +224,120 @@ def main():
 
 
 
+
+    '''
+    Shows each participants extension values
+    '''
 #    graphParticipantsAboveBelow(participants, pCount, trial = 2)
 
 
     
     bundles = []
     
-    for p in participants[:4]:
+    for p in participants[:]:
         bundle = constructDataBundle(p, 'cop')
-        print(bundle)
         bundles.append(bundle)
-    
-    # 0 for trial 1a and 1b, 2 for 2a and 2b, 4 for 3a and 3b
-    rfrom = pCount * 4 
-    rto = rfrom + pCount
-    
-    for i in range(rfrom, rto):
-        testA = participants[i]
-        testB = participants[i + pCount] # This will fetch the same participants alternate movement test.
+      
         
-#        ''' 
-#        Data 
-#        Maybe I should normalise all values here (ideally between -1 and 1)
-#        ''' 
-#        aX = [cp.x for cp in testA.normalisedAboveMean]
-#        aY = [cp.y for cp in testA.normalisedAboveMean]
-#        bX = [cp.x for cp in testB.normalisedAboveMean]
-#        bY = [cp.y for cp in testB.normalisedAboveMean]
-#         
-#        ''' Labels and things '''
-#        testAName = testA.name.split()[1]
-#        testBName = testB.name.split()[1]
-#        pName = testA.name.split()[2].upper()
-#        title = 'CoP values during extension for\n{} (green) vs {} (red) for participant {}'.format(testAName, testBName, pName)
-#     
-#
-#        X = np.append(aX, bX)
-#        y = np.append(aY, bY)
-#        
-#        '''
-#        What is the actual difference between X and y in this scenario?
-#        Because the SVM seems to ask for numpy data of a certain shape, so what am I doing wrong?
-#        '''
-#        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
-#
-#      
-#        svm = SVM(kernel=linear_kernel, power=4, coef=1)
-#        svm.fit(X_train, Y_train)
-#        return
-#
+    '''
+    Make an SVM out of ALL participants data.
+    '''
+    
+    bigBundle = appendDataBundles(bundles)
+    
+    
+    X = normalize(bigBundle['data'])
+    y = bigBundle['target']
+    
+    '''
+    Will I also have to do this? Is this important for the convex optimisation/lagrange multipliers???
+    y[y == 1] = -1
+    y[y == 2] = 1
+    Lets give it a try and see what happens!
+    '''
+    flipTargets = True
+    
+    if flipTargets:
+        y[y == 0] = -1
+        print('The target values are flipped to be -1 for pendulum movement or 1 for hinge movement')
+    else:
+        print('Target values are 0 for pendulum movement or 1 for hinge movement')
 
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+
+    print('xtrain length {} \nytrain length {} \nxtest length {}\nytest length {}'.format(len(X_train), len(y_train), len(X_test), len(y_test)))
+    
+    chosenKernel = polynomial_kernel
+    clf = SupportVectorMachine(kernel=chosenKernel, power=4, coef=1)
+    clf.fit(X_train, y_train)
+    y_pred = clf.predict(X_test)
+
+    print ("Kernel: {}, Accuracy: {}".format(chosenKernel, accuracy_score(y_test, y_pred)))
+
+    # Reduce dimension to two using PCA and plot the results
+    pca = PCA()
+    pca.plot_in_2d(X_test, y_pred)
+    
+
+'''
+Trying to make an SVM from each participant
+'''
+
+#    for bundle in bundles[:2]:
+#        X = normalize(bundle['data'])
+#        y = bundle['target']
+#        print('Bundle normalised data is {}'.format(X))
+#        print('X shape is {}'.format(np.shape(X)))
 #
-#    '''
-#    Finally a section for making any graphics out of ALL data
-#    '''
+#        print('Y targets are {}'.format(y))
+#        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+#
+#        print('X_train is {}\nX_test is {}'.format(X_train, X_test))
+#        print('')
+        
+        
+#        clf = SupportVectorMachine(kernel=polynomial_kernel, power=4, coef=1)
+#        clf.fit(X_train, y_train)
+#        y_pred = clf.predict(X_test)
+#    
+#        print ("Accuracy:", accuracy_score(y_test, y_pred))
+#    
+#        # Reduce dimension to two using PCA and plot the results
+#        pca = PCA()
+#        pca.plot_in_2d(X_test, y_pred)
+    
+
+
+'''
+Compound scatter and line graphs for rest and extension -
+A bit old and can probably be made better using the updates to Participant
+'''
+        
+#        if returnType == 'p':
+#            p.plotCopHighLows()
+#        
+#            highMeans = np.append(highMeans, Helper.averagePoints(p.aboveMean))
+#            lowMeans = np.append(lowMeans, Helper.averagePoints(p.belowMean))
+#            
+#        else:
+#            highMean = np.mean(p.aboveMean)
+#            lowMean = np.mean(p.belowMean)
+#            print('The highs are {} with a mean of {}'.format(p.aboveMean, highMean))
+#            print('the lows are{} with a mean of {}'.format(p.belowMean, lowMean))
+#            print('') #empty row
+#            highMeans = np.append(highMeans, highMean)
+#            lowMeans = np.append(lowMeans, lowMean)
+        
+#        p.compoundScatterLine(plateaus)
+#        p.showAvgHighLows(avgPlateaus, show = True)
+#        plt.scatter(np.arange(len(avgPlateaus)), avgPlateaus)
+   
+
+
+'''
+Finally a section for making any graphics out of ALL data
+'''
+    
 ##    if returnType == 'p':
 ##        # make a graph of the points, cartesian style
 ##
