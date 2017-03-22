@@ -46,8 +46,8 @@ BR = back right = data6[[:,3]] = y
 '''
 Bundle format
 
-bundle = {'data':np.array([[]]), 
-             'targets':np.array([]), 
+bundle = {'data':np.array([[ 4 float values ]]), 
+             'targets':np.array([ 0 or 1 ]), 
              'target_names':np.array(['pendulum', 'hinge']),
              'data_feature_names':np.array(['xBelow', 'yBelow', 'xAbove', 'yAbove'])}
 '''
@@ -80,12 +80,7 @@ def constructDataBundle(P, key = 'cop'):
         target = 1
     
     if key.lower() == 'cop':
-        
-        totalLength = len(P.aboveMean + P.belowMean)
-        print('Participant {} has {} above and below mean values'.format(P.name , totalLength))
-        
-       
-            
+          
         length = min(len(P.aboveMean), len(P.belowMean))
             
         xBelow = [cp.x for cp in P.belowMean]
@@ -102,17 +97,24 @@ def constructDataBundle(P, key = 'cop'):
             targets.append(target)
         
 #    elif key.lower() == 'data6':
-#        
+#       Not supporting this yet
     
     return {'data':np.array(dataRows).astype(float), 
-            'targets':np.array(targets).astype(int), 
-            'target_names':np.array(['pendulum', 'hinge']).astype(str),
-            'data_feature_names':np.array(['xBelow', 'yBelow', 'xAbove', 'yAbove']).astype(str)}
+            'target':np.array(targets).astype(int), 
+            'data_feature_names':np.array(['xBelow', 'yBelow', 'xAbove', 'yAbove']).astype(str),
+            'target_names':np.array(['pendulum', 'hinge']).astype(str)}
         
         
 
-def appendDataBundles():
-    return 0
+def appendDataBundles(bundles):
+    
+    outData = np.concatenate([b['data'] for b in bundles]).astype(float)
+    outTargets = np.concatenate([b['target'] for b in bundles]).astype(int)
+
+    return {'data':outData, 
+            'target':outTargets, 
+            'data_feature_names':np.array(['xBelow', 'yBelow', 'xAbove', 'yAbove']).astype(str),
+            'target_names':np.array(['pendulum', 'hinge']).astype(str)}
     
     
 def graphParticipantsAboveBelow(participants, pCount, trial):
@@ -204,26 +206,7 @@ def main():
         '''
         aboveMean = Helper.pointListMinusPoint(p.aboveMean, p.meanRestPoint)
         p.normalisedAboveMean = np.append(normalisedAboveMean, aboveMean)
-        
-#        if returnType == 'p':
-#            p.plotCopHighLows()
-#        
-#            highMeans = np.append(highMeans, Helper.averagePoints(p.aboveMean))
-#            lowMeans = np.append(lowMeans, Helper.averagePoints(p.belowMean))
-#            
-#        else:
-#            highMean = np.mean(p.aboveMean)
-#            lowMean = np.mean(p.belowMean)
-#            print('The highs are {} with a mean of {}'.format(p.aboveMean, highMean))
-#            print('the lows are{} with a mean of {}'.format(p.belowMean, lowMean))
-#            print('') #empty row
-#            highMeans = np.append(highMeans, highMean)
-#            lowMeans = np.append(lowMeans, lowMean)
-        
-#        p.compoundScatterLine(plateaus)
-#        p.showAvgHighLows(avgPlateaus, show = True)
-#        plt.scatter(np.arange(len(avgPlateaus)), avgPlateaus)
-   
+
   
     '''
     Introduce a loop here that will create graphs and whatnot out of each individual Participant
