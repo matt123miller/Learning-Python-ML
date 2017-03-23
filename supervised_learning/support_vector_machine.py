@@ -21,6 +21,19 @@ from principal_component_analysis import PCA
 
 # Hide cvxopt output
 cvxopt.solvers.options['show_progress'] = False
+'''
+Example output when 'show_progress' is true
+     pcost       dcost       gap    pres   dres
+ 0: -1.8847e+01 -1.3222e+02  5e+02  2e+00  1e-14
+ 1: -1.3308e+01 -7.7172e+01  6e+01  2e-15  1e-14
+ 2: -1.7741e+01 -2.6323e+01  9e+00  1e-16  1e-14
+ 3: -2.1347e+01 -2.2921e+01  2e+00  3e-16  1e-14
+ 4: -2.2026e+01 -2.2231e+01  2e-01  1e-15  1e-14
+ 5: -2.2116e+01 -2.2131e+01  2e-02  2e-15  1e-14
+ 6: -2.2122e+01 -2.2123e+01  1e-03  3e-16  1e-14
+ 7: -2.2123e+01 -2.2123e+01  1e-04  2e-16  1e-14
+ 8: -2.2123e+01 -2.2123e+01  1e-06  2e-16  1e-14
+'''
 
 
 class SupportVectorMachine(object):

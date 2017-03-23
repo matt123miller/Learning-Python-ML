@@ -34,6 +34,30 @@ class PCA():
 
         return X_transformed
 
+    def plotInNd(self, features, X, y = None):
+        n = len(features)
+        X_transformed = self.transform(X, n_components = max(features)+1)
+        
+        # Another option is to loop and plot a single feature at a time and show at the end?
+        
+        for i in range(n):
+            
+            pass
+            
+            
+        if n == 3:
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            x1 = X_transformed[:, features[0]]
+            x2 = X_transformed[:, features[1]]
+            x3 = X_transformed[:, features[2]]
+            ax.scatter(x1, x2, x3, c=y)
+        else:
+            x1 = X_transformed[:, features[0]]
+            x2 = X_transformed[:, features[1]]
+            plt.scatter(x1, x2, c=y)
+        plt.show()
+        
     # Plot the dataset X and the corresponding labels y in 2D using PCA.
     def plot_in_2d(self, X, y=None):
         X_transformed = self.transform(X, n_components=2)
@@ -56,14 +80,15 @@ class PCA():
 
 def main():
     # Load the dataset
-    data = datasets.load_digits()
+    data = datasets.load_iris()
     X = data.data
     y = data.target
 
     # Project the data onto the 2 primary principal components and plot the
     # data
     pca = PCA()
-    pca.plot_in_2d(X, y)
+#    pca.plot_in_3d(X, y)
+    pca.plot_in_3d( X, y)
 
 if __name__ == "__main__":
     main()

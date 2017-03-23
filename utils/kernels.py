@@ -7,6 +7,13 @@ def linear_kernel(**kwargs):
     return f
 
 
+def gaussian(sigma):
+        def f(x, y):
+            exponent = -np.sqrt(la.norm(x-y) ** 2 / (2 * sigma ** 2))
+            return np.exp(exponent)
+        return f
+
+
 def polynomial_kernel(power, coef, **kwargs):
     def f(x1, x2):
         return (np.inner(x1, x2) + coef)**power

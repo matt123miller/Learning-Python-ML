@@ -8,6 +8,9 @@ class Kernel(object):
     """Implements list of kernels from
     http://en.wikipedia.org/wiki/Support_vector_machine
     I found this file at http://tullo.ch/articles/svm-py/
+    
+    For these ones do I have to choose my kernel and pass arguments defined in the outer def, 
+    later passing x and y args to the  nested f function? How does this work?
     """
     @staticmethod
     def linear():

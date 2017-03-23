@@ -5,12 +5,10 @@ import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-from mpl_toolkits.mplot3d import Axes3D
 
 from point import Point
 from HelperFile import Helper
-from SupportVectorMachine import SVMTrainer
+from SupportVectorMachine import SupportVectorMachine as MySVM
 from participant import Participant
 #from kernels import *
 
@@ -22,8 +20,7 @@ from data_manipulation import train_test_split, shuffle_data, normalize
 from data_operation import accuracy_score
 from kernels import *
 sys.path.insert(0, dir_path + "/../supervised_learning")
-from support_vector_machine import SupportVectorMachine # as SVM
-from kernels import *
+from support_vector_machine import SupportVectorMachine as OtherSVM
 sys.path.insert(0, dir_path + "/../unsupervised_learning/")
 from principal_component_analysis import PCA
 
@@ -72,55 +69,6 @@ def loadParticipants(trials, names):
 
 
 
-def constructDataBundle(P, key = 'cop'):
-            
-    targetHingeNames = ('trial1b', 'trial2b', 'trial3b')
-    target = 0
-    dataRows = []
-    targets = []
-    
-    #if contains a pendulum trial then targets is 0, hinge trials target is 1
-    if any(s in P.name.lower() for s in targetHingeNames):
-        target = 1
-    
-    if key.lower() == 'cop':
-          
-        length = min(len(P.aboveMean), len(P.belowMean))
-            
-        xBelow = [cp.x for cp in P.belowMean]
-        yBelow = [cp.y for cp in P.belowMean]
-        xAbove = [cp.x for cp in P.aboveMean]
-        yAbove = [cp.y for cp in P.aboveMean]
-        
-        dataRows = []
-        targets = []
-        
-        for i in range(length):
-            item = [ xBelow[i].item(), yBelow[i].item(), xAbove[i].item(), yAbove[i].item() ]
-            dataRows.append(item)
-            targets.append(target)
-        
-#    elif key.lower() == 'data6':
-#       Not supporting this yet
-    
-    return {'data':np.array(dataRows).astype(float), 
-            'target':np.array(targets).astype(int), 
-            'data_feature_names':np.array(['xBelow', 'yBelow', 'xAbove', 'yAbove']).astype(str),
-            'target_names':np.array(['pendulum', 'hinge']).astype(str)}
-        
-        
-
-def appendDataBundles(bundles):
-    
-    outData = np.concatenate([b['data'] for b in bundles]).astype(float)
-    outTargets = np.concatenate([b['target'] for b in bundles]).astype(int)
-
-    return {'data':outData, 
-            'target':outTargets, 
-            'data_feature_names':np.array(['xBelow', 'yBelow', 'xAbove', 'yAbove']).astype(str),
-            'target_names':np.array(['pendulum', 'hinge']).astype(str)}
-    
-    
 def graphParticipantsAboveBelow(participants, pCount, trial):
     # 0 for trial 1a and 1b, 2 for 2a and 2b, 4 for 3a and 3b
     trials = [0,0,2,4]
@@ -235,16 +183,22 @@ def main():
     bundles = []
     
     for p in participants[:]:
-        bundle = constructDataBundle(p, 'cop')
+        bundle = Helper.constructDataBundle(p, 'cop')
         bundles.append(bundle)
       
         
     '''
-    Make an SVM out of ALL participants data.
+    Make an SVM out of ALL or a SUBSET OF participants data.
     '''
     
-    bigBundle = appendDataBundles(bundles)
     
+    bigBundle = Helper.appendDataBundles(bundles)
+    
+    ''' 
+    Alternatively create a big bundle from only a subset
+    
+    bigBundle = appendDataBundles(bundles[ some sort of list comprehension ])
+    '''
     
     X = normalize(bigBundle['data'])
     y = bigBundle['target']
@@ -262,22 +216,26 @@ def main():
         print('The target values are flipped to be -1 for pendulum movement or 1 for hinge movement')
     else:
         print('Target values are 0 for pendulum movement or 1 for hinge movement')
-
+    color= ['red' if l == 1 else 'green' for l in y]
+    print(color)
+    return
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
 
     print('xtrain length {} \nytrain length {} \nxtest length {}\nytest length {}'.format(len(X_train), len(y_train), len(X_test), len(y_test)))
     
-    chosenKernel = polynomial_kernel
-    clf = SupportVectorMachine(kernel=chosenKernel, power=4, coef=1)
-    clf.fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
-
-    print ("Kernel: {}, Accuracy: {}".format(chosenKernel, accuracy_score(y_test, y_pred)))
-
-    # Reduce dimension to two using PCA and plot the results
-    pca = PCA()
-    pca.plot_in_2d(X_test, y_pred)
+    chosenKernel = linear_kernel
+    clf = MySVM(kernel=chosenKernel, power=4, coef=1)
+   
     
+#    clf.fit(X_train, y_train)
+#    y_pred = clf.predict(X_test)
+#
+#    print ("Kernel: {}, Accuracy: {}".format(chosenKernel, accuracy_score(y_test, y_pred)))
+#
+#    # Reduce dimension to two using PCA and plot the results
+#    pca = PCA()
+#    pca.plot_in_3d(X_test, y_pred)
+#    
 
 '''
 Trying to make an SVM from each participant
