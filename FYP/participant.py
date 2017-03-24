@@ -22,7 +22,7 @@ class Participant(object):
     '''
     name and filetype aren't case sensitive
     '''
-    def __init__(self, name = "", fileType = ".mat", dataKey = 'data6'):
+    def __init__(self, name = "", fileType = ".mat", dataKey = 'data6', createCSV = False):
         self.name = name
         self.dataBlob = None
         self.copX = np.array([]).astype(float)
@@ -46,20 +46,23 @@ class Participant(object):
             matlab = io.loadmat(self.filename)
             # atm I use data6 as that's what's in the files I was given
             self.dataBlob = matlab
-        # Not gonna use csv for now, too much extra complexity.
-#        elif fileType == ".csv":
-#            csvFile = open(self.filename, newline='\n')
-#            file = csv.reader(csvFile)
-#            self.dataBlob = file["whatever the hell goes here for the magic"]
-#        
+        '''
+        Not gonna use csv for now, too much extra complexity.
+        elif fileType == ".csv":
+            csvFile = open(self.filename, newline='\n')
+            file = csv.reader(csvFile)
+            self.dataBlob = file["whatever the hell goes here for the magic"]
+        '''
         self.data6 = self.dataBlob[dataKey]
         
-        self.stripOutEnds(minimumThreshold = 400)
+        self.stripOutEnds(minimumSensorThreshold = 400)
         self.removeJunkData()    
         
         for i in range(len(self.copX)):
             self.copPoints = np.append(self.copPoints, Point(x = self.copX[i], y = self.copY[i]))
-            
+         
+        if createCSV:
+            self.createCSV()
         
          
     
@@ -86,7 +89,7 @@ class Participant(object):
         self.data6 = np.array(tempDict['data6'])
        
         
-    def stripOutEnds(self, minimumThreshold):
+    def stripOutEnds(self, minimumSensorThreshold):
                 
         # I could try some list comprehension magic but I'd rather keep it clear to my noob python brain
         # And I also need some numbers saved along with the lists themselves
@@ -97,7 +100,7 @@ class Participant(object):
             data = self.data6[i,:]
             
             for d in data:
-                if d > minimumThreshold:
+                if d > minimumSensorThreshold:
                     self.beginIndex = i
                     beginFound = True
                     break
@@ -110,7 +113,7 @@ class Participant(object):
             data = self.data6[j,:]
 #            print(j)
             for d in data:
-                if d > minimumThreshold:
+                if d > minimumSensorThreshold:
                     self.endIndex = j
                     endFound = True
                     break
@@ -123,15 +126,28 @@ class Participant(object):
         self.copY = self.dataBlob['result_y'][self.beginIndex-1:self.endIndex+1]
         
     
-    
-            
-    
+    def createCSV(self, overwrite = False):
+        '''
+        Make a CSV file out of the COP data or maybe the data6
+        Create a csv writer
+        write the data
+        save the file
+        '''
+        writeData = []
+        
+        ''' 'w' parameter will write and overwrite if it exists already '''
+        with open('{}{}'.format(self.name, '.csv'), 'w') as file:
+            writer = csv.writer(file, dialect='excel')
+            for p in self.copPoints:
+                writer.writerow([p.printForUnity()])
+#            
+   
+        
     
     def normaliseData(self):
         self.copX = Helper.normaliseOverHighestValue(self.copX)
         self.copY = Helper.normaliseOverHighestValue(self.copY)
         self.copPoints = [p.normalise() for p in self.copPoints]
-    
     '''
     Returns an array of length data6.count containing zeroes or an index where a flat point is.
     '''

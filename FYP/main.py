@@ -85,7 +85,6 @@ def main():
     participants = loadParticipants(trials = trialNames[0:tCount], names = participantNames[0:pCount])
     
     
-    
     highMeans = np.array([])
     lowMeans = np.array([])
     diffMeans = np.array([])

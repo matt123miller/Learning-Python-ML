@@ -21,6 +21,9 @@ class Point(object):
         
     def __repr__(self):
         return "Point x:{0}, y:{1}".format(self.x,self.y)
+     
+    def printForUnity(self):
+        return '{}, {}'.format(self.x.item(), self.y.item())
         
     def __add__(self,other):
         x = self.x + other.x

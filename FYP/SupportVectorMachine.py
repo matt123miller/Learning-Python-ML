@@ -36,13 +36,10 @@ class SupportVectorMachine(object):
     
     
     
-    def plotInNd(self, dimensions, X, y = None):
-        n = len(dimensions)
-        for i in range(n):
-            pass
+    
     
      # Plot the dataset X and the corresponding labels y in 2D using PCA.
-    def plot_in_2d(self, X, y=None):
+    def plot_in_2d(self, X, y = None, features = []):
         X_transformed = PCA.transform(X, n_components=2)
         x1 = X_transformed[:, 0]
         x2 = X_transformed[:, 1]
@@ -50,14 +47,19 @@ class SupportVectorMachine(object):
         plt.show()
 
     # Plot the dataset X and the corresponding labels y in 3D using PCA.
-    def plot_in_3d(self, X, y=None):
+    def plot_in_3d(self, X, y = None, features = [], featureLabels = []):
         X_transformed = self.transform(X, n_components=3)
-        x1 = X_transformed[:, 0]
-        x2 = X_transformed[:, 1]
-        x3 = X_transformed[:, 2]
+        f1, f2, f3 = features[0], features[1], features[2]
+        
+        x1 = X_transformed[:, f1]
+        x2 = X_transformed[:, f2]
+        x3 = X_transformed[:, f3]
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         ax.scatter(x1, x2, x3, c=y)
+        plt.xlabel(featureLabels[f1])
+        plt.ylabel(featureLabels[f2])
+        plt.zlabel(featureLabels[f3])
         plt.show()
      
         
