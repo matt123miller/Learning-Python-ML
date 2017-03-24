@@ -69,48 +69,7 @@ def loadParticipants(trials, names):
 
 
 
-def graphParticipantsAboveBelow(participants, pCount, trial):
-    # 0 for trial 1a and 1b, 2 for 2a and 2b, 4 for 3a and 3b
-    trials = [0,0,2,4]
-    rfrom = pCount * trials[trial]
-    rto = rfrom + pCount
-    
-    for i in range(rfrom, rto):
-        testA = participants[i]
-        testB = participants[i + pCount] # This will fetch the same participants alternate movement test.
-        
-        ''' 
-        Data 
-        Maybe I should normalise all values here (ideally between -1 and 1)
-        '''
-#        aX = Helper.normaliseOverHighestValue([cp.x for cp in testA.normalisedAboveMean])
-#        aY = Helper.normaliseOverHighestValue([cp.y for cp in testA.normalisedAboveMean])
-#        bX = Helper.normaliseOverHighestValue([cp.x for cp in testB.normalisedAboveMean])
-#        bY = Helper.normaliseOverHighestValue([cp.y for cp in testB.normalisedAboveMean])
-        
-        aX = [cp.x for cp in testA.normalisedAboveMean]
-        aY = [cp.y for cp in testA.normalisedAboveMean]
-        bX = [cp.x for cp in testB.normalisedAboveMean]
-        bY = [cp.y for cp in testB.normalisedAboveMean]
-         
-        ''' Labels and things '''
-        testAName = testA.name.split()[1]
-        testBName = testB.name.split()[1]
-        pName = testA.name.split()[2].upper()
-        title = 'CoP values during extension for\n{} (green) vs {} (red) for participant {}'.format(testAName, testBName, pName)
-       
-     
-        ''' Graph all the things '''
-        plt.scatter(aX, aY, color = 'g')
-        plt.scatter(bX, bY, color = 'r')
-#        plt.xlim([-1,3])
-#        plt.ylim([-6,6])
-        plt.xlabel(xCopLabel)
-        plt.ylabel(yCopLabel)
-        plt.title(title)
-        
-        plt.show()
-        
+
 def main():
         
     pCount = len(participantNames)
@@ -166,59 +125,68 @@ def main():
       
         for i in whatever:
             do things
+            
+        When I refactor graphParticipantsAboveBelow into the Participant object make the loop I mentioned in Helper here.
     '''     
     
-    print('All data manipulation is hopefully done now \nNow to make graphs and things out of each participant')
-
-
-
 
     '''
     Shows each participants extension values
     '''
-#    graphParticipantsAboveBelow(participants, pCount, trial = 2)
-
+#    Helper.graphParticipantsAboveBelow(participants, pCount, trial = 2, labels = [xCopLabel, yCopLabel])
+#    return
 
     
+    print('All data manipulation is hopefully done now \nNow to make graphs and things out of each participant')
+
+
+    ''' Create each bundle '''
     bundles = []
     
     for p in participants[:]:
         bundle = Helper.constructDataBundle(p, 'cop')
         bundles.append(bundle)
       
-        
-    '''
-    Make an SVM out of ALL or a SUBSET OF participants data.
-    '''
-    
-    
-    bigBundle = Helper.appendDataBundles(bundles)
     
     ''' 
-    Alternatively create a big bundle from only a subset
+    Create a big bundle combining all the individual bundles
     
+    Alternatively create a big bundle from only a subset
     bigBundle = appendDataBundles(bundles[ some sort of list comprehension ])
     '''
+    bigBundle = Helper.appendDataBundles(bundles)
+
+
+    '''
+    Make an SVM out of ALL with bigbundle or a SUBSET OF participants data using bundles?
+    Maybe pass a slice of bundles to appendDataBundles
+    '''
+    
     
     X = normalize(bigBundle['data'])
     y = bigBundle['target']
     
     '''
-    Will I also have to do this? Is this important for the convex optimisation/lagrange multipliers???
-    y[y == 1] = -1
-    y[y == 2] = 1
-    Lets give it a try and see what happens!
+    The targets define whether an element belongs to a class (1) or not (-1)
+    
     '''
-    flipTargets = True
+    flipTargets = False
     
     if flipTargets:
-        y[y == 0] = -1
-        print('The target values are flipped to be -1 for pendulum movement or 1 for hinge movement')
+        print('The target values are flipped to be 0 for hinge movement or 1 for pendulum movement')
     else:
-        print('Target values are 0 for pendulum movement or 1 for hinge movement')
-    color= ['red' if l == 1 else 'green' for l in y]
-    print(color)
-    return
+        y[y == 0] = -1
+        print('Target values are -1 for hinge movement or 1 for pendulum movement')
+    
+    '''
+    Green points will hopefully show pendulum movement, red for hinge
+    '''
+    color = ['green' if l == 1 else 'red' for l in y]
+    
+    ''' 
+    Data is all read and processed sequentially by file up until this point
+    The train_test_split method shuffles the data before splitting it
+    '''
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
 
     print('xtrain length {} \nytrain length {} \nxtest length {}\nytest length {}'.format(len(X_train), len(y_train), len(X_test), len(y_test)))
