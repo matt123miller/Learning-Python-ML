@@ -151,7 +151,7 @@ def main():
     Create a big bundle combining all the individual bundles
     
     Alternatively create a big bundle from only a subset
-    bigBundle = appendDataBundles(bundles[ some sort of list comprehension ])
+    bigBundle = appendDataBundles(bundles[ some sort of list comprehension or slice])
     '''
     bigBundle = Helper.appendDataBundles(bundles)
 
@@ -191,18 +191,17 @@ def main():
     print('xtrain length {} \nytrain length {} \nxtest length {}\nytest length {}'.format(len(X_train), len(y_train), len(X_test), len(y_test)))
     
     chosenKernel = linear_kernel
-    clf = MySVM(kernel=chosenKernel, power=4, coef=1)
+    svm = MySVM(kernel=chosenKernel, power=4, coef=1, )
    
     
-#    clf.fit(X_train, y_train)
-#    y_pred = clf.predict(X_test)
-#
-#    print ("Kernel: {}, Accuracy: {}".format(chosenKernel, accuracy_score(y_test, y_pred)))
-#
-#    # Reduce dimension to two using PCA and plot the results
-#    pca = PCA()
-#    pca.plot_in_3d(X_test, y_pred)
-#    
+    svm.fit(X_train, y_train)
+    y_pred = svm.predict(X_test)
+
+    print ("Kernel: {}, Accuracy: {}".format(chosenKernel, accuracy_score(y_test, y_pred)))
+
+    # Reduce dimension to two using PCA and plot the results
+    svm.plot_in_2d(X_test, y_pred, [0,2], bigBundle['data_feature_names'])
+    
 
 '''
 Trying to make an SVM from each participant
