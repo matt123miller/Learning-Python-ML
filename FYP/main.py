@@ -113,7 +113,7 @@ def main():
         mean rest point I can graph each participant for their differences between 
         tests a and b for each direction. Then SVM that to get an actual project?
         '''
-        p.extensionLength = Helper.pointListMinusPoint(p.aboveMean, p.meanRestPoint)
+        p.extensionDifferences = Helper.pointListMinusPoint(p.aboveMean, p.meanRestPoint)
 
   
     '''
@@ -140,17 +140,40 @@ def main():
     ''' Create each bundle '''
     bundles = []
     
-    for p in participants[:]:
-        bundle = Helper.constructDataBundle(p, 'cop')
-        bundles.append(bundle)
-      
+#    pSlice = range(pCount)
+#    pSlice.append(range(pCount * 2, pCount * 3))
+#    pSlice.append(range(pCount * 4, pCount * 5))
+#    
+#    print(pSlice)
+#    return
+#    for i in range(pCount):
+#        p = participants[i]
+#        pNext = participants[i+pCount]
+#        bundle = Helper.constructDualDataBundle(p, pNext, 'cop')
+#        bundles.append(bundle)
+#    
+#    for i in range(pCount * 2, pCount * 3):
+#        p = participants[i]
+#        pNext = participants[i+pCount]
+#        bundle = Helper.constructDualDataBundle(p, pNext, 'cop')
+#        bundles.append(bundle)
+#    
+#    for i in range(pCount * 4, pCount * 5):
+#        p = participants[i]
+#        pNext = participants[i+pCount]
+#        bundle = Helper.constructDualDataBundle(p, pNext, 'cop')
+#        bundles.append(bundle)
     
     ''' 
     Create a big bundle combining all the individual bundles
     
     Alternatively create a big bundle from only a subset
     bigBundle = appendDataBundles(bundles[ some sort of list comprehension or slice])
-    '''
+    ''' 
+    for p in participants[:pCount * 2]:
+        bundle = Helper.constructDataBundle(p, 'cop')
+        bundles.append(bundle)
+
     bigBundle = Helper.appendDataBundles(bundles)
 
 
