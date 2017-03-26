@@ -110,8 +110,65 @@ class Helper():
 
         return X_transformed
      
+        
+   
     @staticmethod
-    def constructDataBundle(P, key = 'cop'):
+    def constructDualDataBundle(P, nextP, key = 'cop'):
+                
+#        targetPendulumNames = ('trial1a', 'trial2a', 'trial3a')
+        target = 0
+        dataRows = []
+        targets = []
+        
+        #if contains a pendulum trial then targets is 0, hinge trials target is 1
+#        if any(s in P.name.lower() for s in targetPendulumNames):
+#            target = 1
+        
+        if key.lower() == 'cop':
+              
+            length = min(len(P.extensionDifferences), len(nextP.extensionDifferences))
+                
+            xp = [cp.x for cp in P.extensionDifferences]
+            yp = [cp.y for cp in P.extensionDifferences]
+            xnextp = [cp.x for cp in nextP.extensionDifferences]
+            ynextp = [cp.y for cp in nextP.extensionDifferences]
+            
+            dataRows = []
+            targets = []
+            
+            for i in range(length):
+                item = [ xp[i].item(), yp[i].item() ] 
+                dataRows.append(item)
+                targets.append(1)
+            
+            for i in range(length):
+                item = [ xnextp[i].item(), ynextp[i].item() ] 
+                dataRows.append(item)
+                targets.append(-1)
+            
+    #    elif key.lower() == 'data6':
+    #       Not supporting this yet
+        
+        return {'data':np.array(dataRows).astype(float), 
+                'target':np.array(targets).astype(int), 
+                'data_feature_names':np.array(['xBelow', 'yBelow', 'xAbove', 'yAbove']).astype(str),
+                'target_names':np.array(['pendulum', 'hinge']).astype(str)}
+           
+     
+    @staticmethod
+    def appendDualDataBundles(bundles):
+        
+        outData = np.concatenate([b['data'] for b in bundles]).astype(float)
+        outTargets = np.concatenate([b['target'] for b in bundles]).astype(int)
+    
+        return {'data':outData, 
+                'target':outTargets, 
+                'data_feature_names':np.array(['xBelow', 'yBelow', 'xAbove', 'yAbove']).astype(str),
+                'target_names':np.array(['pendulum', 'hinge']).astype(str)}
+        
+        
+    @staticmethod
+    def constructDataBundle(P, nextP, key = 'cop'):
                 
         targetPendulumNames = ('trial1a', 'trial2a', 'trial3a')
         target = 0
