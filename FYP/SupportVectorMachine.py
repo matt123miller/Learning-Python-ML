@@ -204,7 +204,8 @@ def main():
     
     # Reduce dimension to two using PCA and plot the results
     pca = PCA()
-    pca.plot_in_2d(X_test, y_pred, features = [0,1])
+#    pca.plot_in_2d(X_test, y_pred)
+    clf.plot_in_2d(X_test, y_pred, features = [0,1,2,3], featureLabels = ['a','b'])
 
 
 if __name__ == "__main__":

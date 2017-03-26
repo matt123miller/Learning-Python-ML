@@ -196,6 +196,7 @@ def main():
         print('The target values are flipped to be 0 for hinge movement or 1 for pendulum movement')
     else:
         y[y == 0] = -1
+        print([y==-1])
         print('Target values are -1 for hinge movement or 1 for pendulum movement')
     
     '''
@@ -211,8 +212,8 @@ def main():
 
     print('xtrain length {} \nytrain length {} \nxtest length {}\nytest length {}'.format(len(X_train), len(y_train), len(X_test), len(y_test)))
     
-    chosenKernel = linear_kernel
-    svm = MySVM(kernel=chosenKernel, power=4, coef=1)
+    chosenKernel = polynomial_kernel
+    svm = MySVM(kernel=chosenKernel, C = 0, power=4, coef=1)
    
     
     svm.fit(X_train, y_train)
@@ -222,8 +223,9 @@ def main():
     print ("Kernel: {}, Accuracy: {}".format(chosenKernel, accuracy_score(y_test, y_pred)))
 
     # Reduce dimension to two using PCA and plot the results
-    svm.plot_in_2d(X_test, y_pred, [0,2], bigBundle['data_feature_names'])
-    
+    svm.plot_in_2d(X_test, y_pred, [0,1,2,3], bigBundle['data_feature_names'], True)
+#    svm.plot_in_2d(X_test, y_pred, [2,3], bigBundle['data_feature_names'], True)
+
 
 '''
 Trying to make an SVM from each participant
