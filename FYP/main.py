@@ -88,7 +88,6 @@ def main():
     highMeans = np.array([])
     lowMeans = np.array([])
     diffMeans = np.array([])
-    normalisedAboveMean = np.array([])
     
     print('The plateaus were computed by looking {0} values ahead and saving values below {1}'.format(byValue, threshold))
 
@@ -114,8 +113,7 @@ def main():
         mean rest point I can graph each participant for their differences between 
         tests a and b for each direction. Then SVM that to get an actual project?
         '''
-        aboveMean = Helper.pointListMinusPoint(p.aboveMean, p.meanRestPoint)
-        p.normalisedAboveMean = np.append(normalisedAboveMean, aboveMean)
+        p.extensionLength = Helper.pointListMinusPoint(p.aboveMean, p.meanRestPoint)
 
   
     '''
@@ -191,7 +189,7 @@ def main():
     print('xtrain length {} \nytrain length {} \nxtest length {}\nytest length {}'.format(len(X_train), len(y_train), len(X_test), len(y_test)))
     
     chosenKernel = linear_kernel
-    svm = MySVM(kernel=chosenKernel, power=4, coef=1, )
+    svm = MySVM(kernel=chosenKernel, power=4, coef=1)
    
     
     svm.fit(X_train, y_train)
