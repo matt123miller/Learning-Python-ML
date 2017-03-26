@@ -35,9 +35,9 @@ class SupportVectorMachine(object):
         self.power = power
         self.gamma = gamma
         self.coef = coef
-        self.lagr_multipliers = None
-        self.support_vectors = None
-        self.support_vector_labels = None
+        self.lagrMultipliers = None
+        self.supportVectors = None
+        self.supportVectorLabels = None
         self.intercept = None
         
         
@@ -60,7 +60,9 @@ class SupportVectorMachine(object):
             coef=self.coef)
         
         # Calculate kernel matrix
+        # Fill it with zeroes first
         kernel_matrix = np.zeros((n_samples, n_samples))
+        # Replace each cell with it's values passed through the kernel
         for i in range(n_samples):
             for j in range(n_samples):
                 kernel_matrix[i, j] = self.kernel(X[i], X[j])
@@ -86,23 +88,26 @@ class SupportVectorMachine(object):
         minimization = cvxopt.solvers.qp(P, q, G, h, A, b)
         
         # Lagrange multipliers
-        lagr_mult = np.ravel(minimization['x'])
+        lagrMult = np.ravel(minimization['x'])
         
         # Extract support vectors
         # Get indexes of non-zero lagr. multipiers
-        idx = lagr_mult > 1e-7
+        idx = lagrMult > 1e-7 # this means 0.00000001 
         # Get the corresponding lagr. multipliers
-        self.lagr_multipliers = lagr_mult[idx]
+        self.lagrMultipliers = lagrMult[idx]
         # Get the samples that will act as support vectors
-        self.support_vectors = X[idx]
+        self.supportVectors = X[idx]
+        print('These are my support vectors {}'.format(self.supportVectors))
         # Get the corresponding labels
-        self.support_vector_labels = y[idx]
+        self.supportVectorLabels = y[idx]
+        print('And their corresponding labels {}'.format(self.supportVectorLabels))
+
         
         # Calculate intercept with first support vector
-        self.intercept = self.support_vector_labels[0]
-        for i in range(len(self.lagr_multipliers)):
-            self.intercept -= self.lagr_multipliers[i] * self.support_vector_labels[
-                i] * self.kernel(self.support_vectors[i], self.support_vectors[0])
+        self.intercept = self.supportVectorLabels[0]
+        for i in range(len(self.lagrMultipliers)):
+            self.intercept -= self.lagrMultipliers[i] * self.supportVectorLabels[
+                i] * self.kernel(self.supportVectors[i], self.supportVectors[0])
 
     def predict(self, X):
         y_pred = []
@@ -110,9 +115,9 @@ class SupportVectorMachine(object):
         for sample in X:
             prediction = 0
             # Determine the label of the sample by the support vectors
-            for i in range(len(self.lagr_multipliers)):
-                prediction += self.lagr_multipliers[i] * self.support_vector_labels[
-                    i] * self.kernel(self.support_vectors[i], sample)
+            for i in range(len(self.lagrMultipliers)):
+                prediction += self.lagrMultipliers[i] * self.supportVectorLabels[
+                    i] * self.kernel(self.supportVectors[i], sample)
             prediction += self.intercept
             y_pred.append(np.sign(prediction))
         return np.array(y_pred)
@@ -135,34 +140,47 @@ class SupportVectorMachine(object):
         X_transformed = X.dot(eigenvectors)
 
         return X_transformed
-     # Plot the dataset X and the corresponding labels y in 2D using PCA.
-    def plot_in_2d(self, X, y = None, features = [], featureLabels = []):
+    
+    # Plot the dataset X and the corresponding labels y
+    def plot_in_2d(self, X, y = None, features = [], featureLabels = [], show = True):
         X_transformed = self.transform(X, n_components=4)
-        f1, f2 = features[0], features[1]
+        f1, f2, f3, f4 = features[0], features[1], features[2], features[3]
+        colours = ['green' if l == 1 else 'red' for l in y]
 
         x1 = X_transformed[:, f1]
         x2 = X_transformed[:, f2]
-        plt.scatter(x1, x2, c=y)
+        x3 = X_transformed[:, f3]
+        x4 = X_transformed[:, f4]
+        
+        
+        plt.scatter(x1, x2, c=colours)
+        plt.scatter(x3, x4, c=colours)
+
         plt.xlabel(featureLabels[f1])
         plt.ylabel(featureLabels[f2])
         
-        plt.show()
+        if show:
+            plt.show()
 
-    # Plot the dataset X and the corresponding labels y in 3D using PCA.
-    def plot_in_3d(self, X, y = None, features = [], featureLabels = []):
+    # Plot the dataset X and the corresponding labels y
+    def plot_in_3d(self, X, y = None, features = [], featureLabels = [], show = True):
         X_transformed = self.transform(X, n_components=4)
         f1, f2, f3 = features[0], features[1], features[2]
+        colours = ['green' if l == 1 else 'red' for l in y]
+
         
         x1 = X_transformed[:, f1]
         x2 = X_transformed[:, f2]
         x3 = X_transformed[:, f3]
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
-        ax.scatter(x1, x2, x3, c=y)
+        ax.scatter(x1, x2, x3, c=colours)
         ax.set_xlabel(featureLabels[f1])
         ax.set_ylabel(featureLabels[f2])
         ax.set_zlabel(featureLabels[f3])
-        plt.show()
+        
+        if show:
+            plt.show()
      
         
 '''

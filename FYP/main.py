@@ -217,6 +217,7 @@ def main():
     
     svm.fit(X_train, y_train)
     y_pred = svm.predict(X_test)
+    print('My predictions y for the testing set X are {}'.format(y_pred))
 
     print ("Kernel: {}, Accuracy: {}".format(chosenKernel, accuracy_score(y_test, y_pred)))
 
