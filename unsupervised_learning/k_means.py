@@ -91,11 +91,12 @@ class KMeans():
 def main():
     # Load the dataset
     X, y = datasets.make_blobs()
-
+    print(X)
+    print(y)
     # Cluster the data using K-Means
     clf = KMeans(k=3)
     y_pred = clf.predict(X)
-
+    
     # Project the data onto the 2 primary principal components
     pca = PCA()
     pca.plot_in_2d(X, y_pred)

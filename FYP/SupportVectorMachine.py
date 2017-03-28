@@ -7,7 +7,8 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import cvxopt
-from sklearn import datasets # Probably not used
+from sklearn import datasets # Used as a test in main below
+#from sklearn import 
 
 ''' My code '''
 from participant import Participant

@@ -109,7 +109,42 @@ class Helper():
         X_transformed = X.dot(eigenvectors)
 
         return X_transformed
-     
+    
+    def constructSmallDataBundle(P, key = 'cop'):
+                
+        targetPendulumNames = ('trial1a', 'trial2a', 'trial3a')
+        target = 0
+        dataRows = []
+        targets = []
+        
+        #if contains a pendulum trial then targets is 0, hinge trials target is 1
+        if any(s in P.name.lower() for s in targetPendulumNames):
+            target = 1
+            
+        if key.lower() == 'cop':
+                  
+            xed = [cp.x for cp in P.extensionDifferences]
+            yed = [cp.y for cp in P.extensionDifferences]
+            
+            dataRows = []
+            targets = []
+    
+            for i in range(len(P.extensionDifferences)):
+                item = [ xed[i].item(), yed[i].item() ] 
+                dataRows.append(item)
+                targets.append(target)
+                
+
+    #    elif key.lower() == 'data6':
+    #       Not supporting this yet
+        
+        return {'data':np.array(dataRows).astype(float), 
+                'target':np.array(targets).astype(int), 
+                'data_feature_names':np.array(['xExtDiff', 'yExtDiff']).astype(str),
+                'target_names':np.array(['pendulum', 'hinge']).astype(str)}
+        
+            
+
     @staticmethod
     def constructDataBundle(P, key = 'cop'):
                 

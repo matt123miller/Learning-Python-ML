@@ -23,6 +23,7 @@ sys.path.insert(0, dir_path + "/../supervised_learning")
 from support_vector_machine import SupportVectorMachine as OtherSVM
 sys.path.insert(0, dir_path + "/../unsupervised_learning/")
 from principal_component_analysis import PCA
+from k_means import KMeans
 
 """
 variables
@@ -113,7 +114,7 @@ def main():
         mean rest point I can graph each participant for their differences between 
         tests a and b for each direction. Then SVM that to get an actual project?
         '''
-        p.extensionLength = Helper.pointListMinusPoint(p.aboveMean, p.meanRestPoint)
+        p.extensionDifferences = Helper.pointListMinusPoint(p.aboveMean, p.meanRestPoint)
 
   
     '''
@@ -140,8 +141,8 @@ def main():
     ''' Create each bundle '''
     bundles = []
     
-    for p in participants[:]:
-        bundle = Helper.constructDataBundle(p, 'cop')
+    for p in participants[:pCount * 4]:
+        bundle = Helper.constructSmallDataBundle(p, 'cop')
         bundles.append(bundle)
       
     
@@ -153,21 +154,17 @@ def main():
     '''
     bigBundle = Helper.appendDataBundles(bundles)
 
-
-    '''
-    Make an SVM out of ALL with bigbundle or a SUBSET OF participants data using bundles?
-    Maybe pass a slice of bundles to appendDataBundles
-    '''
-    
+     # Load the dataset
     
     X = normalize(bigBundle['data'])
     y = bigBundle['target']
     
+       
     '''
     The targets define whether an element belongs to a class (1) or not (-1)
     
     '''
-    flipTargets = False
+    flipTargets = True
     
     if flipTargets:
         print('The target values are flipped to be 0 for hinge movement or 1 for pendulum movement')
@@ -181,25 +178,50 @@ def main():
     color = ['green' if l == 1 else 'red' for l in y]
     
     ''' 
-    Data is all read and processed sequentially by file up until this point
-    The train_test_split method shuffles the data before splitting it
+    Trying some KMeans because I can see clusters myself and I'm desperate for something
     '''
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
-
-    print('xtrain length {} \nytrain length {} \nxtest length {}\nytest length {}'.format(len(X_train), len(y_train), len(X_test), len(y_test)))
     
-    chosenKernel = linear_kernel
-    svm = MySVM(kernel=chosenKernel, power=4, coef=1)
    
     
-    svm.fit(X_train, y_train)
-    y_pred = svm.predict(X_test)
-
-    print ("Kernel: {}, Accuracy: {}".format(chosenKernel, accuracy_score(y_test, y_pred)))
-
-    # Reduce dimension to two using PCA and plot the results
-    svm.plot_in_2d(X_test, y_pred, [0,2], bigBundle['data_feature_names'])
+#    X, y = datasets.make_blobs()
+    print(X)
+    print(y)
+    # Cluster the data using K-Means
+    clf = KMeans(k=3)
+    y_pred = clf.predict(X)
     
+    # Project the data onto the 2 primary principal components
+    pca = PCA()
+    pca.plot_in_2d(X, y_pred)
+    pca.plot_in_2d(X, y)
+    
+    '''
+    Make an SVM out of ALL with bigbundle or a SUBSET OF participants data using bundles?
+    Maybe pass a slice of bundles to appendDataBundles
+    '''
+  
+# 
+#    ''' 
+#    Data is all read and processed sequentially by file up until this point
+#    The train_test_split method shuffles the data before splitting it
+#    '''
+#    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+##
+#    print('xtrain length {} \nytrain length {} \nxtest length {}\nytest length {}'.format(len(X_train), len(y_train), len(X_test), len(y_test)))
+#    
+#    chosenKernel = linear_kernel
+#    svm = MySVM(kernel=chosenKernel, C = 1, power=4, coef=2)
+#   
+#    
+#    svm.fit(X_train, y_train)
+#    y_pred = svm.predict(X_test)
+#
+#    print ("Kernel: {}, Accuracy: {}".format(chosenKernel, accuracy_score(y_test, y_pred)))
+
+    # Reduce dimensions and plot the results
+#    pca = PCA()
+#    pca.plot_in_2d(X_test, y_test)
+#    
 
 '''
 Trying to make an SVM from each participant
