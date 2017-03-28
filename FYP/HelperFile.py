@@ -5,6 +5,12 @@ import numpy as np
 from numpy import linalg 
 from point import Point
 
+import sys
+import os
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, dir_path + "/../utils")
+from data_operation import calculate_covariance_matrix
+
 class Helper():
 
     @staticmethod

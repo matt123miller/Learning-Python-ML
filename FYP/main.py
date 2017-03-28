@@ -146,33 +146,36 @@ def main():
 #    
 #    print(pSlice)
 #    return
-#    for i in range(pCount):
-#        p = participants[i]
-#        pNext = participants[i+pCount]
-#        bundle = Helper.constructDualDataBundle(p, pNext, 'cop')
-#        bundles.append(bundle)
-#    
-#    for i in range(pCount * 2, pCount * 3):
-#        p = participants[i]
-#        pNext = participants[i+pCount]
-#        bundle = Helper.constructDualDataBundle(p, pNext, 'cop')
-#        bundles.append(bundle)
-#    
-#    for i in range(pCount * 4, pCount * 5):
-#        p = participants[i]
-#        pNext = participants[i+pCount]
-#        bundle = Helper.constructDualDataBundle(p, pNext, 'cop')
-#        bundles.append(bundle)
+    for i in range(pCount):
+        p = participants[i]
+        pNext = participants[i+pCount]
+        bundle = Helper.constructDualDataBundle(p, pNext, 'cop')
+        bundles.append(bundle)
     
+    for i in range(pCount * 2, pCount * 3):
+        p = participants[i]
+        pNext = participants[i+pCount]
+        bundle = Helper.constructDualDataBundle(p, pNext, 'cop')
+        bundles.append(bundle)
+    
+    for i in range(pCount * 4, pCount * 5):
+        p = participants[i]
+        pNext = participants[i+pCount]
+        bundle = Helper.constructDualDataBundle(p, pNext, 'cop')
+        bundles.append(bundle)
+    
+    for i in range(len(bundles[0]['data'])):
+        print('Data: {}, Target: {}'.format( bundles[0]['data'][i] , bundles[0]['target'][i]))
+    return
     ''' 
     Create a big bundle combining all the individual bundles
     
     Alternatively create a big bundle from only a subset
     bigBundle = appendDataBundles(bundles[ some sort of list comprehension or slice])
     ''' 
-    for p in participants[:pCount * 2]:
-        bundle = Helper.constructDataBundle(p, 'cop')
-        bundles.append(bundle)
+#    for p in participants[:pCount * 2]:
+#        bundle = Helper.constructDataBundle(p, 'cop')
+#        bundles.append(bundle)
 
     bigBundle = Helper.appendDataBundles(bundles)
 
@@ -188,7 +191,6 @@ def main():
     
     '''
     The targets define whether an element belongs to a class (1) or not (-1)
-    
     '''
     flipTargets = False
     
