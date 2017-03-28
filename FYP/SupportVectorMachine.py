@@ -59,7 +59,7 @@ class SupportVectorMachine(object):
             gamma=self.gamma,
             coef=self.coef)
         
-        # Calculate kernel matrix
+        # Calculate a matrix of values that came through the kernel
         # Fill it with zeroes first
         kernel_matrix = np.zeros((n_samples, n_samples))
         # Replace each cell with it's values passed through the kernel
@@ -68,6 +68,7 @@ class SupportVectorMachine(object):
                 kernel_matrix[i, j] = self.kernel(X[i], X[j])
         
         # Define the quadratic optimization problem
+        # This shit is gibberish
         P = cvxopt.matrix(np.outer(y, y) * kernel_matrix, tc='d')
         q = cvxopt.matrix(np.ones(n_samples) * -1)
         A = cvxopt.matrix(y, (1, n_samples), tc='d')
@@ -89,15 +90,16 @@ class SupportVectorMachine(object):
         
         # Lagrange multipliers
         lagrMult = np.ravel(minimization['x'])
-        
+        print('Lagrange Multipliers {}'.format(lagrMult))
         # Extract support vectors
         # Get indexes of non-zero lagr. multipiers
         idx = lagrMult > 1e-7 # this means 0.00000001 
         # Get the corresponding lagr. multipliers
         self.lagrMultipliers = lagrMult[idx]
+        print('Multipliers > 0 {}'.format(self.lagrMultipliers))
         # Get the samples that will act as support vectors
         self.supportVectors = X[idx]
-        print('These are my support vectors {}'.format(self.supportVectors))
+        print('I have {} support vectors {}'.format(len(self.supportVectors),self.supportVectors))
         # Get the corresponding labels
         self.supportVectorLabels = y[idx]
         print('And their corresponding labels {}'.format(self.supportVectorLabels))
@@ -141,46 +143,24 @@ class SupportVectorMachine(object):
 
         return X_transformed
     
-    # Plot the dataset X and the corresponding labels y
-    def plot_in_2d(self, X, y = None, features = [], featureLabels = [], show = True):
-        X_transformed = self.transform(X, n_components=4)
-        f1, f2, f3, f4 = features[0], features[1], features[2], features[3]
-        colours = ['green' if l == 1 else 'red' for l in y]
+    # Plot the dataset X and the corresponding labels y in 2D using PCA.
+    def plot_in_2d(self, X, y=None):
+        X_transformed = self.transform(X, n_components=2)
+        x1 = X_transformed[:, 0]
+        x2 = X_transformed[:, 1]
+        plt.scatter(x1, x2, c=y)
+        plt.show()
 
-        x1 = X_transformed[:, f1]
-        x2 = X_transformed[:, f2]
-        x3 = X_transformed[:, f3]
-        x4 = X_transformed[:, f4]
-        
-        
-        plt.scatter(x1, x2, c=colours)
-        plt.scatter(x3, x4, c=colours)
-
-        plt.xlabel(featureLabels[f1])
-        plt.ylabel(featureLabels[f2])
-        
-        if show:
-            plt.show()
-
-    # Plot the dataset X and the corresponding labels y
-    def plot_in_3d(self, X, y = None, features = [], featureLabels = [], show = True):
-        X_transformed = self.transform(X, n_components=4)
-        f1, f2, f3 = features[0], features[1], features[2]
-        colours = ['green' if l == 1 else 'red' for l in y]
-
-        
-        x1 = X_transformed[:, f1]
-        x2 = X_transformed[:, f2]
-        x3 = X_transformed[:, f3]
+    # Plot the dataset X and the corresponding labels y in 3D using PCA.
+    def plot_in_3d(self, X, y=None):
+        X_transformed = self.transform(X, n_components=3)
+        x1 = X_transformed[:, 0]
+        x2 = X_transformed[:, 1]
+        x3 = X_transformed[:, 2]
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
-        ax.scatter(x1, x2, x3, c=colours)
-        ax.set_xlabel(featureLabels[f1])
-        ax.set_ylabel(featureLabels[f2])
-        ax.set_zlabel(featureLabels[f3])
-        
-        if show:
-            plt.show()
+        ax.scatter(x1, x2, x3, c=y)
+        plt.show()
      
         
 '''
@@ -204,8 +184,8 @@ def main():
     
     # Reduce dimension to two using PCA and plot the results
     pca = PCA()
-#    pca.plot_in_2d(X_test, y_pred)
-    clf.plot_in_2d(X_test, y_pred, features = [0,1,2,3], featureLabels = ['a','b'])
+    pca.plot_in_2d(X_test, y_pred)
+#    clf.plot_in_2d(X_test, y_pred, features = [0,1,2,3], featureLabels = ['a','b'])
 
 
 if __name__ == "__main__":

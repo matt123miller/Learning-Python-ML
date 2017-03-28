@@ -94,29 +94,7 @@ class Helper():
             plt.title(title)
             
             plt.show()
-        
-    # Fit the dataset to the number of principal components
-    # specified in the constructor and return the transform dataset
-    @staticmethod
-    def transform(self, X, n_components):
-        covariance = calculate_covariance_matrix(X)
 
-        # Get the eigenvalues and eigenvectors.
-        # (eigenvector[:,0] corresponds to eigenvalue[0])
-        eigenvalues, eigenvectors = linalg.eig(covariance)
-
-        # Sort the eigenvalues and corresponding eigenvectors from largest
-        # to smallest eigenvalue and select the first n_components
-        idx = eigenvalues.argsort()[::-1]
-        eigenvalues = eigenvalues[idx][:n_components]
-        eigenvectors = np.atleast_1d(eigenvectors[:, idx])[:, :n_components]
-
-        # Project the data onto principal components
-        X_transformed = X.dot(eigenvectors)
-
-        return X_transformed
-     
-        
    
     @staticmethod
     def constructDualDataBundle(P, nextP, key = 'cop'):
@@ -160,19 +138,44 @@ class Helper():
                 'data_feature_names':np.array(['xBelow', 'yBelow', 'xAbove', 'yAbove']).astype(str),
                 'target_names':np.array(['pendulum', 'hinge']).astype(str)}
            
+   
      
     @staticmethod
-    def appendDualDataBundles(bundles):
+    def constructSmallDataBundle(P, key = 'cop'):
+                
+        targetPendulumNames = ('trial1a', 'trial2a', 'trial3a')
+        target = 0
+        dataRows = []
+        targets = []
         
-        outData = np.concatenate([b['data'] for b in bundles]).astype(float)
-        outTargets = np.concatenate([b['target'] for b in bundles]).astype(int)
+        #if contains a pendulum trial then targets is 0, hinge trials target is 1
+        if any(s in P.name.lower() for s in targetPendulumNames):
+            target = 1
+            
+        if key.lower() == 'cop':
+                  
+            xed = [cp.x for cp in P.extensionDifferences]
+            yed = [cp.y for cp in P.extensionDifferences]
+            
+            dataRows = []
+            targets = []
     
-        return {'data':outData, 
-                'target':outTargets, 
-                'data_feature_names':np.array(['xBelow', 'yBelow', 'xAbove', 'yAbove']).astype(str),
+            for i in range(len(P.extensionDifferences)):
+                item = [ xed[i].item(), yed[i].item() ] 
+                dataRows.append(item)
+                targets.append(target)
+                
+
+    #    elif key.lower() == 'data6':
+    #       Not supporting this yet
+        
+        return {'data':np.array(dataRows).astype(float), 
+                'target':np.array(targets).astype(int), 
+                'data_feature_names':np.array(['xExtDiff', 'yExtDiff']).astype(str),
                 'target_names':np.array(['pendulum', 'hinge']).astype(str)}
         
-        
+            
+     
     @staticmethod
     def constructDataBundle(P, nextP, key = 'cop'):
                 

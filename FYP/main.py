@@ -140,43 +140,54 @@ def main():
     ''' Create each bundle '''
     bundles = []
     
+    '''
+    Dual bundles of a participants a and b test
+    '''
 #    pSlice = range(pCount)
 #    pSlice.append(range(pCount * 2, pCount * 3))
 #    pSlice.append(range(pCount * 4, pCount * 5))
 #    
 #    print(pSlice)
 #    return
-    for i in range(pCount):
-        p = participants[i]
-        pNext = participants[i+pCount]
-        bundle = Helper.constructDualDataBundle(p, pNext, 'cop')
+#    for i in range(pCount):
+#        p = participants[i]
+#        pNext = participants[i+pCount]
+#        bundle = Helper.constructDualDataBundle(p, pNext, 'cop')
+#        bundles.append(bundle)
+#    
+#    for i in range(pCount * 2, pCount * 3):
+#        p = participants[i]
+#        pNext = participants[i+pCount]
+#        bundle = Helper.constructDualDataBundle(p, pNext, 'cop')
+#        bundles.append(bundle)
+#    
+#    for i in range(pCount * 4, pCount * 5):
+#        p = participants[i]
+#        pNext = participants[i+pCount]
+#        bundle = Helper.constructDualDataBundle(p, pNext, 'cop')
+#        bundles.append(bundle)
+#    
+#    assert(len(bundles[0]['data']) == len(bundles[0]['target']))
+#    
+    # Checking if a bundle looks ok
+#    for i in range(len(bundles[0]['data'])):
+#        print('Data: {}, Target: {}'.format(  , bundles[0]['target'][i]))
+#    return
+
+  
+    '''
+    Normal boring bundles
+    '''
+    for p in participants[:pCount * 2]:
+        bundle = Helper.constructDataBundle(p, 'cop')
         bundles.append(bundle)
-    
-    for i in range(pCount * 2, pCount * 3):
-        p = participants[i]
-        pNext = participants[i+pCount]
-        bundle = Helper.constructDualDataBundle(p, pNext, 'cop')
-        bundles.append(bundle)
-    
-    for i in range(pCount * 4, pCount * 5):
-        p = participants[i]
-        pNext = participants[i+pCount]
-        bundle = Helper.constructDualDataBundle(p, pNext, 'cop')
-        bundles.append(bundle)
-    
-    for i in range(len(bundles[0]['data'])):
-        print('Data: {}, Target: {}'.format( bundles[0]['data'][i] , bundles[0]['target'][i]))
-    return
+        
     ''' 
     Create a big bundle combining all the individual bundles
     
     Alternatively create a big bundle from only a subset
     bigBundle = appendDataBundles(bundles[ some sort of list comprehension or slice])
     ''' 
-#    for p in participants[:pCount * 2]:
-#        bundle = Helper.constructDataBundle(p, 'cop')
-#        bundles.append(bundle)
-
     bigBundle = Helper.appendDataBundles(bundles)
 
 
@@ -184,11 +195,19 @@ def main():
     Make an SVM out of ALL with bigbundle or a SUBSET OF participants data using bundles?
     Maybe pass a slice of bundles to appendDataBundles
     '''
+#    X = normalize(data.data[data.target != 0])
+#    y = data.target[data.target != 0]
+#    
     
+    valuesToTake = bigBundle['target'] != 0 
+    print(valuesToTake)
+    X = normalize(bigBundle['data'][valuesToTake])
+    y = bigBundle['target'][valuesToTake]
     
-    X = normalize(bigBundle['data'])
-    y = bigBundle['target']
-    
+    print(np.shape(X))
+    print(y)
+#    return
+
     '''
     The targets define whether an element belongs to a class (1) or not (-1)
     '''
@@ -198,13 +217,12 @@ def main():
         print('The target values are flipped to be 0 for hinge movement or 1 for pendulum movement')
     else:
         y[y == 0] = -1
-        print([y==-1])
         print('Target values are -1 for hinge movement or 1 for pendulum movement')
     
     '''
     Green points will hopefully show pendulum movement, red for hinge
     '''
-    color = ['green' if l == 1 else 'red' for l in y]
+    colours = ['green' if l == 1 else 'red' for l in y]
     
     ''' 
     Data is all read and processed sequentially by file up until this point
@@ -214,8 +232,8 @@ def main():
 
     print('xtrain length {} \nytrain length {} \nxtest length {}\nytest length {}'.format(len(X_train), len(y_train), len(X_test), len(y_test)))
     
-    chosenKernel = polynomial_kernel
-    svm = MySVM(kernel=chosenKernel, C = 0, power=4, coef=1)
+    chosenKernel = linear_kernel
+    svm = MySVM(kernel=chosenKernel, C = 0, power=3, coef=1)
    
     
     svm.fit(X_train, y_train)
@@ -225,7 +243,10 @@ def main():
     print ("Kernel: {}, Accuracy: {}".format(chosenKernel, accuracy_score(y_test, y_pred)))
 
     # Reduce dimension to two using PCA and plot the results
-    svm.plot_in_2d(X_test, y_pred, [0,1,2,3], bigBundle['data_feature_names'], True)
+    pca = PCA()
+    pca.plot_in_2d(X_test, y_pred)
+#    pca.plot_in_3d(X_test, y_pred)
+#    svm.plot_in_2d(X_test, y_pred, [0,1,2,3], bigBundle['data_feature_names'], True)
 #    svm.plot_in_2d(X_test, y_pred, [2,3], bigBundle['data_feature_names'], True)
 
 
