@@ -91,7 +91,7 @@ class Helper():
 
         return X_transformed
     
-    def constructSmallDataBundle(P, key = 'cop'):
+    def constructSmallDataBundle(pname, desiredData = [], key = 'cop'):
                 
         targetPendulumNames = ('trial1a', 'trial2a', 'trial3a')
         target = 0
@@ -99,19 +99,19 @@ class Helper():
         targets = []
         
         #if contains a pendulum trial then targets is 0, hinge trials target is 1
-        if any(s in P.name.lower() for s in targetPendulumNames):
+        if any(s in pname.lower() for s in targetPendulumNames):
             target = 1
             
         if key.lower() == 'cop':
                   
-            xed = [cp.x for cp in P.extensionDifferences]
-            yed = [cp.y for cp in P.extensionDifferences]
+            x = [cp.x for cp in desiredData]
+            y = [cp.y for cp in desiredData]
             
             dataRows = []
             targets = []
     
-            for i in range(len(P.extensionDifferences)):
-                item = [ xed[i].item(), yed[i].item() ] 
+            for i in range(len(desiredData)):
+                item = [ x[i].item(), y[i].item() ] 
                 dataRows.append(item)
                 targets.append(target)
                 
@@ -125,7 +125,36 @@ class Helper():
                 'target_names':np.array(['pendulum', 'hinge']).astype(str)}
         
             
-
+        
+    @staticmethod
+    def constructVariedDataBundle(pname, data = [], targets = 0, key = 'cop'):
+        targetPendulumNames = ('trial1a', 'trial2a', 'trial3a')
+        target = 0
+        dataRows = []
+        target = []
+        
+        shape = np.shape(data)
+        print(shape)
+        rows = shape[0]
+        # unknown amount of columns as they are of various lengths
+        items = []
+        for i, rowContents in enumerate(data):
+            x = [cp.x for cp in rowContents]
+            y = [cp.y for cp in rowContents]
+#            items
+#            row = []
+#            for point in rowContents:
+##                row.append(point.x.item(), point.y.item()) 
+#                dataRows.append(row)               
+#            target.append(targets)
+            
+        
+    
+        return {'data':np.array(dataRows).astype(float), 
+                'target':np.array(target).astype(int), 
+                'data_feature_names':np.array(['xExtDiff', 'yExtDiff']).astype(str),
+                'target_names':np.array(['pendulum', 'hinge']).astype(str)}
+                    
     @staticmethod
     def constructDataBundle(P, key = 'cop'):
                 

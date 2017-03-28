@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from math import sqrt
-from numpy import array
+import numpy as np
 class Point(object):
     
-    def __init__(self, x, y):
+    def __init__(self, x = 0, y = 0):
         self.x = x
         self.y = y
     
@@ -40,6 +40,11 @@ class Point(object):
         y = self.y * other.y
         return Point(x,y)
     
+    def __div__(self,other):
+        x = self.x / other.x
+        y = self.y / other.y
+        return Point(x,y)
+    
     def divideBy(self,scalar):
         return Point(self.x / scalar, self.y / scalar)
     
@@ -57,9 +62,9 @@ class Point(object):
         rlist = []
         for p in points:
              rlist.append(p - point)
-        return array(rlist)
+        return np.array(rlist)
     
     @staticmethod
-    def normaliseOverHighestValue(values):
-        highest = np.max(values)
-        return array([v / highest for v in values]) 
+    def normaliseOverLongest(values):
+        highest = np.max([v.magnitude() for v in values])
+        return np.array([v.divideBy(highest) for v in values]) 

@@ -144,14 +144,25 @@ def main():
     beginOne, endOne = 0, pCount * 2
     beginTwo, endTwo = pCount * 2, pCount * 4
     beginThree, endThree = pCount * 4, pCount * 6
-    
+    chosenSlice = participants[beginOne:beginTwo]
+
     ''' Create each bundle '''
     bundles = []
-    for p in participants[beginOne:endOne]:
-        bundle = Helper.constructDataBundle(p, 'cop')
-        bundles.append(bundle)
-      
     
+    for participant in chosenSlice:
+        chosenData = [cp for cp in participant.aboveMean]
+        bundle = Helper.constructSmallDataBundle(participant.name, chosenData, 'cop')
+        bundles.append(bundle)
+        
+    ''' Is it a good idea to make more bundles with different chosenData before stacking them? '''
+      
+#    chosenSlice = participants[:]
+#    for i, p in enumerate(chosenSlice):
+#        target = 0 
+#        if i >= len(chosenSlice) / 2:
+#            target = 1
+#        bundle = Helper.constructVariedDataBundle(p.name, [p.extensionDifferences], target, 'cop')
+#        bundles.append(bundle)
     ''' 
     Create a big bundle combining all the individual bundles
     
@@ -174,12 +185,13 @@ def main():
     '''
     colours = ['green' if l == 1 else 'red' for l in y]
     
-    
-    plt.scatter(X[:,0], X[:,1], c='g') 
-    plt.scatter(X[:,2], X[:,3], c='r') 
+    #Quick graph test of data
+#    plt.scatter(X[:,0], X[:,1], c='g') 
+#    plt.scatter(X[:,2], X[:,3], c='r') 
 
     plt.show()
     return
+
     '''
     The targets define whether an element belongs to a class (1) or not (-1)
     
