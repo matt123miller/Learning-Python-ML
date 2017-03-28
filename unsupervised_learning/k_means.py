@@ -22,14 +22,16 @@ class KMeans():
     # Initialize the centroids as random samples
     def _init_random_centroids(self, X):
         n_samples, n_features = np.shape(X)
+        # Preallocate an array of the X shape
         centroids = np.zeros((self.k, n_features))
+        # A random item in X will be chosen as a centroid for each K cluster
         for i in range(self.k):
-            centroid = X[np.random.choice(range(n_samples))]
-            centroids[i] = centroid
+            centroids[i] = X[np.random.choice(range(n_samples))]
         return centroids
 
     # Return the index of the closest centroid to the sample
     def _closest_centroid(self, sample, centroids):
+        # i is the row in X
         closest_i = None
         closest_distance = float("inf")
         for i, centroid in enumerate(centroids):
@@ -42,6 +44,7 @@ class KMeans():
     # Assign the samples to the closest centroids to create clusters
     def _create_clusters(self, centroids, X):
         n_samples = np.shape(X)[0]
+        #Creates a 2d array with 1 row and k columns
         clusters = [[] for _ in range(self.k)]
         for sample_i, sample in enumerate(X):
             centroid_i = self._closest_centroid(sample, centroids)
@@ -73,7 +76,7 @@ class KMeans():
         centroids = self._init_random_centroids(X)
 
         # Iterate until convergence or for max iterations
-        for _ in range(self.max_iterations):
+        for i in range(self.max_iterations):
             # Assign samples to closest centroids (create clusters)
             clusters = self._create_clusters(centroids, X)
             prev_centroids = centroids
@@ -83,16 +86,22 @@ class KMeans():
             # If no centroids have changed => convergence
             diff = centroids - prev_centroids
             if not diff.any():
+                print('KMeans converged after {} iterations'.format(i))
                 break
-
+        print('Cluster shape: {}'.format(np.shape(clusters)))
+#        print('Clusters: {}'.format(clusters))
         return self._get_cluster_labels(clusters, X)
 
 
 def main():
     # Load the dataset
-    X, y = datasets.make_blobs()
-    print(X)
-    print(y)
+#    X, y = datasets.make_blobs()
+    
+    data = datasets.load_iris()
+    X = normalize(data.data)
+#    X = data.data
+    y = data.target
+    
     # Cluster the data using K-Means
     clf = KMeans(k=3)
     y_pred = clf.predict(X)

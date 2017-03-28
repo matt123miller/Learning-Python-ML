@@ -138,11 +138,17 @@ def main():
     print('All data manipulation is hopefully done now \nNow to make graphs and things out of each participant')
 
 
+
+    
+    ''' different slices '''
+    beginOne, endOne = 0, pCount * 2
+    beginTwo, endTwo = pCount * 2, pCount * 4
+    beginThree, endThree = pCount * 4, pCount * 6
+    
     ''' Create each bundle '''
     bundles = []
-    
-    for p in participants[:pCount * 4]:
-        bundle = Helper.constructSmallDataBundle(p, 'cop')
+    for p in participants[beginOne:endOne]:
+        bundle = Helper.constructDataBundle(p, 'cop')
         bundles.append(bundle)
       
     
@@ -152,14 +158,28 @@ def main():
     Alternatively create a big bundle from only a subset
     bigBundle = appendDataBundles(bundles[ some sort of list comprehension or slice])
     '''
-    bigBundle = Helper.appendDataBundles(bundles)
+    
+    bigBundle = Helper.appendDataBundles(bundles[:])
 
      # Load the dataset
     
-    X = normalize(bigBundle['data'])
+#    X = normalize( bigBundle['data'] )
+
+    X = bigBundle['data']
     y = bigBundle['target']
     
-       
+    
+    '''
+    Green points will hopefully show pendulum movement, red for hinge
+    '''
+    colours = ['green' if l == 1 else 'red' for l in y]
+    
+    
+    plt.scatter(X[:,0], X[:,1], c='g') 
+    plt.scatter(X[:,2], X[:,3], c='r') 
+
+    plt.show()
+    return
     '''
     The targets define whether an element belongs to a class (1) or not (-1)
     
@@ -170,24 +190,21 @@ def main():
         print('The target values are flipped to be 0 for hinge movement or 1 for pendulum movement')
     else:
         y[y == 0] = -1
-        print('Target values are -1 for hinge movement or 1 for pendulum movement')
+        print('Target values are the default -1 for hinge movement or 1 for pendulum movement')
     
-    '''
-    Green points will hopefully show pendulum movement, red for hinge
-    '''
-    color = ['green' if l == 1 else 'red' for l in y]
+    
+    
+    
     
     ''' 
     Trying some KMeans because I can see clusters myself and I'm desperate for something
     '''
     
-   
-    
 #    X, y = datasets.make_blobs()
     print(X)
     print(y)
     # Cluster the data using K-Means
-    clf = KMeans(k=3)
+    clf = KMeans(k=2)
     y_pred = clf.predict(X)
     
     # Project the data onto the 2 primary principal components
