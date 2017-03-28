@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from math import sqrt
-
+from numpy import array
 class Point(object):
     
     def __init__(self, x, y):
@@ -42,3 +42,24 @@ class Point(object):
     
     def divideBy(self,scalar):
         return Point(self.x / scalar, self.y / scalar)
+    
+    
+    @staticmethod
+    def averagePoints(points):
+        x, y = [], []
+        for p in points:
+            x.append(p.x)
+            y.append(p.y)
+        return Point(sum(x)/len(x),sum(y)/len(y))
+     
+    @staticmethod
+    def pointListMinusPoint(points, point):
+        rlist = []
+        for p in points:
+             rlist.append(p - point)
+        return array(rlist)
+    
+    @staticmethod
+    def normaliseOverHighestValue(values):
+        highest = np.max(values)
+        return array([v / highest for v in values]) 

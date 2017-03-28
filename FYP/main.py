@@ -107,14 +107,14 @@ def main():
         
         #returns numpy arrays
         p.aboveMean, p.belowMean = Helper.splitDataAboveBelowMean(avgPlateaus, returnType) 
-        p.meanRestPoint = Helper.averagePoints(p.belowMean)
+        p.meanRestPoint = Point.averagePoints(p.belowMean)
                 
         '''
         Now that I've got a somewhat normalised value for each plateau above the 
         mean rest point I can graph each participant for their differences between 
         tests a and b for each direction. Then SVM that to get an actual project?
         '''
-        p.extensionDifferences = Helper.pointListMinusPoint(p.aboveMean, p.meanRestPoint)
+        p.extensionDifferences = Point.pointListMinusPoint(p.aboveMean, p.meanRestPoint)
 
   
     '''
@@ -260,8 +260,8 @@ A bit old and can probably be made better using the updates to Participant
 #        if returnType == 'p':
 #            p.plotCopHighLows()
 #        
-#            highMeans = np.append(highMeans, Helper.averagePoints(p.aboveMean))
-#            lowMeans = np.append(lowMeans, Helper.averagePoints(p.belowMean))
+#            highMeans = np.append(highMeans, Point.averagePoints(p.aboveMean))
+#            lowMeans = np.append(lowMeans, Point.averagePoints(p.belowMean))
 #            
 #        else:
 #            highMean = np.mean(p.aboveMean)

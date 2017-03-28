@@ -145,8 +145,8 @@ class Participant(object):
         
     
     def normaliseData(self):
-        self.copX = Helper.normaliseOverHighestValue(self.copX)
-        self.copY = Helper.normaliseOverHighestValue(self.copY)
+        self.copX = Point.normaliseOverHighestValue(self.copX)
+        self.copY = Point.normaliseOverHighestValue(self.copY)
         self.copPoints = [p.normalise() for p in self.copPoints]
     '''
     Returns an array of length data6.count containing zeroes or an index where a flat point is.
@@ -196,7 +196,7 @@ class Participant(object):
                     if returnType == 'm':
                         returnArray.append(np.mean(avgFlat))
                     else:
-                        returnArray.append(Helper.averagePoints(avgFlat))
+                        returnArray.append(Point.averagePoints(avgFlat))
                     avgFlat.clear()
                 continue
             if returnType == 'm': 
@@ -209,7 +209,7 @@ class Participant(object):
             if returnType == 'm':
                 returnArray.append(np.mean(avgFlat))
             else:
-                returnArray.append(Helper.averagePoints(avgFlat))
+                returnArray.append(Point.averagePoints(avgFlat))
 
         
         return np.array(returnArray)
