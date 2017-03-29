@@ -35,6 +35,7 @@ class Participant(object):
         self.belowMean = np.array([])
         self.meanRestPoint = Point(0,0)
         self.extensionDifferences = np.array([])
+        self.aboveMinusBelow = np.array([]).astype(float)
         self.beginIndex = 0
         self.endIndex = 0
         self.movement = ''

@@ -91,27 +91,27 @@ class Helper():
 
         return X_transformed
     
-    def constructSmallDataBundle(pname, desiredData = [], key = 'cop'):
+    def constructSmallDataBundle(pname, desiredData = [], target = 0, key = 'cop'):
                 
         targetPendulumNames = ('trial1a', 'trial2a', 'trial3a')
-        target = 0
         dataRows = []
         targets = []
         
-        #if contains a pendulum trial then targets is 0, hinge trials target is 1
-        if any(s in pname.lower() for s in targetPendulumNames):
-            target = 1
+        if target == 0:
+            #if contains a pendulum trial then targets is 0, hinge trials target is 1
+            if any(s in pname.lower() for s in targetPendulumNames):
+                target = 1
             
         if key.lower() == 'cop':
                   
-            x = [cp.x for cp in desiredData]
-            y = [cp.y for cp in desiredData]
-            
+#            x = [cp.x for cp in desiredData]
+#            y = [cp.y for cp in desiredData]
+#            
             dataRows = []
             targets = []
     
-            for i in range(len(desiredData)):
-                item = [ x[i].item(), y[i].item() ] 
+            for i, xy in enumerate(desiredData):
+                item = [ xy.x.item(), xy.y.item() ] 
                 dataRows.append(item)
                 targets.append(target)
                 

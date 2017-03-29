@@ -9,17 +9,19 @@ Created on Tue Mar 28 19:00:19 2017
 import numpy as np
 from point import Point
 
-data = np.array([[Point(1,1), Point(2,2)],[Point(3,2), Point()],[Point(), Point()]])
-
-print(np.shape(data))
-print(np.shape(data)[0])
-print(np.shape(data)[1])
-
-#for i,j in enumerate(data):
-#    print(i)
-#    print(j[1])
-    
-#for i in range(np.shape(data)[0]):
-#    print(i)
-
-print(Point.normaliseOverLongest([Point(1,1), Point(2,2), Point(3,2), Point(10,5), Point(4,3), Point(6,6)]))
+points = [Point(1,1), Point(2,1), Point(3,1)]
+print(points)
+#data = np.array([[Point(1,1), Point(2,2)],[Point(3,2), Point()],[Point(), Point()]])
+#
+#print(np.shape(data))
+#print(np.shape(data)[0])
+#print(np.shape(data)[1])
+#
+##for i,j in enumerate(data):
+##    print(i)
+##    print(j[1])
+#    
+##for i in range(np.shape(data)[0]):
+##    print(i)
+#
+#print(Point.normaliseOverLongest([Point(1,1), Point(2,2), Point(3,2), Point(10,5), Point(4,3), Point(6,6)]))

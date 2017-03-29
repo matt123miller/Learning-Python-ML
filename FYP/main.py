@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from point import Point
 from HelperFile import Helper
 from SupportVectorMachine import SupportVectorMachine as MySVM
+from KMeansClustering import KMeansClustering as KMeans
 from participant import Participant
 #from kernels import *
 
@@ -23,7 +24,6 @@ sys.path.insert(0, dir_path + "/../supervised_learning")
 from support_vector_machine import SupportVectorMachine as OtherSVM
 sys.path.insert(0, dir_path + "/../unsupervised_learning/")
 from principal_component_analysis import PCA
-from k_means import KMeans
 
 """
 variables
@@ -108,14 +108,14 @@ def main():
         #returns numpy arrays
         p.aboveMean, p.belowMean = Helper.splitDataAboveBelowMean(avgPlateaus, returnType) 
         p.meanRestPoint = Point.averagePoints(p.belowMean)
-                
+        
         '''
         Now that I've got a somewhat normalised value for each plateau above the 
         mean rest point I can graph each participant for their differences between 
         tests a and b for each direction. Then SVM that to get an actual project?
         '''
         p.extensionDifferences = Point.pointListMinusPoint(p.aboveMean, p.meanRestPoint)
-
+        p.aboveMinusBelow = [p.aboveMean[i] - p.belowMean[i] for i in range(min(len(p.aboveMean), len(p.belowMean)))]
   
     '''
     Introduce a loop here that will create graphs and whatnot out of each individual Participant
@@ -150,12 +150,15 @@ def main():
     bundles = []
     
     for participant in chosenSlice:
-        length = min(len(participant.aboveMean), len(participant.belowMean))
-        chosenData = [cp for cp in participant.aboveMean[:length] - participant.belowMean[:length]]
-        bundle = Helper.constructSmallDataBundle(participant.name, chosenData, 'cop')
-        print('length {} vs bundle length {}'.format(length, len(bundle['data'])))
+        
+        chosenData = participant.aboveMean
+            
+        bundle = Helper.constructSmallDataBundle(participant.name, chosenData, key = 'cop')
+        print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
         bundles.append(bundle)
         
+        
+    
     ''' Is it a good idea to make more bundles with different chosenData before stacking them? '''
       
 #    chosenSlice = participants[:]
@@ -176,7 +179,7 @@ def main():
 
      # Load the dataset
     
-    X = normalize( bigBundle['data'], 2 )
+    X = normalize( bigBundle['data'], 0 ) # Normalising over the 0th axis seems good. The 1st axis is awful though
 
 #    X = bigBundle['data']
     y = bigBundle['target']
@@ -188,14 +191,16 @@ def main():
     colours = ['green' if l == 1 else 'red' for l in y]
     
     #Quick graph test of data
-    plt.scatter(X[:,0], X[:,1], c='g') 
-#    plt.scatter(X[:,2], X[:,3], c='r') 
-#
-    plt.show()
-    return
+#    plt.scatter(X[:,0], X[:,1], c='g') 
+##    plt.scatter(X[:,2], X[:,3], c='r') 
+##
+#    plt.show()
+#    return
 
     '''
     The targets define whether an element belongs to a class (1) or not (-1)
+    Important for SVM and should be False
+    KMeans doens't matter, I've set to True but I don't think it matters
     
     '''
     flipTargets = True
@@ -223,8 +228,8 @@ def main():
     
     # Project the data onto the 2 primary principal components
     pca = PCA()
-    pca.plot_in_2d(X, y_pred, 'Predicted clusters')
-    pca.plot_in_2d(X, y, 'Defined clusters')
+    pca.plot_in_2d(X, y_pred, ['Predicted clusters', xCopLabel, yCopLabel])
+    pca.plot_in_2d(X, y, ['Defined clusters', xCopLabel, yCopLabel])
     
     '''
     Make an SVM out of ALL with bigbundle or a SUBSET OF participants data using bundles?
