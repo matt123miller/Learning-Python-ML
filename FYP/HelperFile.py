@@ -33,7 +33,7 @@ class Helper():
     '''
     Definitely refactor into Participant, 
     In a loop do the first part computing rfrom and rto and pass the testB participant as argument
-    It will be in line with other single participant graphs and keep main clean.
+    It will be in line with other single participant graphs.
     '''
     @staticmethod
     def graphParticipantsAboveBelow(participants, pCount, trial, labels):
@@ -47,10 +47,10 @@ class Helper():
             testB = participants[i + pCount] # This will fetch the same participants alternate movement test.
             
             
-            aX = [cp.x for cp in testA.normalisedAboveMean]
-            aY = [cp.y for cp in testA.normalisedAboveMean]
-            bX = [cp.x for cp in testB.normalisedAboveMean]
-            bY = [cp.y for cp in testB.normalisedAboveMean]
+            aX = [cp.x for cp in testA.extensionLengths]
+            aY = [cp.y for cp in testA.extensionLengths]
+            bX = [cp.x for cp in testB.extensionLengths]
+            bY = [cp.y for cp in testB.extensionLengths]
              
             ''' Labels and things '''
             testAName = testA.name.split()[1]
@@ -91,13 +91,13 @@ class Helper():
 
         return X_transformed
     
-    def constructSmallDataBundle(pname, desiredData = [], target = 0, key = 'cop'):
+    def constructSmallDataBundle(pname, desiredData = [], target = None, key = 'cop'):
                 
         targetPendulumNames = ('trial1a', 'trial2a', 'trial3a')
         dataRows = []
         targets = []
         
-        if target == 0:
+        if target == None:
             #if contains a pendulum trial then targets is 0, hinge trials target is 1
             if any(s in pname.lower() for s in targetPendulumNames):
                 target = 1

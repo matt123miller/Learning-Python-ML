@@ -114,7 +114,7 @@ def main():
         mean rest point I can graph each participant for their differences between 
         tests a and b for each direction. Then SVM that to get an actual project?
         '''
-        p.extensionDifferences = Point.pointListMinusPoint(p.aboveMean, p.meanRestPoint)
+        p.extensionLengths = Point.pointListMinusPoint(p.aboveMean, p.meanRestPoint)
         p.aboveMinusBelow = [p.aboveMean[i] - p.belowMean[i] for i in range(min(len(p.aboveMean), len(p.belowMean)))]
   
     '''
@@ -129,7 +129,7 @@ def main():
     
 
     '''
-    Shows each participants extension values
+    Shows each participants difference between extension values in a and b tests
     '''
 #    Helper.graphParticipantsAboveBelow(participants, pCount, trial = 2, labels = [xCopLabel, yCopLabel])
 #    return
@@ -144,51 +144,47 @@ def main():
     beginOne, endOne = 0, pCount * 2
     beginTwo, endTwo = pCount * 2, pCount * 4
     beginThree, endThree = pCount * 4, pCount * 6
-    chosenSlice = participants[beginTwo:endTwo]
+    chosenSlice = participants[beginThree:endThree]
 
-    ''' Create each bundle '''
+    ''' Create each bundle using the chosenSlice '''
     bundles = []
     
-    for participant in chosenSlice:
+    for participant in chosenSlice[:pCount]: #First half
         
-        chosenData = participant.aboveMean
+        chosenData = participant.extensionLengths
             
-        bundle = Helper.constructSmallDataBundle(participant.name, chosenData, key = 'cop')
+        bundle = Helper.constructSmallDataBundle(participant.name, chosenData, target = 0, key = 'cop')
         print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
         bundles.append(bundle)
-        
-        
     
-    ''' Is it a good idea to make more bundles with different chosenData before stacking them? '''
-      
-#    chosenSlice = participants[:]
-#    for i, p in enumerate(chosenSlice):
-#        target = 0 
-#        if i >= len(chosenSlice) / 2:
-#            target = 1
-#        bundle = Helper.constructVariedDataBundle(p.name, [p.extensionDifferences], target, 'cop')
-#        bundles.append(bundle)
+    ''' 
+    Is it a good idea to make more bundles with different chosenData before stacking them? 
+    Lets try
+    '''
+    
+    for participant in chosenSlice[pCount:]: #Second half
+    
+        chosenData = participant.extensionLengths
+        
+        bundle = Helper.constructSmallDataBundle(participant.name, chosenData, target = 1, key = 'cop')
+        print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
+        bundles.append(bundle)   
+    
+
+
     ''' 
     Create a big bundle combining all the individual bundles
-    
-    Alternatively create a big bundle from only a subset
-    bigBundle = appendDataBundles(bundles[ some sort of list comprehension or slice])
     '''
     
     bigBundle = Helper.appendDataBundles(bundles[:])
 
      # Load the dataset
     
-    X = normalize( bigBundle['data'], 0 ) # Normalising over the 0th axis seems good. The 1st axis is awful though
+#    X = normalize( bigBundle['data'], 0 ) # Normalising over the 0th axis seems good. The 1st axis is awful though
 
-#    X = bigBundle['data']
+    X = bigBundle['data']
     y = bigBundle['target']
     
-    
-    '''
-    Green points will hopefully show pendulum movement, red for hinge
-    '''
-    colours = ['green' if l == 1 else 'red' for l in y]
     
     #Quick graph test of data
 #    plt.scatter(X[:,0], X[:,1], c='g') 
@@ -224,12 +220,18 @@ def main():
     print(y)
     # Cluster the data using K-Means
     clf = KMeans(k=2)
-    y_pred = clf.predict(X)
+    yPred = clf.predict(X)
     
+    '''
+    Green points will hopefully show pendulum movement, red for hinge
+    '''
+    colours = ['green' if l == 1 else 'red' for l in y]
+    predColours = ['green' if l == 1 else 'red' for l in yPred]
+
     # Project the data onto the 2 primary principal components
     pca = PCA()
-    pca.plot_in_2d(X, y_pred, ['Predicted clusters', xCopLabel, yCopLabel])
-    pca.plot_in_2d(X, y, ['Defined clusters', xCopLabel, yCopLabel])
+    pca.plot_in_2d(X, predColours, ['Predicted clusters for leaning backward extension lengths', xCopLabel, yCopLabel])
+    pca.plot_in_2d(X, colours, ['Defined clusters for leaning backward extension lengths', xCopLabel, yCopLabel])
     
     '''
     Make an SVM out of ALL with bigbundle or a SUBSET OF participants data using bundles?

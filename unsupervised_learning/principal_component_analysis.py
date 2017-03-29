@@ -3,6 +3,7 @@ import os
 from sklearn import datasets
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, dir_path + "/../utils")
@@ -10,6 +11,10 @@ from data_operation import calculate_covariance_matrix
 from data_operation import calculate_correlation_matrix
 from data_manipulation import standardize
 
+redPatch = mpatches.Patch(color='red', label='Hinge movement')
+greenPatch = mpatches.Patch(color='green', label='Pendulum movement')
+        
+graphLegend = [greenPatch, redPatch]
 
 class PCA():
     def __init__(self): pass
@@ -67,6 +72,7 @@ class PCA():
         plt.title(labels[0])
         plt.xlabel(labels[1])
         plt.ylabel(labels[2])
+        plt.legend(handles = graphLegend)
         plt.show()
 
     # Plot the dataset X and the corresponding labels y in 3D using PCA.
@@ -81,6 +87,9 @@ class PCA():
         plt.title(labels[0])
         plt.xlabel(labels[1])
         plt.ylabel(labels[2])
+        
+        # Do I add the 
+        
         plt.show()
 
 
