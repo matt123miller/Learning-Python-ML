@@ -85,7 +85,7 @@ class KMeansClustering():
             # Calculate new centroids from the clusters
             centroids = self._calculateCentroids(clusters, X)
 
-            # If no centroids have changed => convergence
+            # If no centroids have changed then it's reached convergence
             diff = centroids - prev_centroids
             if not diff.any():
                 print('KMeans converged after {} iterations'.format(i))
@@ -105,13 +105,13 @@ def main():
     y = data.target
     
     # Cluster the data using K-Means
-    clf = KMeans(k=3)
+    clf = KMeansClustering(k=3)
     y_pred = clf.predict(X)
     
     # Project the data onto the 2 primary principal components
     pca = PCA()
-    pca.plot_in_2d(X, y_pred, 'Predicted clusters')
-    pca.plot_in_2d(X, y, 'Defined clusters')
+    pca.plot_in_2d(X, y_pred, ['Predicted clusters','',''])
+    pca.plot_in_2d(X, y, ['Defined clusters','',''])
 
 
 if __name__ == "__main__":
