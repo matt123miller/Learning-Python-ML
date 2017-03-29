@@ -59,15 +59,16 @@ class PCA():
         plt.show()
         
     # Plot the dataset X and the corresponding labels y in 2D using PCA.
-    def plot_in_2d(self, X, y=None):
+    def plot_in_2d(self, X, y=None, title = ''):
         X_transformed = self.transform(X, n_components=2)
         x1 = X_transformed[:, 0]
         x2 = X_transformed[:, 1]
         plt.scatter(x1, x2, c=y)
+        plt.title(title)
         plt.show()
 
     # Plot the dataset X and the corresponding labels y in 3D using PCA.
-    def plot_in_3d(self, X, y=None):
+    def plot_in_3d(self, X, y=None, title = ''):
         X_transformed = self.transform(X, n_components=3)
         x1 = X_transformed[:, 0]
         x2 = X_transformed[:, 1]
@@ -75,6 +76,7 @@ class PCA():
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         ax.scatter(x1, x2, x3, c=y)
+        plt.title(title)
         plt.show()
 
 

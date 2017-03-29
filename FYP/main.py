@@ -144,14 +144,16 @@ def main():
     beginOne, endOne = 0, pCount * 2
     beginTwo, endTwo = pCount * 2, pCount * 4
     beginThree, endThree = pCount * 4, pCount * 6
-    chosenSlice = participants[beginOne:beginTwo]
+    chosenSlice = participants[beginTwo:endTwo]
 
     ''' Create each bundle '''
     bundles = []
     
     for participant in chosenSlice:
-        chosenData = [cp for cp in participant.aboveMean]
+        length = min(len(participant.aboveMean), len(participant.belowMean))
+        chosenData = [cp for cp in participant.aboveMean[:length] - participant.belowMean[:length]]
         bundle = Helper.constructSmallDataBundle(participant.name, chosenData, 'cop')
+        print('length {} vs bundle length {}'.format(length, len(bundle['data'])))
         bundles.append(bundle)
         
     ''' Is it a good idea to make more bundles with different chosenData before stacking them? '''
@@ -174,9 +176,9 @@ def main():
 
      # Load the dataset
     
-#    X = normalize( bigBundle['data'] )
+    X = normalize( bigBundle['data'], 2 )
 
-    X = bigBundle['data']
+#    X = bigBundle['data']
     y = bigBundle['target']
     
     
@@ -186,9 +188,9 @@ def main():
     colours = ['green' if l == 1 else 'red' for l in y]
     
     #Quick graph test of data
-#    plt.scatter(X[:,0], X[:,1], c='g') 
+    plt.scatter(X[:,0], X[:,1], c='g') 
 #    plt.scatter(X[:,2], X[:,3], c='r') 
-
+#
     plt.show()
     return
 
@@ -221,8 +223,8 @@ def main():
     
     # Project the data onto the 2 primary principal components
     pca = PCA()
-    pca.plot_in_2d(X, y_pred)
-    pca.plot_in_2d(X, y)
+    pca.plot_in_2d(X, y_pred, 'Predicted clusters')
+    pca.plot_in_2d(X, y, 'Defined clusters')
     
     '''
     Make an SVM out of ALL with bigbundle or a SUBSET OF participants data using bundles?

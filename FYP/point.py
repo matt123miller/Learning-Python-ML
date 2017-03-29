@@ -48,6 +48,13 @@ class Point(object):
     def divideBy(self,scalar):
         return Point(self.x / scalar, self.y / scalar)
     
+    @staticmethod
+    def distance(x1, x2):
+        distance = 0
+        for i in range(len(x1)):
+            distance += pow((x1[i] - x2[i]), 2)
+    
+        return sqrt(distance)
     
     @staticmethod
     def averagePoints(points):
