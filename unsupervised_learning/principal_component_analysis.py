@@ -72,7 +72,7 @@ class PCA():
         plt.title(labels[0])
         plt.xlabel(labels[1])
         plt.ylabel(labels[2])
-        plt.legend(handles = graphLegend)
+#        plt.legend(handles = graphLegend)
         plt.show()
 
     # Plot the dataset X and the corresponding labels y in 3D using PCA.
