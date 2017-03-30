@@ -112,7 +112,7 @@ class Participant(object):
 #        # Loop through the back
         for j in reversed(range(len(self.data6))):
             data = self.data6[j,:]
-#            print(j)
+
             for d in data:
                 if d > minimumSensorThreshold:
                     self.endIndex = j

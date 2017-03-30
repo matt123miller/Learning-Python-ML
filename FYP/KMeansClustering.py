@@ -8,13 +8,22 @@ from sklearn import datasets
 import numpy as np
 from point import Point
 
+
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+
 # Import helper functions
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, dir_path + "/../utils")
 from data_manipulation import normalize
 sys.path.insert(0, dir_path + "/../unsupervised_learning/")
-from principal_component_analysis import PCA
+from principal_component_analysis import transform
 
+
+redPatch = mpatches.Patch(color='red', label='Hinge movement')
+greenPatch = mpatches.Patch(color='green', label='Pendulum movement')
+graphLegend = [greenPatch, redPatch]
 
 class KMeansClustering():
     def __init__(self, k=2, maxIterations=500):
@@ -95,6 +104,36 @@ class KMeansClustering():
         return self._getClusterLabels(clusters, X)
 
 
+    # Plot the dataset X and the corresponding labels y in 2D using PCA.
+    def plot_in_2d(self, X, y=None, labels = []):
+        X_transformed = transform(X, n_components=2)
+        x1 = X_transformed[:, 0]
+        x2 = X_transformed[:, 1]
+        plt.scatter(x1, x2, c=y)
+        plt.title(labels[0])
+        plt.xlabel(labels[1])
+        plt.ylabel(labels[2])
+        plt.legend(handles = graphLegend)
+        plt.show()
+
+    # Plot the dataset X and the corresponding labels y in 3D using PCA.
+    def plot_in_3d(self, X, y=None, labels = []):
+        X_transformed = transform(X, n_components=3)
+        x1 = X_transformed[:, 0]
+        x2 = X_transformed[:, 1]
+        x3 = X_transformed[:, 2]
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(x1, x2, x3, c=y)
+        plt.title(labels[0])
+        plt.xlabel(labels[1])
+        plt.ylabel(labels[2])
+        plt.legend(handles = graphLegend)
+
+        # Do I add the 
+        
+        plt.show()
+        
 def main():
     # Load the dataset
 #    X, y = datasets.make_blobs()
@@ -109,9 +148,9 @@ def main():
     y_pred = clf.predict(X)
     
     # Project the data onto the 2 primary principal components
-    pca = PCA()
-    pca.plot_in_2d(X, y_pred, ['Predicted clusters','',''])
-    pca.plot_in_2d(X, y, ['Defined clusters','',''])
+    
+    clf.plot_in_2d(X, y_pred, ['Predicted clusters','',''])
+    clf.plot_in_2d(X, y, ['Defined clusters','',''])
 
 
 if __name__ == "__main__":

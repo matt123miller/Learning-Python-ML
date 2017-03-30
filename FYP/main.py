@@ -1,29 +1,27 @@
 # -*- coding: utf-8 -*-
 
-
+# Libraries
 import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from enum import Enum
 
+# My code
 from point import Point
 from HelperFile import Helper
 from SupportVectorMachine import SupportVectorMachine as MySVM
 from KMeansClustering import KMeansClustering as KMeans
 from participant import Participant
-#from kernels import *
+from kernels import *
 
 
-# Import helper functions
+# Some helper functions
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, dir_path + "/../utils")
 from data_manipulation import train_test_split, shuffle_data, normalize
 from data_operation import accuracy_score
-from kernels import *
-sys.path.insert(0, dir_path + "/../supervised_learning")
-from support_vector_machine import SupportVectorMachine as OtherSVM
-sys.path.insert(0, dir_path + "/../unsupervised_learning/")
-from principal_component_analysis import PCA
+#from kernels import *
 
 """
 variables
@@ -54,9 +52,11 @@ bundle = {'data':np.array([[ 4 float values ]]),
              'data_feature_names':np.array(['xBelow', 'yBelow', 'xAbove', 'yAbove'])}
 '''
 
-'''
-How can I use a nice CMAP for colours? I saw autumn looks nice
-'''
+class MLType(Enum):
+    SVM = 0
+    KMEANS = 1
+    # Add more types as necessary
+
 
 def loadParticipants(trials, names):
     outParticipants = []
@@ -72,7 +72,12 @@ def loadParticipants(trials, names):
 
 
 def main():
-        
+    
+    ''' Choose what algorithm you wanna do '''
+    chosenAlgorithm = MLType.SVM
+    
+    
+    
     pCount = len(participantNames)
     tCount = len(trialNames)
     byValue = 15
@@ -144,34 +149,46 @@ def main():
     beginOne, endOne = 0, pCount * 2
     beginTwo, endTwo = pCount * 2, pCount * 4
     beginThree, endThree = pCount * 4, pCount * 6
-    chosenSlice = participants[beginThree:endThree]
+
+    chosenSlice = participants[beginOne:endOne]
 
     ''' Create each bundle using the chosenSlice '''
     bundles = []
     
-    for participant in chosenSlice[:pCount]: #First half
+    if chosenAlgorithm == MLType.KMEANS:
         
-        chosenData = participant.extensionLengths
+        for participant in chosenSlice[:pCount]: #First half
             
-        bundle = Helper.constructSmallDataBundle(participant.name, chosenData, target = 0, key = 'cop')
-        print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
-        bundles.append(bundle)
-    
-    ''' 
-    Is it a good idea to make more bundles with different chosenData before stacking them? 
-    Lets try
-    '''
-    
-    for participant in chosenSlice[pCount:]: #Second half
-    
-        chosenData = participant.extensionLengths
+            chosenData = participant.extensionLengths
+                
+            bundle = Helper.constructSmallDataBundle(participant.name, chosenData, target = 0, key = 'cop')
+            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
+            bundles.append(bundle)
         
-        bundle = Helper.constructSmallDataBundle(participant.name, chosenData, target = 1, key = 'cop')
-        print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
-        bundles.append(bundle)   
+        ''' 
+        Is it a good idea to make more bundles with different chosenData before stacking them? 
+        Lets try
+        '''
+        
+        for participant in chosenSlice[pCount:]: #Second half
+        
+            chosenData = participant.extensionLengths
+            
+            bundle = Helper.constructSmallDataBundle(participant.name, chosenData, target = 1, key = 'cop')
+            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
+            bundles.append(bundle)   
     
-
-
+    
+    elif chosenAlgorithm == MLType.SVM:
+    
+        for participant in chosenSlice[:]: # Whole slice
+            
+            chosenData = participant.extensionLengths
+                
+            bundle = Helper.constructDataBundle(participant, key = 'cop')
+            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
+            bundles.append(bundle)
+    
     ''' 
     Create a big bundle combining all the individual bundles
     '''
@@ -197,69 +214,68 @@ def main():
     The targets define whether an element belongs to a class (1) or not (-1)
     Important for SVM and should be False
     KMeans doens't matter, I've set to True but I don't think it matters
-    
+    I've actually moved the code forthis into the if statements as each algorithm requires it's own thing.
     '''
-    flipTargets = True
+#    flipTargets = True
+#    
+#    if flipTargets:
+#    else:
+        
     
-    if flipTargets:
+    if chosenAlgorithm == MLType.KMEANS:
+    
+        ''' 
+        Trying some KMeans because I can see clusters myself and I'm desperate for something
+        '''
         print('The target values are flipped to be 0 for hinge movement or 1 for pendulum movement')
-    else:
+
+        # Cluster the data using K-Means
+        kmeans = KMeans(k=2)
+        yPred = kmeans.predict(X)
+        
+        '''
+        Green points will hopefully show pendulum movement, red for hinge
+        '''
+        colours = ['green' if l == 1 else 'red' for l in y]
+        predColours = ['green' if l == 1 else 'red' for l in yPred]
+    
+        # Project the data onto the 2 primary principal components
+        kmeans.plot_in_2d(X, predColours, ['Predicted clusters for leaning right extension lengths', xCopLabel, yCopLabel])
+        kmeans.plot_in_2d(X, colours, ['Defined clusters for leaning right extension lengths', xCopLabel, yCopLabel])
+     
+        
+    elif chosenAlgorithm == MLType.SVM:
+        
+        '''
+        Make an SVM out of ALL with bigbundle or a SUBSET OF participants data using bundles?
+        Maybe pass a slice of bundles to appendDataBundles
+        '''
+        
         y[y == 0] = -1
         print('Target values are the default -1 for hinge movement or 1 for pendulum movement')
+     
+        ''' 
+        Data is all read and processed sequentially by file up until this point
+        The train_test_split method shuffles the data before splitting it
+        '''
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+    #
+        print('xtrain length {} \nytrain length {} \nxtest length {}\nytest length {}'.format(len(X_train), len(y_train), len(X_test), len(y_test)))
+        
+        # What kernel would you like to use?
+        chosenKernel = linear_kernel
+        svm = MySVM(kernel=chosenKernel, C = 1, power=4, coef=2)
+        
+        svm.fit(X_train, y_train)
+        y_pred = svm.predict(X_test)
     
+        print ("Kernel: {}, Accuracy: {}".format(chosenKernel, accuracy_score(y_test, y_pred)))
     
-    
-    
-    
-    ''' 
-    Trying some KMeans because I can see clusters myself and I'm desperate for something
-    '''
-    
-#    X, y = datasets.make_blobs()
-    print(X)
-    print(y)
-    # Cluster the data using K-Means
-    clf = KMeans(k=2)
-    yPred = clf.predict(X)
-    
-    '''
-    Green points will hopefully show pendulum movement, red for hinge
-    '''
-    colours = ['green' if l == 1 else 'red' for l in y]
-    predColours = ['green' if l == 1 else 'red' for l in yPred]
+        colours = ['green' if l == 1 else 'red' for l in y_test]
 
-    # Project the data onto the 2 primary principal components
-    pca = PCA()
-    pca.plot_in_2d(X, predColours, ['Predicted clusters for leaning backward extension lengths', xCopLabel, yCopLabel])
-    pca.plot_in_2d(X, colours, ['Defined clusters for leaning backward extension lengths', xCopLabel, yCopLabel])
-    
-    '''
-    Make an SVM out of ALL with bigbundle or a SUBSET OF participants data using bundles?
-    Maybe pass a slice of bundles to appendDataBundles
-    '''
-  
-# 
-#    ''' 
-#    Data is all read and processed sequentially by file up until this point
-#    The train_test_split method shuffles the data before splitting it
-#    '''
-#    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
-##
-#    print('xtrain length {} \nytrain length {} \nxtest length {}\nytest length {}'.format(len(X_train), len(y_train), len(X_test), len(y_test)))
-#    
-#    chosenKernel = linear_kernel
-#    svm = MySVM(kernel=chosenKernel, C = 1, power=4, coef=2)
-#   
-#    
-#    svm.fit(X_train, y_train)
-#    y_pred = svm.predict(X_test)
-#
-#    print ("Kernel: {}, Accuracy: {}".format(chosenKernel, accuracy_score(y_test, y_pred)))
-
-    # Reduce dimensions and plot the results
-#    pca = PCA()
-#    pca.plot_in_2d(X_test, y_test)
-#    
+        # Reduce dimensions and plot the results
+        svm.plot_in_2d(X_test, colours, ['',xCopLabel,yCopLabel])
+    #    
 
 '''
 Trying to make an SVM from each participant
@@ -278,15 +294,14 @@ Trying to make an SVM from each participant
 #        print('')
         
         
-#        clf = SupportVectorMachine(kernel=polynomial_kernel, power=4, coef=1)
-#        clf.fit(X_train, y_train)
-#        y_pred = clf.predict(X_test)
+#        svm = MySVM(kernel=polynomial_kernel, power=4, coef=1)
+#        svm.fit(X_train, y_train)
+#        y_pred = svm.predict(X_test)
 #    
 #        print ("Accuracy:", accuracy_score(y_test, y_pred))
 #    
 #        # Reduce dimension to two using PCA and plot the results
-#        pca = PCA()
-#        pca.plot_in_2d(X_test, y_pred)
+#        svm.plot_in_2d(X_test, y_pred)
     
 
 
