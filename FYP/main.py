@@ -4,6 +4,7 @@
 import sys
 import os
 import numpy as np
+from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 from enum import Enum
 
@@ -47,9 +48,9 @@ BR = back right = data6[[:,3]] = y
 Bundle format
 
 bundle = {'data':np.array([[ 4 float values ]]), 
-             'targets':np.array([ 0 or 1 ]), 
-             'target_names':np.array(['pendulum', 'hinge']),
-             'data_feature_names':np.array(['xBelow', 'yBelow', 'xAbove', 'yAbove'])}
+          'targets':np.array([ 0 or 1 ]), 
+          'target_names':np.array(['pendulum', 'hinge']),
+          'data_feature_names':np.array([ 'Depends on what's stored in the data array'])}
 '''
 
 class MLType(Enum):
@@ -76,7 +77,10 @@ def main():
     ''' Choose what algorithm you wanna do '''
     chosenAlgorithm = MLType.SVM
     
-    
+    if chosenAlgorithm == MLType.KMEANS:
+        print("We're doing K-Means Clustering!")
+    elif chosenAlgorithm == MLType.SVM:
+        print("We're doing SVM")
     
     pCount = len(participantNames)
     tCount = len(trialNames)
@@ -105,13 +109,21 @@ def main():
     for p in participants[:]:
         
         plateaus = p.lookAheadForPlateau(by = byValue, varianceThreshold = threshold)
+#        print(plateaus)
         
-#        p.normaliseData() #As in the vector normalise
+        # Returns numpy arrays where possible
         
         avgPlateaus = p.averagePlateauSections(plateaus, returnType)
+#        print(len(avgPlateaus))
+#        print(avgPlateaus)
+        p.aboveMean, p.belowMean, p.meanPoint = Helper.splitDataAboveBelowMean(avgPlateaus, returnType) 
         
-        #returns numpy arrays
-        p.aboveMean, p.belowMean = Helper.splitDataAboveBelowMean(avgPlateaus, returnType) 
+        # Make my above and below arrays each 10 values long for the 10 tests
+#        print('above {} below {}'.format(len(p.aboveMean), len(p.belowMean)))
+        
+#        p.formatAboveBelowIntoNEach(avgPlateaus, n_tests = 10)
+        
+        
         p.meanRestPoint = Point.averagePoints(p.belowMean)
         
         '''
@@ -121,12 +133,13 @@ def main():
         '''
         p.extensionLengths = Point.pointListMinusPoint(p.aboveMean, p.meanRestPoint)
         p.aboveMinusBelow = [p.aboveMean[i] - p.belowMean[i] for i in range(min(len(p.aboveMean), len(p.belowMean)))]
-  
+        
     '''
+    MAYBE
     Introduce a loop here that will create graphs and whatnot out of each individual Participant
     Much cleaner
       
-        for i in whatever:
+        for i, obj in enumerate(whatever):
             do things
             
         When I refactor graphParticipantsAboveBelow into the Participant object make the loop I mentioned in Helper here.
@@ -137,6 +150,7 @@ def main():
     Shows each participants difference between extension values in a and b tests
     '''
 #    Helper.graphParticipantsAboveBelow(participants, pCount, trial = 2, labels = [xCopLabel, yCopLabel])
+#    Helper.saveFigures(participants, xCopLabel, yCopLabel)
 #    return
 
     
@@ -152,6 +166,14 @@ def main():
 
     chosenSlice = participants[beginOne:endOne]
 
+    
+    
+    '''
+    RETURNING HERE WHILE I GRAPH RANDOM THINGS TO TRY AND FIND THE RIGHT DATA FEATURES
+    '''
+    return
+    
+    
     ''' Create each bundle using the chosenSlice '''
     bundles = []
     
@@ -214,13 +236,18 @@ def main():
     The targets define whether an element belongs to a class (1) or not (-1)
     Important for SVM and should be False
     KMeans doens't matter, I've set to True but I don't think it matters
-    I've actually moved the code forthis into the if statements as each algorithm requires it's own thing.
+    I've actually moved the code for this into the if statements as each algorithm requires it's own thing.
     '''
 #    flipTargets = True
 #    
 #    if flipTargets:
 #    else:
         
+    
+    
+    
+    
+    
     
     if chosenAlgorithm == MLType.KMEANS:
     
@@ -262,7 +289,7 @@ def main():
     #
         print('xtrain length {} \nytrain length {} \nxtest length {}\nytest length {}'.format(len(X_train), len(y_train), len(X_test), len(y_test)))
         
-        # What kernel would you like to use?
+        # What kernel would you like to use? Make sure I'm importing the right kernel file.
         chosenKernel = linear_kernel
         svm = MySVM(kernel=chosenKernel, C = 1, power=4, coef=2)
         
@@ -326,7 +353,7 @@ A bit old and can probably be made better using the updates to Participant
 #            lowMeans = np.append(lowMeans, lowMean)
         
 #        p.compoundScatterLine(plateaus)
-#        p.showAvgHighLows(avgPlateaus, show = True)
+#        p.plotAvgHighLows(avgPlateaus, show = True)
 #        plt.scatter(np.arange(len(avgPlateaus)), avgPlateaus)
    
 

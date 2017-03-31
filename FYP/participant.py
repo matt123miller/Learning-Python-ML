@@ -30,7 +30,8 @@ class Participant(object):
         self.copPoints = np.array([]).astype(Point) # will hold points
         self.data6 = np.array([[]]).astype(float)
         self.plateaus = []
-        self.meanAllPlateaus = 0.0
+        self.plateauTargets = [] # Will hold ints for the whole dataset, -1 for resting, 1 for extension
+        self.meanPoint = Point()
         self.aboveMean = np.array([])
         self.belowMean = np.array([])
         self.meanRestPoint = Point(0,0)
@@ -127,7 +128,7 @@ class Participant(object):
         self.copY = self.dataBlob['result_y'][self.beginIndex-1:self.endIndex+1]
         
     
-    def createCSV(self, overwrite = False):
+    def createCSV(self):
         '''
         Make a CSV file out of the COP data or maybe the data6
         Create a csv writer
@@ -141,14 +142,14 @@ class Participant(object):
             writer = csv.writer(file, dialect='excel')
             for p in self.copPoints:
                 writer.writerow([p.printForUnity()])
-#            
+       
    
+    # This looks super wrong right now so probably never use it. It looks to be normalising the wrong way so edit it if we need it or use an existing one from the library
+#    def normaliseData(self):
+#        self.copX = Point.normaliseOverHighestValue(self.copX)
+#        self.copY = Point.normaliseOverHighestValue(self.copY)
+#        self.copPoints = [p.normalise() for p in self.copPoints]
         
-    
-    def normaliseData(self):
-        self.copX = Point.normaliseOverHighestValue(self.copX)
-        self.copY = Point.normaliseOverHighestValue(self.copY)
-        self.copPoints = [p.normalise() for p in self.copPoints]
     '''
     Returns an array of length data6.count containing zeroes or an index where a flat point is.
     '''
@@ -191,6 +192,7 @@ class Participant(object):
         return array
         '''
         avgFlat, returnArray = [],[]
+        
         for i in plateaus:
             if i == 0:
                 if len(avgFlat) != 0: #we've reached the end of a plateau
@@ -211,11 +213,49 @@ class Participant(object):
                 returnArray.append(np.mean(avgFlat))
             else:
                 returnArray.append(Point.averagePoints(avgFlat))
-
         
         return np.array(returnArray)
 
-    def showAvgHighLows(self, avgPlateauValues, show = False):
+    
+#    def formatAboveBelowIntoNEach(self, avgPlateaus, n_tests):
+#        '''
+#        loop through the array
+#            is this value the same side of the meanpoint as the prevous valiue?
+#                add it to an array
+#                average that array
+#                add it to a return list
+#        '''
+#        returnAbove, returnBelow = [], []
+#        avgList = []
+#        midMag = self.meanPoint.magnitude()     
+#        isAbove = avgPlateaus[0].magnitude() > midMag
+#
+#        prevMag = 0.0
+#        
+#        def avg(inList):
+#            return 0
+#        
+#        for i, point in enumerate(avgPlateaus):
+#            if i == 0: # Skip the first iteration
+#                prevMag = point.magnitude()
+#                continue
+#            greaterThan = point.magnitude() > midMag:
+#            
+#            if isAbove and greaterThan:
+#                avgList.append(point)
+#            elif isAbove and not greaterThan:
+#                returnAbove.append(point)
+#            elif not isAbove and greaterThan:
+#                
+#            elif not isAbove and not greaterThan:
+#                pass
+#        return 0
+#
+#    def fillPlateauTargets(self, aboveTarget, belowTarget):
+#        
+#        return 0
+        
+    def plotAvgHighLows(self, avgPlateauValues, show = False):
                 
         axisX = np.arange(len(avgPlateauValues))
         
@@ -232,13 +272,6 @@ class Participant(object):
     
     def plotCopLine(self, show = True):
         
-        print(len(self.copX))
-        print(len(self.copY))
-        #length = np.arange(len(rawData))
-    #    fig = plt.figure()
-    #    ax = fig.add_subplot(111, projection = '3d')
-    #    plt.plot(length, copX)
-    #    plt.plot(length, copY)
         plt.plot(self.copX, self.copY)
         plt.title(self.name)
         if show:
