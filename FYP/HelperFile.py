@@ -7,12 +7,13 @@ import numpy as np
 from numpy import linalg 
 from point import Point
 
+pCount = 12
+beginOne, endOne = 0, pCount * 2
+beginTwo, endTwo = pCount * 2, pCount * 4
+beginThree, endThree = pCount * 4, pCount * 6
+    
 class Helper():
     
-    pCount = 12
-    beginOne, endOne = 0, pCount * 2
-    beginTwo, endTwo = pCount * 2, pCount * 4
-    beginThree, endThree = pCount * 4, pCount * 6
     
     def constructSmallDataBundle(pname, desiredData = [], target = None, key = 'cop'):
                 
@@ -129,26 +130,32 @@ class Helper():
         
     
     @staticmethod
-    def saveFigures(participants, xCopLabel, yCopLabel):
+    def saveFigures(participants, testLabel, xCopLabel, yCopLabel):
     
         
-        with PdfPages('Test 1a.pdf') as pdf:
+        with PdfPages('Test 1a {}.pdf'.format(testLabel)) as pdf:
         
             for p in participants[beginOne:pCount]:
                 fig = plt.figure()
                 plt.plot([x for x in p.copX], [y for y in p.copY])
+                plt.scatter(p.copX[0], p.copY[0], color = 'g')
+                plt.scatter(p.copX[-1], p.copY[-1], color = 'r')
+
                 plt.xlim([0,10])
                 plt.ylim([0,10])
                 plt.xlabel(xCopLabel)
                 plt.ylabel(yCopLabel)
                 plt.title(p.name)
+                plt.show()
                 pdf.savefig(fig, bbox_inches = 'tight')
 
-        with PdfPages('Test 1b.pdf') as pdf:
+        with PdfPages('Test 1b {}.pdf'.format(testLabel)) as pdf:
             
             for p in participants[pCount:endOne]:
                 fig = plt.figure()
                 plt.plot([x for x in p.copX], [y for y in p.copY])
+                plt.scatter(p.copX[0], p.copY[0], color = 'g')
+                plt.scatter(p.copX[-1], p.copY[-1], color = 'r')
                 plt.xlim([0,10])
                 plt.ylim([0,10])
                 plt.xlabel(xCopLabel)
@@ -156,11 +163,13 @@ class Helper():
                 plt.title(p.name)
                 pdf.savefig(fig, bbox_inches = 'tight')
     
-        with PdfPages('Test 2a.pdf') as pdf:
+        with PdfPages('Test 2a {}.pdf'.format(testLabel)) as pdf:
             
             for p in participants[beginTwo:beginTwo + pCount]:
                 fig = plt.figure()
                 plt.plot([x for x in p.copX], [y for y in p.copY])
+                plt.scatter(p.copX[0], p.copY[0], color = 'g')
+                plt.scatter(p.copX[-1], p.copY[-1], color = 'r')
                 plt.xlim([0,10])
                 plt.ylim([0,10])
                 plt.xlabel(xCopLabel)
@@ -168,11 +177,13 @@ class Helper():
                 plt.title(p.name)
                 pdf.savefig(fig, bbox_inches = 'tight')
                 
-        with PdfPages('Test 2b.pdf') as pdf:
+        with PdfPages('Test 2b {}.pdf'.format(testLabel)) as pdf:
             
             for p in participants[beginTwo + pCount:endTwo]:
                 fig = plt.figure()
                 plt.plot([x for x in p.copX], [y for y in p.copY])
+                plt.scatter(p.copX[0], p.copY[0], color = 'g')
+                plt.scatter(p.copX[-1], p.copY[-1], color = 'r')
                 plt.xlim([0,10])
                 plt.ylim([0,10])
                 plt.xlabel(xCopLabel)
@@ -180,11 +191,13 @@ class Helper():
                 plt.title(p.name)
                 pdf.savefig(fig, bbox_inches = 'tight')
         
-        with PdfPages('Test 3a.pdf') as pdf:
+        with PdfPages('Test 3a {}.pdf'.format(testLabel)) as pdf:
             
             for p in participants[beginThree:beginThree + pCount]:
                 fig = plt.figure()
                 plt.plot([x for x in p.copX], [y for y in p.copY])
+                plt.scatter(p.copX[0], p.copY[0], color = 'g')
+                plt.scatter(p.copX[-1], p.copY[-1], color = 'r')
                 plt.xlim([0,10])
                 plt.ylim([0,10])
                 plt.xlabel(xCopLabel)
@@ -192,11 +205,13 @@ class Helper():
                 plt.title(p.name)
                 pdf.savefig(fig, bbox_inches = 'tight')
                 
-        with PdfPages('Test 3b.pdf') as pdf:
+        with PdfPages('Test 3b {}.pdf'.format(testLabel)) as pdf:
             
             for p in participants[beginThree + pCount:endThree]:
                 fig = plt.figure()
                 plt.plot([x for x in p.copX], [y for y in p.copY])
+                plt.scatter(p.copX[0], p.copY[0], color = 'g')
+                plt.scatter(p.copX[-1], p.copY[-1], color = 'r')
                 plt.xlim([0,10])
                 plt.ylim([0,10])
                 plt.xlabel(xCopLabel)
