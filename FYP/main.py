@@ -150,7 +150,7 @@ def main():
     Shows each participants difference between extension values in a and b tests
     '''
 #    Helper.graphParticipantsAboveBelow(participants, pCount, trial = 2, labels = [xCopLabel, yCopLabel])
-    Helper.saveFigures(participants, 'raw COP', xCopLabel, yCopLabel)
+    Helper.saveFigures(participants, 'x & y over time', xCopLabel, yCopLabel)
 #    return
 
     
