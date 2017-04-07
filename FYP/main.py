@@ -36,6 +36,15 @@ date = "170306"
 dataKey = 'data6'
 xCopLabel = 'Anteroposterior weight distribution'
 yCopLabel = 'Mediolateral weight distribution'
+pCount = len(participantNames)
+tCount = len(trialNames)
+byValue = 15
+threshold = 0.5
+returnType = 'p'
+
+''' Choose what algorithm you wanna do '''
+chosenAlgorithm = MLType.SVM
+    
 
 """
 TL = front left = data6[[:,0]] = b
@@ -70,42 +79,11 @@ def loadParticipants(trials, names):
     return outParticipants
 
 
-
-
-def main():
-    
-    ''' Choose what algorithm you wanna do '''
-    chosenAlgorithm = MLType.SVM
-    
-    if chosenAlgorithm == MLType.KMEANS:
-        print("We're doing K-Means Clustering!")
-    elif chosenAlgorithm == MLType.SVM:
-        print("We're doing SVM")
-    
-    pCount = len(participantNames)
-    tCount = len(trialNames)
-    byValue = 15
-    threshold = 0.5
-    returnType = 'p'
-
-    # Do I want a specific subset of files for some reason?
-
-    # pass this to all methods
-    # use a slice on trialnames or participant names!
-    participants = loadParticipants(trials = trialNames[0:tCount], names = participantNames[0:pCount])
-    
-    
-    highMeans = np.array([])
-    lowMeans = np.array([])
-    diffMeans = np.array([])
-    
-    print('The plateaus were computed by looking {0} values ahead and saving values below {1}'.format(byValue, threshold))
+def createParticipantFeatures(participants):
 
     '''
     This loop is what creates all the data required for later steps
     '''
-    
-
     for p in participants[:]:
         
         plateaus = p.lookAheadForPlateau(by = byValue, varianceThreshold = threshold)
@@ -133,7 +111,31 @@ def main():
         '''
         p.extensionLengths = Point.pointListMinusPoint(p.aboveMean, p.meanRestPoint)
         p.aboveMinusBelow = [p.aboveMean[i] - p.belowMean[i] for i in range(min(len(p.aboveMean), len(p.belowMean)))]
-        
+      
+    return participants
+
+    
+def main():
+    
+    
+    if chosenAlgorithm == MLType.KMEANS:
+        print("We're doing K-Means Clustering!")
+    elif chosenAlgorithm == MLType.SVM:
+        print("We're doing SVM")
+    
+    # pass this to all methods
+    # use a slice on trialnames or participant names!
+    participants = loadParticipants(trials = trialNames[0:tCount], names = participantNames[0:pCount])
+    
+  
+    print('The plateaus were computed by looking {0} values ahead and saving values below {1}'.format(byValue, threshold))
+
+'''
+Create my features
+'''
+    participants = createParticipantFeatures(participants)
+    
+    
     '''
     MAYBE
     Introduce a loop here that will create graphs and whatnot out of each individual Participant
@@ -150,8 +152,17 @@ def main():
     Shows each participants difference between extension values in a and b tests
     '''
 #    Helper.graphParticipantsAboveBelow(participants, pCount, trial = 2, labels = [xCopLabel, yCopLabel])
-    Helper.saveFigures(participants, 'x & y over time', xCopLabel, yCopLabel)
+#    Helper.saveFigures(participants, 'x & y over time', xCopLabel, yCopLabel)
 #    return
+
+    '''
+    Try to bruteforce feature selection here?
+    sklearn.feature_selection 
+    '''
+
+    
+
+
 
     
     print('All data manipulation is hopefully done now \nNow to make graphs and things out of each participant')
@@ -173,6 +184,13 @@ def main():
     '''
     return
     
+
+'''
+This section MUST BE CHANGED to work with a chosen subset of features.
+
+'''
+
+
     
     ''' Create each bundle using the chosenSlice '''
     bundles = []
