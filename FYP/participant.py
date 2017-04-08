@@ -66,7 +66,7 @@ class Participant(object):
         if createCSV:
             self.createCSV()
         
-         
+        
     
     def removeJunkData(self):
         
@@ -149,7 +149,13 @@ class Participant(object):
 #        self.copX = Point.normaliseOverHighestValue(self.copX)
 #        self.copY = Point.normaliseOverHighestValue(self.copY)
 #        self.copPoints = [p.normalise() for p in self.copPoints]
+     
+
+    def findAnglesBetweenHighLow(self):
         
+#        for 
+        return 0
+    
     '''
     Returns an array of length data6.count containing zeroes or an index where a flat point is.
     '''
@@ -162,7 +168,7 @@ class Participant(object):
         for i in range(length):
             nextIndex = i + by
             if nextIndex >= length:
-                # We've reached the end, maybe just return
+                # We've reached the end, maybe just return?
                 continue
             
             nextItem = self.copPoints[nextIndex]
@@ -216,7 +222,7 @@ class Participant(object):
         
         return np.array(returnArray)
 
-    
+#    
 #    def formatAboveBelowIntoNEach(self, avgPlateaus, n_tests):
 #        '''
 #        loop through the array
@@ -250,6 +256,7 @@ class Participant(object):
 #            elif not isAbove and not greaterThan:
 #                pass
 #        return 0
+#    
 #
 #    def fillPlateauTargets(self, aboveTarget, belowTarget):
 #        
@@ -336,4 +343,42 @@ class Participant(object):
         self.scatterTimeSeriesFrom(modifiedData = self.data6[plateaus], show = False)
         self.lineTimeSeriesFrom(show = False)
         plt.show()
+  
+    
+#     I know it's safe to put it at the end but I'd rather put it after the constructor.
+#     Once it compiles, move it up and test there.
+
+    def generateFeatures(self, byValue, threshold):
+        plateaus = self.lookAheadForPlateau(by = byValue, varianceThreshold = threshold)
+#        print(plateaus)
+        
+        # Returns numpy arrays where possible
+        
+        avgPlateaus = self.averagePlateauSections(plateaus, 'p')
+#        print(len(avgPlateaus))
+#        print(avgPlateaus)
+#        self.plotAvgHighLows(avgPlateaus, True)
+
+    
+
+''' Uncomment all this once I test changing the byValue and threshold values to try and keep only the 10 tests '''
+#        p.aboveMean, p.belowMean, p.meanPoint = Helper.splitDataAboveBelowMean(avgPlateaus, returnType) 
+#        
+#        # Make my above and below arrays each 10 values long for the 10 tests
+#        print('above {} below {}'.format(len(p.aboveMean), len(p.belowMean)))
+#        
+##        p.formatAboveBelowIntoNEach(avgPlateaus, n_tests = 10)
+#        
+#        
+#        p.meanRestPoint = Point.averagePoints(p.belowMean)
+#        
+#        '''
+#        Now that I've got a somewhat normalised value for each plateau above the 
+#        mean rest point I can graph each participant for their differences between 
+#        tests a and b for each direction. Then SVM that to get an actual project?
+#        '''
+#        p.extensionLengths = Point.pointListMinusPoint(p.aboveMean, p.meanRestPoint)
+#        p.aboveMinusBelow = [p.aboveMean[i] - p.belowMean[i] for i in range(min(len(p.aboveMean), len(p.belowMean)))]
+#        p.findAngleBetweenHighLow()
+
   

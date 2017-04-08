@@ -42,6 +42,14 @@ byValue = 15
 threshold = 0.5
 returnType = 'p'
 
+
+class MLType(Enum):
+    SVM = 0
+    KMEANS = 1
+    # Add more types as necessary
+
+
+
 ''' Choose what algorithm you wanna do '''
 chosenAlgorithm = MLType.SVM
     
@@ -62,12 +70,6 @@ bundle = {'data':np.array([[ 4 float values ]]),
           'data_feature_names':np.array([ 'Depends on what's stored in the data array'])}
 '''
 
-class MLType(Enum):
-    SVM = 0
-    KMEANS = 1
-    # Add more types as necessary
-
-
 def loadParticipants(trials, names):
     outParticipants = []
 
@@ -79,40 +81,14 @@ def loadParticipants(trials, names):
     return outParticipants
 
 
-def createParticipantFeatures(participants):
+#def createParticipantFeatures(participants):
 
     '''
     This loop is what creates all the data required for later steps
     '''
-    for p in participants[:]:
+#    for p in participants[:]:
         
-        plateaus = p.lookAheadForPlateau(by = byValue, varianceThreshold = threshold)
-#        print(plateaus)
-        
-        # Returns numpy arrays where possible
-        
-        avgPlateaus = p.averagePlateauSections(plateaus, returnType)
-#        print(len(avgPlateaus))
-#        print(avgPlateaus)
-        p.aboveMean, p.belowMean, p.meanPoint = Helper.splitDataAboveBelowMean(avgPlateaus, returnType) 
-        
-        # Make my above and below arrays each 10 values long for the 10 tests
-#        print('above {} below {}'.format(len(p.aboveMean), len(p.belowMean)))
-        
-#        p.formatAboveBelowIntoNEach(avgPlateaus, n_tests = 10)
-        
-        
-        p.meanRestPoint = Point.averagePoints(p.belowMean)
-        
-        '''
-        Now that I've got a somewhat normalised value for each plateau above the 
-        mean rest point I can graph each participant for their differences between 
-        tests a and b for each direction. Then SVM that to get an actual project?
-        '''
-        p.extensionLengths = Point.pointListMinusPoint(p.aboveMean, p.meanRestPoint)
-        p.aboveMinusBelow = [p.aboveMean[i] - p.belowMean[i] for i in range(min(len(p.aboveMean), len(p.belowMean)))]
-      
-    return participants
+    
 
     
 def main():
@@ -130,12 +106,19 @@ def main():
   
     print('The plateaus were computed by looking {0} values ahead and saving values below {1}'.format(byValue, threshold))
 
-'''
-Create my features
-'''
-    participants = createParticipantFeatures(participants)
+    '''
+    Create my features
+    '''
+#    participants = createParticipantFeatures(participants)
+    participants = [p.generateFeatures(byValue, threshold) for p in participants]
     
-    
+    # Validate that the above and below mean data is the same length - Ideally 10 values.
+    p = participants[0]
+    print('above mean is {} long: {}'.format(len(p.aboveMean),p.aboveMean))
+    print('below mean is {} long: {}'.format(len(p.belowMean),p.belowMean))
+    return
+
+
     '''
     MAYBE
     Introduce a loop here that will create graphs and whatnot out of each individual Participant
@@ -185,10 +168,10 @@ Create my features
     return
     
 
-'''
-This section MUST BE CHANGED to work with a chosen subset of features.
-
-'''
+    '''
+    This section MUST BE CHANGED to work with a chosen subset of features.
+    
+    '''
 
 
     

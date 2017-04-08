@@ -130,6 +130,13 @@ class Helper():
         
     
     @staticmethod
+    def angleBetweenNumpyVectors(v1, v2):
+        """ Returns the angle in radians between vectors 'v1' and 'v2'    """
+        cosang = np.dot(v1, v2)
+        sinang = linalg.norm(np.cross(v1, v2))
+        return np.arctan2(sinang, cosang)
+    
+    @staticmethod
     def saveFigures(participants, testLabel, xCopLabel, yCopLabel):
     
         
@@ -149,7 +156,7 @@ class Helper():
                 plt.title('{} {}'.format(p.name, testLabel))
                 plt.show()
                 pdf.savefig(fig, bbox_inches = 'tight')
-                   
+
         with PdfPages('Test 1b {}.pdf'.format(testLabel)) as pdf:
             
             for p in participants[pCount:endOne]:
@@ -244,7 +251,7 @@ class Helper():
 #                    above = np.append(above, p)
 #                else:
 #                    below = np.append(below, p)
-            
+                
             above = [p for p in npIn if p.sqrMagnitude() > mean]
             below = [p for p in npIn if p.sqrMagnitude() < mean]
         return above, below, mean
