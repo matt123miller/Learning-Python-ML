@@ -75,3 +75,12 @@ class Point(object):
     def normaliseOverLongest(values):
         highest = np.max([v.magnitude() for v in values])
         return np.array([v.divideBy(highest) for v in values]) 
+        
+    @staticmethod
+    def angleBetweenVectors(a, b):
+        """ Returns the angle in radians between vectors 'v1' and 'v2'    """
+        v1 = [a.x, a.y]
+        v2 = [b.x, b.y]
+        cosang = np.dot(v1, v2)
+        sinang = np.linalg.norm(np.cross(v1, v2))
+        return np.arctan2(sinang, cosang)

@@ -129,12 +129,7 @@ class Helper():
                 'target_names':np.array(['pendulum', 'hinge']).astype(str)}
         
     
-    @staticmethod
-    def angleBetweenNumpyVectors(v1, v2):
-        """ Returns the angle in radians between vectors 'v1' and 'v2'    """
-        cosang = np.dot(v1, v2)
-        sinang = linalg.norm(np.cross(v1, v2))
-        return np.arctan2(sinang, cosang)
+    
     
     @staticmethod
     def saveFigures(participants, testLabel, xCopLabel, yCopLabel):
