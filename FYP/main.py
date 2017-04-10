@@ -110,12 +110,15 @@ def main():
     Create my features
     '''
 #    participants = createParticipantFeatures(participants)
-    participants = [p.generateFeatures(byValue, threshold) for p in participants]
+#    participants = [p.generateFeatures(byValue, threshold) for p in participants]
+    for p in participants:
+        p.generateFeatures(byValue, threshold)
     
     # Validate that the above and below mean data is the same length - Ideally 10 values.
     p = participants[0]
     print('above mean is {} long: {}'.format(len(p.aboveMean),p.aboveMean))
     print('below mean is {} long: {}'.format(len(p.belowMean),p.belowMean))
+    print(p.aboveMinusBelow)
     return
 
 
@@ -141,8 +144,11 @@ def main():
     '''
     Try to bruteforce feature selection here?
     sklearn.feature_selection 
+    chi squared
+    make many bundles using a 2 loops to combine every combo of features
     '''
 
+    # create an array out of each participant s features and loop that that to create bundles
     
 
 

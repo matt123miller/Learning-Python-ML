@@ -4,7 +4,7 @@ import math
 import sys
 import os
 import numpy as np
-import cvxopt
+#import cvxopt
 from sklearn import datasets # Used as a test in main below
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
@@ -28,7 +28,7 @@ greenPatch = mpatches.Patch(color='green', label='Pendulum movement')
 graphLegend = [greenPatch, redPatch]
 
 # Hide cvxopt output
-cvxopt.solvers.options['show_progress'] = False
+#cvxopt.solvers.options['show_progress'] = False
 '''
 Example output when 'show_progress' is true
      pcost       dcost       gap    pres   dres
@@ -66,30 +66,30 @@ class SupportVectorMachine(object):
         pass
     
     
-    def computeLagrangeMultipliers(self, X, y, kernelMatrix, n_samples):
-        # Define the quadratic optimization problem
-        # This shit is gibberish
-        P = cvxopt.matrix(np.outer(y, y) * kernelMatrix, tc='d')
-        q = cvxopt.matrix(np.ones(n_samples) * -1)
-        A = cvxopt.matrix(y, (1, n_samples), tc='d')
-        b = cvxopt.matrix(0, tc='d')
-        
-        if not self.C:
-            G = cvxopt.matrix(np.identity(n_samples) * -1)
-            h = cvxopt.matrix(np.zeros(n_samples))
-        else:
-            G_max = np.identity(n_samples) * -1
-            G_min = np.identity(n_samples)
-            G = cvxopt.matrix(np.vstack((G_max, G_min)))
-            h_max = cvxopt.matrix(np.zeros(n_samples))
-            h_min = cvxopt.matrix(np.ones(n_samples) * self.C)
-            h = cvxopt.matrix(np.vstack((h_max, h_min)))
-        
-        # Solve the quadratic optimization problem using cvxopt
-        minimization = cvxopt.solvers.qp(P, q, G, h, A, b)
-        
-        # Lagrange multipliers
-        return np.ravel(minimization['x'])
+#    def computeLagrangeMultipliers(self, X, y, kernelMatrix, n_samples):
+#        # Define the quadratic optimization problem
+#        # This shit is gibberish
+#        P = cvxopt.matrix(np.outer(y, y) * kernelMatrix, tc='d')
+#        q = cvxopt.matrix(np.ones(n_samples) * -1)
+#        A = cvxopt.matrix(y, (1, n_samples), tc='d')
+#        b = cvxopt.matrix(0, tc='d')
+#        
+#        if not self.C:
+#            G = cvxopt.matrix(np.identity(n_samples) * -1)
+#            h = cvxopt.matrix(np.zeros(n_samples))
+#        else:
+#            G_max = np.identity(n_samples) * -1
+#            G_min = np.identity(n_samples)
+#            G = cvxopt.matrix(np.vstack((G_max, G_min)))
+#            h_max = cvxopt.matrix(np.zeros(n_samples))
+#            h_min = cvxopt.matrix(np.ones(n_samples) * self.C)
+#            h = cvxopt.matrix(np.vstack((h_max, h_min)))
+#        
+#        # Solve the quadratic optimization problem using cvxopt
+#        minimization = cvxopt.solvers.qp(P, q, G, h, A, b)
+#        
+#        # Lagrange multipliers
+#        return np.ravel(minimization['x'])
         
     def fit(self, X, y):
 
