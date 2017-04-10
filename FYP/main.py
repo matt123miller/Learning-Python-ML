@@ -7,9 +7,9 @@ import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 from enum import Enum
-import sklearn
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import chi2, f_classif as anova
+from sklearn.feature_selection import SelectKBest, chi2, f_classif as anova
+from sklearn.svm import SVC
+
 
 # My code
 from point import Point
@@ -60,7 +60,7 @@ class MLType(Enum):
 
 
 ''' Choose what algorithm you wanna do '''
-chosenAlgorithm = MLType.KMEANS
+chosenAlgorithm = MLType.SVM
     
 
 """
@@ -185,7 +185,7 @@ def main():
                 
 #            bundle = Helper.constructSmallDataBundle(participant.name, chosenData, target = 0, key = 'cop')
             bundle = Helper.constructBigDataBundle(participant)
-            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
+#            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
             bundles.append(bundle)
         
         ''' 
@@ -199,7 +199,7 @@ def main():
             
 #            bundle = Helper.constructSmallDataBundle(participant.name, chosenData, target = 1, key = 'cop')
             bundle = Helper.constructBigDataBundle(participant)
-            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
+#            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
             bundles.append(bundle)   
     
     
@@ -209,8 +209,8 @@ def main():
             
             chosenData = participant.vectorsBetween
                 
-            bundle = Helper.constructDataBundle(participant, key = 'cop')
-            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
+            bundle = Helper.constructBigDataBundle(participant, key = 'cop')
+#            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
             bundles.append(bundle)
     
     ''' 
@@ -228,9 +228,9 @@ def main():
     
      # Choose best features
 #    X, y = iris.data, iris.target
-    X_new = SelectKBest(chi2, k=2).fit_transform(X, y)
-    X_new.shape
-    return
+#    X_new = SelectKBest(chi2, k=2).fit_transform(X, y)
+#    X_new.shape
+#    return
 
     #Quick graph test of data
 #    plt.scatter(X[:,0], X[:,1], c='g') 
@@ -296,19 +296,32 @@ def main():
     #
         print('xtrain length {} \nytrain length {} \nxtest length {}\nytest length {}'.format(len(X_train), len(y_train), len(X_test), len(y_test)))
         
+        '''
+        Using sklearn SVM.SVC - Support Vector Classifier 
+        '''
+    
+        clf = SVC(probability=True, verbose=True)
+        clf.fit(X_train, y_train) 
+        y_pred = clf.predict(X_test)
+        print(y_pred)
+        score = clf.score(X_test, y_test)
+        print(score)
+        '''
+        Using my SVM stuff, this can go die.
+        '''
         # What kernel would you like to use? Make sure I'm importing the right kernel file.
-        chosenKernel = linear_kernel
-        svm = MySVM(kernel=chosenKernel, C = 1, power=4, coef=2)
-        
-        svm.fit(X_train, y_train)
-        y_pred = svm.predict(X_test)
-    
-        print ("Kernel: {}, Accuracy: {}".format(chosenKernel, accuracy_score(y_test, y_pred)))
-    
-        colours = ['green' if l == 1 else 'red' for l in y_test]
-
-        # Reduce dimensions and plot the results
-        svm.plot_in_2d(X_test, colours, ['',xCopLabel,yCopLabel])
+#        chosenKernel = linear_kernel
+#        svm = MySVM(kernel=chosenKernel, C = 1, power=4, coef=2)
+#        
+#        svm.fit(X_train, y_train)
+#        y_pred = svm.predict(X_test)
+#    
+#        print ("Kernel: {}, Accuracy: {}".format(chosenKernel, accuracy_score(y_test, y_pred)))
+#    
+#        colours = ['green' if l == 1 else 'red' for l in y_test]
+#
+#        # Reduce dimensions and plot the results
+#        svm.plot_in_2d(X_test, colours, ['',xCopLabel,yCopLabel])
        
 
 

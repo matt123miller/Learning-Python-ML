@@ -61,9 +61,9 @@ class Participant(object):
         self.stripOutEnds(minimumSensorThreshold = 400)
         self.removeJunkData()    
         
-        for i in range(len(self.copX)):
-            self.copPoints = np.append(self.copPoints, Point(x = self.copX[i], y = self.copY[i]))
-         
+        self.copPoints = [Point(x = self.copX[i], y = self.copY[i]) for i in range(len(self.copX))]
+
+
         if createCSV:
             self.createCSV()
         
@@ -78,7 +78,7 @@ class Participant(object):
         self.atExtension, self.atRest, self.meanPoint = self.splitDataAboveBelowMean(self.avgPlateaus, n_tests = 10, returnType = 'p', cullValues = True) 
         
         # Make my above and below arrays each 10 values long for the 10 tests, hopefully
-        print('There are {} extension point values and {} rest point values'.format(len(self.atExtension), len(self.atRest)))
+#        print('There are {} extension point values and {} rest point values'.format(len(self.atExtension), len(self.atRest)))
         
 #        self.formatAboveBelowIntoNEach(self.avgPlateaus, n_tests = 10)
         
