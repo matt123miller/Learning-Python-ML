@@ -36,8 +36,8 @@ class Participant(object):
         self.atExtension = np.array([])
         self.atRest = np.array([])
         self.meanRestPoint = Point(0,0)
-        self.extensionLengths = np.array([])
-        self.aboveMinusBelow = np.array([]).astype(float)
+        self.vectorsBetween = np.array([])
+        self.anglesBetween = np.array([]).astype(float)
         self.beginIndex = 0
         self.endIndex = 0
         self.movement = ''
@@ -67,7 +67,35 @@ class Participant(object):
         if createCSV:
             self.createCSV()
         
+    
+    def generateFeatures(self, byValue, threshold):
+        plateaus = self.lookAheadForPlateau(by = byValue, varianceThreshold = threshold)
         
+        # Returns numpy arrays where possible
+        
+        self.avgPlateaus = self.averagePlateauSections(plateaus, 'p')
+
+        self.atExtension, self.atRest, self.meanPoint = self.splitDataAboveBelowMean(self.avgPlateaus, n_tests = 10, returnType = 'p', cullValues = True) 
+        
+        # Make my above and below arrays each 10 values long for the 10 tests, hopefully
+        print('There are {} extension point values and {} rest point values'.format(len(self.atExtension), len(self.atRest)))
+        
+#        self.formatAboveBelowIntoNEach(self.avgPlateaus, n_tests = 10)
+        
+        self.meanRestPoint = Point.averagePoints(self.atRest)
+        
+        '''
+        Now that I've got a somewhat normalised value for each plateau above the 
+        mean rest point I can graph each participant for their differences between 
+        tests a and b for each direction. Then SVM that to get an actual project?
+        '''
+#        for i in range(len(self.atRest)):
+#            pass
+        self.vectorsBetween = [self.atExtension[i] - self.atRest[i] for i in range(len(self.atRest))]
+        self.anglesBetween = [Point.angleBetween(self.atRest[i], self.atExtension[i]) for i in range(len(self.atRest))]
+
+  
+     
     
     def removeJunkData(self):
         
@@ -219,11 +247,13 @@ class Participant(object):
 #        self.copPoints = [p.normalise() for p in self.copPoints]
      
 
-    def findAnglesBetweenHighLow(self):
-        
-#        for 
-        return 0
-    
+# I'm just gonna do the list comprehension inline
+#    def findAnglesBetweenHighLow(self):
+#        
+#        return [Point.angleBetweenVectors(self.atRest[i], self.atExtension[i]) for i in range(len(self.atExtension))]
+#    
+
+
     def splitDataAboveBelowMean(self, npIn, n_tests, returnType, cullValues = False):
         above = np.array([])
         below = np.array([])
@@ -282,7 +312,10 @@ class Participant(object):
 #    def fillPlateauTargets(self, aboveTarget, belowTarget):
 #        
 #        return 0
-        
+    
+#     I know it's safe to put it at the end but I'd rather put it after the constructor.
+#     Once it compiles, move it up and test there.
+       
     def plotAvgHighLows(self, avgPlateauValues, show = False):
                 
         axisX = np.arange(len(avgPlateauValues))
@@ -364,36 +397,4 @@ class Participant(object):
         self.scatterTimeSeriesFrom(modifiedData = self.data6[plateaus], show = False)
         self.lineTimeSeriesFrom(show = False)
         plt.show()
-  
-    
-#     I know it's safe to put it at the end but I'd rather put it after the constructor.
-#     Once it compiles, move it up and test there.
-
-    def generateFeatures(self, byValue, threshold):
-        plateaus = self.lookAheadForPlateau(by = byValue, varianceThreshold = threshold)
-        
-        # Returns numpy arrays where possible
-        
-        self.avgPlateaus = self.averagePlateauSections(plateaus, 'p')
-
-        self.atExtension, self.atRest, self.meanPoint = self.splitDataAboveBelowMean(self.avgPlateaus, n_tests = 10, returnType = 'p', cullValues = True) 
-        
-        # Make my above and below arrays each 10 values long for the 10 tests, hopefully
-        print('There are {} extension point values and {} rest point values'.format(len(self.atExtension), len(self.atRest)))
-        
-#        self.formatAboveBelowIntoNEach(self.avgPlateaus, n_tests = 10)
-        
-        
-        self.meanRestPoint = Point.averagePoints(self.atRest)
-        
-        '''
-        Now that I've got a somewhat normalised value for each plateau above the 
-        mean rest point I can graph each participant for their differences between 
-        tests a and b for each direction. Then SVM that to get an actual project?
-        '''
-        self.extensionLengths = Point.pointListMinusPoint(self.atExtension, self.meanRestPoint)
-        # Hopefully this min len business won't be needed if I can fix the 10 values nonsense
-        self.aboveMinusBelow = [self.atExtension[i] - self.atRest[i] for i in range(min(len(self.atExtension), len(self.atRest)))]
-        self.findAnglesBetweenHighLow()
-
   

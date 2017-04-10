@@ -7,6 +7,9 @@ import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 from enum import Enum
+import sklearn
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import chi2, f_classif as anova
 
 # My code
 from point import Point
@@ -22,6 +25,12 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, dir_path + "/../utils")
 from data_manipulation import train_test_split, shuffle_data, normalize
 from data_operation import accuracy_score
+sys.path.insert(0, dir_path + "/../unsupervised_learning/")
+
+sys.path.insert(0, dir_path + "/../supervised_learning/")
+from decision_tree import ClassificationTree
+
+
 #from kernels import *
 
 """
@@ -51,7 +60,7 @@ class MLType(Enum):
 
 
 ''' Choose what algorithm you wanna do '''
-chosenAlgorithm = MLType.SVM
+chosenAlgorithm = MLType.KMEANS
     
 
 """
@@ -109,14 +118,14 @@ def main():
     '''
     Create my features
     '''
-    for p in participants:
+    for p in participants[:]:
         p.generateFeatures(byValue, threshold)
 
 #    I can cull the participant with 8 above values, but should i?
 #    Maybe we should just deal with there being some participants having less than 10 above and belows? Will it matter?
 #    participants = [p for p in participants if len(p.aboveMean) + len(p.belowMean) >= 20]
-    
-    
+   
+
 
 
     '''
@@ -145,9 +154,9 @@ def main():
     chi squared
     make many bundles using a 2 loops to combine every combo of features
     '''
-
+ 
     # create an array out of each participants features and loop that that to create bundles
-    
+   
 
 
 
@@ -165,20 +174,6 @@ def main():
     chosenSlice = participants[beginOne:endOne]
 
     
-    
-    '''
-    RETURNING HERE WHILE I GRAPH RANDOM THINGS TO TRY AND FIND THE RIGHT DATA FEATURES
-    '''
-    return
-    
-
-    '''
-    This section MUST BE CHANGED to work with a chosen subset of features.
-    
-    '''
-
-
-    
     ''' Create each bundle using the chosenSlice '''
     bundles = []
     
@@ -186,9 +181,10 @@ def main():
         
         for participant in chosenSlice[:pCount]: #First half
             
-            chosenData = participant.extensionLengths
+            chosenData = participant.vectorsBetween
                 
-            bundle = Helper.constructSmallDataBundle(participant.name, chosenData, target = 0, key = 'cop')
+#            bundle = Helper.constructSmallDataBundle(participant.name, chosenData, target = 0, key = 'cop')
+            bundle = Helper.constructBigDataBundle(participant)
             print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
             bundles.append(bundle)
         
@@ -199,9 +195,10 @@ def main():
         
         for participant in chosenSlice[pCount:]: #Second half
         
-            chosenData = participant.extensionLengths
+            chosenData = participant.vectorsBetween
             
-            bundle = Helper.constructSmallDataBundle(participant.name, chosenData, target = 1, key = 'cop')
+#            bundle = Helper.constructSmallDataBundle(participant.name, chosenData, target = 1, key = 'cop')
+            bundle = Helper.constructBigDataBundle(participant)
             print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
             bundles.append(bundle)   
     
@@ -210,7 +207,7 @@ def main():
     
         for participant in chosenSlice[:]: # Whole slice
             
-            chosenData = participant.extensionLengths
+            chosenData = participant.vectorsBetween
                 
             bundle = Helper.constructDataBundle(participant, key = 'cop')
             print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
@@ -229,7 +226,12 @@ def main():
     X = bigBundle['data']
     y = bigBundle['target']
     
-    
+     # Choose best features
+#    X, y = iris.data, iris.target
+    X_new = SelectKBest(chi2, k=2).fit_transform(X, y)
+    X_new.shape
+    return
+
     #Quick graph test of data
 #    plt.scatter(X[:,0], X[:,1], c='g') 
 ##    plt.scatter(X[:,2], X[:,3], c='r') 
@@ -307,60 +309,7 @@ def main():
 
         # Reduce dimensions and plot the results
         svm.plot_in_2d(X_test, colours, ['',xCopLabel,yCopLabel])
-    #    
-
-'''
-Trying to make an SVM from each participant
-'''
-
-#    for bundle in bundles[:2]:
-#        X = normalize(bundle['data'])
-#        y = bundle['target']
-#        print('Bundle normalised data is {}'.format(X))
-#        print('X shape is {}'.format(np.shape(X)))
-#
-#        print('Y targets are {}'.format(y))
-#        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
-#
-#        print('X_train is {}\nX_test is {}'.format(X_train, X_test))
-#        print('')
-        
-        
-#        svm = MySVM(kernel=polynomial_kernel, power=4, coef=1)
-#        svm.fit(X_train, y_train)
-#        y_pred = svm.predict(X_test)
-#    
-#        print ("Accuracy:", accuracy_score(y_test, y_pred))
-#    
-#        # Reduce dimension to two using PCA and plot the results
-#        svm.plot_in_2d(X_test, y_pred)
-    
-
-
-'''
-Compound scatter and line graphs for rest and extension -
-A bit old and can probably be made better using the updates to Participant
-'''
-        
-#        if returnType == 'p':
-#            p.plotCopHighLows()
-#        
-#            highMeans = np.append(highMeans, Point.averagePoints(p.aboveMean))
-#            lowMeans = np.append(lowMeans, Point.averagePoints(p.belowMean))
-#            
-#        else:
-#            highMean = np.mean(p.aboveMean)
-#            lowMean = np.mean(p.belowMean)
-#            print('The highs are {} with a mean of {}'.format(p.aboveMean, highMean))
-#            print('the lows are{} with a mean of {}'.format(p.belowMean, lowMean))
-#            print('') #empty row
-#            highMeans = np.append(highMeans, highMean)
-#            lowMeans = np.append(lowMeans, lowMean)
-        
-#        p.compoundScatterLine(plateaus)
-#        p.plotAvgHighLows(avgPlateaus, show = True)
-#        plt.scatter(np.arange(len(avgPlateaus)), avgPlateaus)
-   
+       
 
 
 '''

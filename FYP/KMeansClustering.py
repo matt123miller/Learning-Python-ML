@@ -18,8 +18,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, dir_path + "/../utils")
 from data_manipulation import normalize
 sys.path.insert(0, dir_path + "/../unsupervised_learning/")
-from principal_component_analysis import transform
-
+from principal_component_analysis import PCA
 
 redPatch = mpatches.Patch(color='red', label='Hinge movement')
 greenPatch = mpatches.Patch(color='green', label='Pendulum movement')
@@ -144,13 +143,13 @@ def main():
     y = data.target
     
     # Cluster the data using K-Means
-    clf = KMeansClustering(k=3)
-    y_pred = clf.predict(X)
+    kmeans = KMeansClustering(k=3)
+    y_pred = kmeans.predict(X)
     
     # Project the data onto the 2 primary principal components
-    
-    clf.plot_in_2d(X, y_pred, ['Predicted clusters','',''])
-    clf.plot_in_2d(X, y, ['Defined clusters','',''])
+    pca = PCA()
+    pca.plot_in_2d(X, y_pred, ['Predicted clusters','',''])
+    pca.plot_in_2d(X, y, ['Defined clusters','',''])
 
 
 if __name__ == "__main__":

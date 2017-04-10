@@ -21,7 +21,7 @@ from data_operation import accuracy_score, calculate_covariance_matrix
 
 from kernels import *
 sys.path.insert(0, dir_path + "/../unsupervised_learning/")
-from principal_component_analysis import transform
+from principal_component_analysis import PCA
 
 redPatch = mpatches.Patch(color='red', label='Hinge movement')
 greenPatch = mpatches.Patch(color='green', label='Pendulum movement')
@@ -203,7 +203,8 @@ def main():
     print ("Accuracy:", accuracy_score(y_test, y_pred))
     
     # Reduce dimension to two using PCA.transform and plot the results
-    svm.plot_in_2d(X_test, y_pred, ['','',''])
+    pca = PCA()
+    pca.plot_in_2d(X_test, y_pred, ['','',''])
 #    svm.plot_in_2d(X_test, y_pred, features = [0,1,2,3], featureLabels = ['a','b'])
 
 

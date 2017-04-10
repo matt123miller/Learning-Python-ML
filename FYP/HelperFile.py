@@ -93,12 +93,12 @@ class Helper():
         
         if key.lower() == 'cop':
               
-            length = min(len(P.aboveMean), len(P.belowMean))
+            length = min(len(P.atExtension), len(P.atRest))
                 
-            xBelow = [cp.x for cp in P.belowMean]
-            yBelow = [cp.y for cp in P.belowMean]
-            xAbove = [cp.x for cp in P.aboveMean]
-            yAbove = [cp.y for cp in P.aboveMean]
+            xBelow = [cp.x for cp in P.atRest]
+            yBelow = [cp.y for cp in P.atRest]
+            xAbove = [cp.x for cp in P.atExtension]
+            yAbove = [cp.y for cp in P.atExtension]
             
             dataRows = []
             targets = []
@@ -115,7 +115,44 @@ class Helper():
                 'target':np.array(targets).astype(int), 
                 'data_feature_names':np.array(['xBelow', 'yBelow', 'xAbove', 'yAbove']).astype(str),
                 'target_names':np.array(['pendulum', 'hinge']).astype(str)}
+           
+    
+    @staticmethod
+    def constructBigDataBundle(P, key = 'cop'):
+                
+        targetPendulumNames = ('trial1a', 'trial2a', 'trial3a')
+        target = 0
+        dataRows = []
+        targets = []
+        
+        #if contains a pendulum trial then targets is 0, hinge trials target is 1
+        if any(s in P.name.lower() for s in targetPendulumNames):
+            target = 1
+        
+        if key.lower() == 'cop':
+              
+            length = min(len(P.atExtension), len(P.atRest))
+                
+            xBelow = [cp.x for cp in P.atRest]
+            yBelow = [cp.y for cp in P.atRest]
+            xAbove = [cp.x for cp in P.atExtension]
+            yAbove = [cp.y for cp in P.atExtension]
+            betweenX = [cp.x for cp in P.vectorsBetween]
+            betweenY = [cp.y for cp in P.vectorsBetween]
+            anglesBetween = [a for a in P.anglesBetween]
+
             
+            for i in range(length):
+                item = [ xBelow[i].item(), yBelow[i].item(), xAbove[i].item(), yAbove[i].item(), 
+                        betweenX[i].item(), betweenY[i].item(), anglesBetween[i].item() ]
+                dataRows.append(item)
+                targets.append(target)
+            
+        
+        return {'data':np.array(dataRows).astype(float), 
+                'target':np.array(targets).astype(int), 
+                'data_feature_names':np.array(['xBelow', 'yBelow', 'xAbove', 'yAbove', 'xBetween', 'yBetween', 'anglesBetween']).astype(str),
+                'target_names':np.array(['pendulum', 'hinge']).astype(str)}
         
     @staticmethod
     def appendDataBundles(bundles):

@@ -77,10 +77,10 @@ class Point(object):
         return np.array([v.divideBy(highest) for v in values]) 
         
     @staticmethod
-    def angleBetweenVectors(a, b):
+    def angleBetween(a, b):
         """ Returns the angle in radians between vectors 'v1' and 'v2'    """
-        v1 = [a.x, a.y]
-        v2 = [b.x, b.y]
+        v1 = [a.x.item(), a.y.item()]
+        v2 = [b.x.item(), b.y.item()]
         cosang = np.dot(v1, v2)
         sinang = np.linalg.norm(np.cross(v1, v2))
         return np.arctan2(sinang, cosang)
