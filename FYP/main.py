@@ -109,16 +109,18 @@ def main():
     '''
     Create my features
     '''
-#    participants = createParticipantFeatures(participants)
-#    participants = [p.generateFeatures(byValue, threshold) for p in participants]
     for p in participants:
         p.generateFeatures(byValue, threshold)
+
+
+#    Maybe we should just deal with there being some participants having less than 10 above and belows? Will it matter?
+#    participants = [p for p in participants if len(p.aboveMean) + len(p.belowMean) >= 20]
     
     # Validate that the above and below mean data is the same length - Ideally 10 values.
-    p = participants[0]
+    p = participants[-8]
     print('above mean is {} long: {}'.format(len(p.aboveMean),p.aboveMean))
     print('below mean is {} long: {}'.format(len(p.belowMean),p.belowMean))
-    print(p.aboveMinusBelow)
+    print(p.meanPoint)
     return
 
 
@@ -130,7 +132,7 @@ def main():
         for i, obj in enumerate(whatever):
             do things
             
-        When I refactor graphParticipantsAboveBelow into the Participant object make the loop I mentioned in Helper here.
+    When I refactor graphParticipantsAboveBelow into the Participant object make the loop I mentioned in Helper here.
     '''     
     
 
@@ -141,6 +143,7 @@ def main():
 #    Helper.saveFigures(participants, 'x & y over time', xCopLabel, yCopLabel)
 #    return
 
+
     '''
     Try to bruteforce feature selection here?
     sklearn.feature_selection 
@@ -148,7 +151,7 @@ def main():
     make many bundles using a 2 loops to combine every combo of features
     '''
 
-    # create an array out of each participant s features and loop that that to create bundles
+    # create an array out of each participants features and loop that that to create bundles
     
 
 

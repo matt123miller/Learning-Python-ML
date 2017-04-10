@@ -30,6 +30,7 @@ class Participant(object):
         self.copPoints = np.array([]).astype(Point) # will hold points
         self.data6 = np.array([[]]).astype(float)
         self.plateaus = []
+        self.avgPlateaus = np.array([]).astype(Point)
         self.plateauTargets = [] # Will hold ints for the whole dataset, -1 for resting, 1 for extension
         self.meanPoint = Point()
         self.aboveMean = np.array([])
@@ -144,17 +145,6 @@ class Participant(object):
                 writer.writerow([p.printForUnity()])
        
    
-    # This looks super wrong right now so probably never use it. It looks to be normalising the wrong way so edit it if we need it or use an existing one from the library
-#    def normaliseData(self):
-#        self.copX = Point.normaliseOverHighestValue(self.copX)
-#        self.copY = Point.normaliseOverHighestValue(self.copY)
-#        self.copPoints = [p.normalise() for p in self.copPoints]
-     
-
-    def findAnglesBetweenHighLow(self):
-        
-#        for 
-        return 0
     
     '''
     Returns an array of length data6.count containing zeroes or an index where a flat point is.
@@ -222,7 +212,36 @@ class Participant(object):
         
         return np.array(returnArray)
 
-#    
+#    # This looks super wrong right now so probably never use it. It looks to be normalising the wrong way so edit it if we need it or use an existing one from the library
+#    def normaliseData(self):
+#        self.copX = Point.normaliseOverHighestValue(self.copX)
+#        self.copY = Point.normaliseOverHighestValue(self.copY)
+#        self.copPoints = [p.normalise() for p in self.copPoints]
+     
+
+    def findAnglesBetweenHighLow(self):
+        
+#        for 
+        return 0
+    
+    def splitDataAboveBelowMean(self, npIn, n_tests, returnType):
+        above = np.array([])
+        below = np.array([])
+        mean = 0
+        
+        if returnType == 'm':
+            mean = np.mean(npIn)
+            above = npIn[npIn > mean]
+            below = npIn[npIn < mean]
+        else: #it's for points
+            mean = Point.averagePoints(npIn).sqrMagnitude()
+            
+            above = [p for p in npIn if p.sqrMagnitude() > mean]
+            below = [p for p in npIn if p.sqrMagnitude() < mean]
+        
+        above, below = above[:n_tests], below[:n_tests]
+        return above, below, Point.averagePoints(np.append(above,below))
+        
 #    def formatAboveBelowIntoNEach(self, avgPlateaus, n_tests):
 #        '''
 #        loop through the array
@@ -353,14 +372,14 @@ class Participant(object):
         
         # Returns numpy arrays where possible
         
-        avgPlateaus = self.averagePlateauSections(plateaus, 'p')
+        self.avgPlateaus = self.averagePlateauSections(plateaus, 'p')
 
-        self.aboveMean, self.belowMean, self.meanPoint = Helper.splitDataAboveBelowMean(avgPlateaus, 'p') 
+        self.aboveMean, self.belowMean, self.meanPoint = self.splitDataAboveBelowMean(self.avgPlateaus, n_tests = 10, returnType = 'p') 
         
         # Make my above and below arrays each 10 values long for the 10 tests
         print('above {} below {}'.format(len(self.aboveMean), len(self.belowMean)))
         
-#        self.formatAboveBelowIntoNEach(avgPlateaus, n_tests = 10)
+#        self.formatAboveBelowIntoNEach(self.avgPlateaus, n_tests = 10)
         
         
         self.meanRestPoint = Point.averagePoints(self.belowMean)

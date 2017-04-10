@@ -233,28 +233,28 @@ class Helper():
                 pdf.savefig(fig, bbox_inches = 'tight')
 
     
-    @staticmethod
-    def splitDataAboveBelowMean(npIn, returnType):
-        above = np.array([])
-        below = np.array([])
-        mean = 0
-        
-        if returnType == 'm':
-            mean = np.mean(npIn)
-            above = npIn[npIn > mean]
-            below = npIn[npIn < mean]
-        else: #it's for points
-            mean = Point.averagePoints(npIn).sqrMagnitude()
-#            for p in npIn:
-#                sqrMag = p.sqrMagnitude()
-#                if sqrMag > mean:
-#                    above = np.append(above, p)
-#                else:
-#                    below = np.append(below, p)
-                
-            above = [p for p in npIn if p.sqrMagnitude() > mean]
-            below = [p for p in npIn if p.sqrMagnitude() < mean]
-        return above, below, mean
+#    @staticmethod
+#    def splitDataAboveBelowMean(npIn, returnType):
+#        above = np.array([])
+#        below = np.array([])
+#        mean = 0
+#        
+#        if returnType == 'm':
+#            mean = np.mean(npIn)
+#            above = npIn[npIn > mean]
+#            below = npIn[npIn < mean]
+#        else: #it's for points
+#            mean = Point.averagePoints(npIn).sqrMagnitude()
+##            for p in npIn:
+##                sqrMag = p.sqrMagnitude()
+##                if sqrMag > mean:
+##                    above = np.append(above, p)
+##                else:
+##                    below = np.append(below, p)
+#                
+#            above = [p for p in npIn if p.sqrMagnitude() > mean]
+#            below = [p for p in npIn if p.sqrMagnitude() < mean]
+#        return above, below, mean
    
     
     '''
