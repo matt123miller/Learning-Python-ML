@@ -38,8 +38,8 @@ xCopLabel = 'Anteroposterior weight distribution'
 yCopLabel = 'Mediolateral weight distribution'
 pCount = len(participantNames)
 tCount = len(trialNames)
-byValue = 15
-threshold = 0.5
+byValue = 25
+threshold = 0.45
 returnType = 'p'
 
 
@@ -112,16 +112,11 @@ def main():
     for p in participants:
         p.generateFeatures(byValue, threshold)
 
-
+#    I can cull the participant with 8 above values, but should i?
 #    Maybe we should just deal with there being some participants having less than 10 above and belows? Will it matter?
 #    participants = [p for p in participants if len(p.aboveMean) + len(p.belowMean) >= 20]
     
-    # Validate that the above and below mean data is the same length - Ideally 10 values.
-    p = participants[-8]
-    print('above mean is {} long: {}'.format(len(p.aboveMean),p.aboveMean))
-    print('below mean is {} long: {}'.format(len(p.belowMean),p.belowMean))
-    print(p.meanPoint)
-    return
+    
 
 
     '''

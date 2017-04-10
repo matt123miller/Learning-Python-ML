@@ -224,7 +224,7 @@ class Participant(object):
 #        for 
         return 0
     
-    def splitDataAboveBelowMean(self, npIn, n_tests, returnType):
+    def splitDataAboveBelowMean(self, npIn, n_tests, returnType, cullValues = False):
         above = np.array([])
         below = np.array([])
         mean = 0
@@ -239,7 +239,9 @@ class Participant(object):
             above = [p for p in npIn if p.sqrMagnitude() > mean]
             below = [p for p in npIn if p.sqrMagnitude() < mean]
         
-        above, below = above[:n_tests], below[:n_tests]
+        if cullValues:
+            above, below = above[:n_tests], below[:n_tests]
+
         return above, below, Point.averagePoints(np.append(above,below))
         
 #    def formatAboveBelowIntoNEach(self, avgPlateaus, n_tests):
@@ -376,8 +378,8 @@ class Participant(object):
 
         self.aboveMean, self.belowMean, self.meanPoint = self.splitDataAboveBelowMean(self.avgPlateaus, n_tests = 10, returnType = 'p') 
         
-        # Make my above and below arrays each 10 values long for the 10 tests
-        print('above {} below {}'.format(len(self.aboveMean), len(self.belowMean)))
+        # Make my above and below arrays each 10 values long for the 10 tests, hopefully
+        print('There are {} above mean point values and {} below mean point values'.format(len(self.aboveMean), len(self.belowMean)))
         
 #        self.formatAboveBelowIntoNEach(self.avgPlateaus, n_tests = 10)
         
