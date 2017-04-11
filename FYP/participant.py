@@ -75,7 +75,7 @@ class Participant(object):
         # Returns numpy arrays where possible
         
         self.avgPlateaus = self.averagePlateauSections(plateaus, 'p')
-#        self.plateauSensorValues = [val for i, val in enumerate(plateaus) if i != 0]
+#        self.plateauSensorValues = [val for i, val in enumerate(plateaus) if val != 0]
         
         self.plateauSensorValues = self.extractData6Values(plateaus)
         
@@ -167,23 +167,28 @@ class Participant(object):
         Create a csv writer
         write the data
         save the file
+        'w' parameter will write and overwrite if it exists already 
         '''
-        writeData = []
-        
-        ''' 'w' parameter will write and overwrite if it exists already '''
         with open('{}{}'.format(self.name, '.csv'), 'w') as file:
             writer = csv.writer(file, dialect='excel')
-            for p in self.copPoints:
-                writer.writerow([p.printForUnity()])
+            for cp in self.copPoints:
+                writer.writerow([cp.printForUnity()])
        
    
     def extractData6Values(self, plateaus):
-        returnArr = []
-        
+        returnList = []
+        platList = []
         for i, arr in enumerate(plateaus):
-            pass
-    #        self.plateauSensorValues = [arr for i, arr in enumerate(self.data6) if i != 0]
+            if arr != 0:
+                platList.append(self.data6[i])
+            elif len(platList) > 0:
+                
+                returnList.append([plat for plat in platList])
+                platList.clear()
+        
+        return returnList
 
+        
     '''
     Returns an array of length data6.count containing zeroes or an index where a flat point is.
     '''
