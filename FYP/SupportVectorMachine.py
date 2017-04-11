@@ -154,7 +154,7 @@ class SupportVectorMachine(object):
     
     # Plot the dataset X and the corresponding labels y in 2D using PCA.
     def plot_in_2d(self, X, y=None, labels = []):
-        X_transformed = transform(X, n_components=2)
+        X_transformed = PCA().transform(X, n_components=2)
         x1 = X_transformed[:, 0]
         x2 = X_transformed[:, 1]
         plt.scatter(x1, x2, c=y)
@@ -166,7 +166,7 @@ class SupportVectorMachine(object):
 
     # Plot the dataset X and the corresponding labels y in 3D using PCA.
     def plot_in_3d(self, X, y=None, labels = []):
-        X_transformed = transform(X, n_components=3)
+        X_transformed = PCA().transform(X, n_components=3)
         x1 = X_transformed[:, 0]
         x2 = X_transformed[:, 1]
         x3 = X_transformed[:, 2]
