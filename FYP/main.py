@@ -89,17 +89,7 @@ def loadParticipants(trials, names):
     
     return outParticipants
 
-
-#def createParticipantFeatures(participants):
-
-    '''
-    This loop is what creates all the data required for later steps
-    '''
-#    for p in participants[:]:
-        
-    
-
-    
+ 
 def main():
     
     
@@ -125,10 +115,7 @@ def main():
 #    Maybe we should just deal with there being some participants having less than 10 above and belows? Will it matter?
 #    participants = [p for p in participants if len(p.aboveMean) + len(p.belowMean) >= 20]
    
-    p = participants[0]
-    print('The values for the 4 sensors in each plateau are {}'.format(p.plateauSensorValues))
-    return
-
+    
     '''
     MAYBE
     Introduce a loop here that will create graphs and whatnot out of each individual Participant
