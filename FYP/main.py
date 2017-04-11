@@ -125,8 +125,9 @@ def main():
 #    Maybe we should just deal with there being some participants having less than 10 above and belows? Will it matter?
 #    participants = [p for p in participants if len(p.aboveMean) + len(p.belowMean) >= 20]
    
-
-
+    p = participants[0]
+    print('The values for the 4 sensors in each plateau are {}'.format(p.plateauSensorValues))
+    return
 
     '''
     MAYBE

@@ -32,6 +32,7 @@ class Participant(object):
         self.plateaus = []
         self.avgPlateaus = np.array([]).astype(Point)
         self.plateauTargets = [] # Will hold ints for the whole dataset, -1 for resting, 1 for extension
+        self.plateauSensorValues = []
         self.meanPoint = Point()
         self.atExtension = np.array([])
         self.atRest = np.array([])
@@ -74,7 +75,10 @@ class Participant(object):
         # Returns numpy arrays where possible
         
         self.avgPlateaus = self.averagePlateauSections(plateaus, 'p')
-
+#        self.plateauSensorValues = [val for i, val in enumerate(plateaus) if i != 0]
+        
+        self.plateauSensorValues = self.extractData6Values(plateaus)
+        
         self.atExtension, self.atRest, self.meanPoint = self.splitDataAboveBelowMean(self.avgPlateaus, n_tests = 10, returnType = 'p', cullValues = True) 
         
         # Make my above and below arrays each 10 values long for the 10 tests, hopefully
@@ -173,7 +177,13 @@ class Participant(object):
                 writer.writerow([p.printForUnity()])
        
    
-    
+    def extractData6Values(self, plateaus):
+        returnArr = []
+        
+        for i, arr in enumerate(plateaus):
+            pass
+    #        self.plateauSensorValues = [arr for i, arr in enumerate(self.data6) if i != 0]
+
     '''
     Returns an array of length data6.count containing zeroes or an index where a flat point is.
     '''
@@ -207,9 +217,11 @@ class Participant(object):
     def averagePlateauSections(self, plateaus, returnType = 'm'):
         '''
         array to hold each flat part of the palteaus
-        rturn array
+        return array
         loop through through plateaus array
-        if i is 0, then we save the mean of avgFlat, then clear avgFlat and move on
+        if i is 0, 
+            then we save the mean of avgFlat, 
+            then clear avgFlat and move on
         else we save the length of the point to avgFlat
         
         then average any flat parts and append to return array
