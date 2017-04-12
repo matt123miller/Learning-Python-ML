@@ -84,7 +84,7 @@ def loadParticipants(trials, names):
 
     for trial in trials:
         for name in names:
-            p = Participant(name = date + ' ' + trial + ' ' + name, fileType = '.mat')
+            p = Participant(date, name, trial, fileType = '.mat')
             outParticipants.append(p)
     
     return outParticipants
@@ -143,11 +143,14 @@ def main():
     make many bundles using a 2 loops to combine every combo of features
     '''
  
-    # create an array out of each participants features and loop that that to create bundles
+    # create an array out of each participants features and loop that that to create many small bundles
+    # Pack those smaller bundles into a dict, with the keys being the combined feature names
    
+    
+    bundleMatrix = {}
 
-
-
+    for p in participants[:2]:
+        partDict = p.namesAndFeatures()
     
     print('All data manipulation is hopefully done now \nNow to make graphs and things out of each participant')
 
@@ -171,7 +174,7 @@ def main():
             
             chosenData = participant.vectorsBetween
                 
-#            bundle = Helper.constructSmallDataBundle(participant.name, chosenData, target = 0, key = 'cop')
+#            bundle = Helper.constructSmallDataBundle(participant.trialName, chosenData, target = 0, key = 'cop')
             bundle = Helper.constructBigDataBundle(participant)
 #            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
             bundles.append(bundle)
@@ -213,19 +216,6 @@ def main():
 
     X = bigBundle['data']
     y = bigBundle['target']
-    
-     # Choose best features
-#    X, y = iris.data, iris.target
-#    X_new = SelectKBest(chi2, k=2).fit_transform(X, y)
-#    X_new.shape
-#    return
-
-    #Quick graph test of data
-#    plt.scatter(X[:,0], X[:,1], c='g') 
-##    plt.scatter(X[:,2], X[:,3], c='r') 
-##
-#    plt.show()
-#    return
 
     '''
     The targets define whether an element belongs to a class (1) or not (-1)
@@ -233,15 +223,7 @@ def main():
     KMeans doens't matter, I've set to True but I don't think it matters
     I've actually moved the code for this into the if statements as each algorithm requires it's own thing.
     '''
-#    flipTargets = True
-#    
-#    if flipTargets:
-#    else:
-        
-    
-    
-    
-    
+
     
     
     if chosenAlgorithm == MLType.KMEANS:

@@ -80,7 +80,7 @@ class Helper():
                 'target_names':np.array(['pendulum', 'hinge']).astype(str)}
                     
     @staticmethod
-    def constructDataBundle(P, key = 'cop'):
+    def constructRestExtDataBundle(P, key = 'cop'):
                 
         targetPendulumNames = ('trial1a', 'trial2a', 'trial3a')
         target = 0
@@ -88,17 +88,17 @@ class Helper():
         targets = []
         
         #if contains a pendulum trial then targets is 0, hinge trials target is 1
-        if any(s in P.name.lower() for s in targetPendulumNames):
+        if any(s in P.trialName.lower() for s in targetPendulumNames):
             target = 1
         
         if key.lower() == 'cop':
               
-            length = min(len(P.atExtension), len(P.atRest))
+            length = min(len(P.extensionPoints), len(P.restPoints))
                 
-            xBelow = [cp.x for cp in P.atRest]
-            yBelow = [cp.y for cp in P.atRest]
-            xAbove = [cp.x for cp in P.atExtension]
-            yAbove = [cp.y for cp in P.atExtension]
+            xBelow = [cp.x for cp in P.restPoints]
+            yBelow = [cp.y for cp in P.restPoints]
+            xAbove = [cp.x for cp in P.extensionPoints]
+            yAbove = [cp.y for cp in P.extensionPoints]
             
             dataRows = []
             targets = []
@@ -126,17 +126,17 @@ class Helper():
         targets = []
         
         #if contains a pendulum trial then targets is 0, hinge trials target is 1
-        if any(s in P.name.lower() for s in targetPendulumNames):
+        if any(s in P.trialName.lower() for s in targetPendulumNames):
             target = 1
         
         if key.lower() == 'cop':
               
-            length = min(len(P.atExtension), len(P.atRest))
+            length = min(len(P.extensionPoints), len(P.restPoints))
                 
-            xBelow = [cp.x for cp in P.atRest]
-            yBelow = [cp.y for cp in P.atRest]
-            xAbove = [cp.x for cp in P.atExtension]
-            yAbove = [cp.y for cp in P.atExtension]
+            xBelow = [cp.x for cp in P.restPoints]
+            yBelow = [cp.y for cp in P.restPoints]
+            xAbove = [cp.x for cp in P.extensionPoints]
+            yAbove = [cp.y for cp in P.extensionPoints]
             betweenX = [cp.x for cp in P.vectorsBetween]
             betweenY = [cp.y for cp in P.vectorsBetween]
             anglesBetween = [a for a in P.anglesBetween]
