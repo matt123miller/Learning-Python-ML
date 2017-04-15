@@ -145,6 +145,7 @@ def main():
  
     # create an array out of each participants features and loop that that to create many small bundles
     # Pack those smaller bundles into a dict, with the keys being the combined feature names
+    # Should this go before or after the following bundle section? Should it replace it? Who knows.
    
     
     bundleMatrix = {}
@@ -152,7 +153,10 @@ def main():
     for p in participants[:2]:
         partDict = p.namesAndFeatures()
     
-    print('All data manipulation is hopefully done now \nNow to make graphs and things out of each participant')
+        
+        
+        
+    print('All data manipulation is hopefully done now. \nNow to make graphs and things out of each participant')
 
 
 

@@ -12,6 +12,7 @@ from point import Point
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import matplotlib.cm as cm
 
 # Import helper functions
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -23,6 +24,7 @@ from principal_component_analysis import PCA
 redPatch = mpatches.Patch(color='red', label='Hinge movement')
 greenPatch = mpatches.Patch(color='green', label='Pendulum movement')
 graphLegend = [greenPatch, redPatch]
+chosenCmap = 'magma'
 
 class KMeansClustering():
     def __init__(self, k=2, maxIterations=500):
@@ -104,30 +106,38 @@ class KMeansClustering():
 
 
     # Plot the dataset X and the corresponding labels y in 2D using PCA.
-    def plot_in_2d(self, X, y=None, labels = []):
-        X_transformed = transform(X, n_components=2)
+    def plot_in_2d(self, X, y=None, k = 1, labels = []):
+        X_transformed = PCA().transform(X, n_components=2)
         x1 = X_transformed[:, 0]
         x2 = X_transformed[:, 1]
-        plt.scatter(x1, x2, c=y)
+        plt.scatter(x1, x2, c=y, cmap = chosenCmap)
+        
+        for i in range(k):
+            plt.scatter(np.mean(X_transformed[y == i, 0]), np.mean(X_transformed[y == i, 1]), s = 400, marker = '*', c='w', cmap = chosenCmap)
+                
+
         plt.title(labels[0])
         plt.xlabel(labels[1])
         plt.ylabel(labels[2])
-        plt.legend(handles = graphLegend)
+#        plt.legend(handles = graphLegend)
         plt.show()
 
     # Plot the dataset X and the corresponding labels y in 3D using PCA.
-    def plot_in_3d(self, X, y=None, labels = []):
-        X_transformed = transform(X, n_components=3)
+    def plot_in_3d(self, X, y=None, k=1, labels = []):
+        X_transformed = PCA().transform(X, n_components=3)
         x1 = X_transformed[:, 0]
         x2 = X_transformed[:, 1]
         x3 = X_transformed[:, 2]
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         ax.scatter(x1, x2, x3, c=y)
+        for i in range(k):
+            ax.scatter(np.mean(X_transformed[y == i, 0]), np.mean(X_transformed[y == i, 1]), np.mean(X_transformed[y == i, 2]), s = 400, marker = '*', c='w', cmap = chosenCmap)
+           
         plt.title(labels[0])
         plt.xlabel(labels[1])
         plt.ylabel(labels[2])
-        plt.legend(handles = graphLegend)
+#        plt.legend(handles = graphLegend)
 
         # Do I add the 
         
@@ -141,16 +151,15 @@ def main():
 #    X = normalize(data.data)
     X = data.data
     y = data.target
-    
+    k = 3
     # Cluster the data using K-Means
-    kmeans = KMeansClustering(k=3)
+    kmeans = KMeansClustering(k=k)
     y_pred = kmeans.predict(X)
     
-    # Project the data onto the 2 primary principal components
-    pca = PCA()
-    pca.plot_in_2d(X, y_pred, ['Predicted clusters','',''])
-    pca.plot_in_2d(X, y, ['Defined clusters','',''])
-
+    # Plot that shit
+    kmeans.plot_in_2d(X, y_pred, k, ['Predicted clusters','',''])
+    kmeans.plot_in_2d(X, y, k, ['Defined clusters','',''])
+    
 
 if __name__ == "__main__":
     main()

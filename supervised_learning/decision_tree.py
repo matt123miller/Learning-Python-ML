@@ -281,23 +281,24 @@ def main():
     pca = PCA()
     pca.plot_in_2d(X_test, y_pred)
 
-    print ("-- Regression Tree --")
-
-    X, y = datasets.make_regression(n_features=1, n_samples=100, bias=0, noise=5)
-
-    X_train, X_test, y_train, y_test = train_test_split(standardize(X), y, test_size=0.3)
-
-    clf = RegressionTree()
-    clf.fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
-
-
-    print ("Mean Squared Error:", mean_squared_error(y_test, y_pred))
-
-    # Plot the results
-    plt.scatter(X_test[:, 0], y_test, color='black')
-    plt.scatter(X_test[:, 0], y_pred, color='green')
-    plt.show()
+    clf.print_tree()
+#    print ("-- Regression Tree --")
+#
+#    X, y = datasets.make_regression(n_features=1, n_samples=100, bias=0, noise=5)
+#
+#    X_train, X_test, y_train, y_test = train_test_split(standardize(X), y, test_size=0.3)
+#
+#    clf = RegressionTree()
+#    clf.fit(X_train, y_train)
+#    y_pred = clf.predict(X_test)
+#
+#
+#    print ("Mean Squared Error:", mean_squared_error(y_test, y_pred))
+#
+#    # Plot the results
+#    plt.scatter(X_test[:, 0], y_test, color='black')
+#    plt.scatter(X_test[:, 0], y_pred, color='green')
+#    plt.show()
 
 
 if __name__ == "__main__":
