@@ -29,11 +29,10 @@ class Participant(object):
         self.copX = np.array([]).astype(float)
         self.copY = np.array([]).astype(float)
         self.copPoints = np.array([]).astype(Point) # will hold points
-        self.data6 = np.array([[]]).astype(float)
+        self.data6 = np.array([[]]).astype(int)
         self.plateaus = []
         self.avgPlateaus = np.array([]).astype(Point) # The average Points for each plateau section, later split into rest and extension
-        self.plateauTargets = [] # Will hold ints for the whole dataset, -1 for resting, 1 for extension
-        self.plateauSensorValues = []
+        self.plateauSensorValues = [] # Becomes a np array later
         self.meanPoint = Point()
         self.extensionPoints = np.array([])
         self.restPoints = np.array([])
@@ -73,11 +72,11 @@ class Participant(object):
     def generateFeatures(self, byValue, threshold):
         # Returns numpy arrays where possible
         
-        plateaus = self.lookAheadForPlateau(by = byValue, varianceThreshold = threshold)
+        self.plateaus = self.lookAheadForPlateau(by = byValue, varianceThreshold = threshold)
         
-        self.avgPlateaus = self.averagePlateauSections(plateaus, 'p')
+        self.avgPlateaus = self.averagePlateauSections(self.plateaus, 'p')
         
-        self.plateauSensorValues = self.extractData6Values(plateaus)
+        self.plateauSensorValues = self.extractData6Values(self.plateaus)
         
         self.extensionPoints, self.restPoints, self.meanPoint = self.splitDataAboveBelowMean(self.avgPlateaus, n_tests = 10, returnType = 'p', cullValues = True) 
         
@@ -98,20 +97,23 @@ class Participant(object):
         self.anglesBetween = [Point.angleBetween(self.restPoints[i], self.extensionPoints[i]) for i in range(len(self.restPoints))]
 
                               
-    def namesAndFeatures(self):
-           return {'plateauSensorValues': self.plateauSensorValues,
-                   'restPointsX': [cp.x for cp in self.restPoints],
-                   'restPointsY': [cp.y for cp in self.restPoints],
-                   'extensionPointsX': [cp.x for cp in self.extensionPoints],
-                   'extensionPointsY': [cp.y for cp in self.extensionPoints],
-                   'meanPoint': self.meanPoint,
-                   'meanRestPoint': self.meanRestPoint,
-                   'vectorsBetweenX': [cp.x for cp in self.vectorsBetween],      
-                   'vectorsBetweenY': [cp.y for cp in self.vectorsBetween],
-                   'anglesBetween': self.anglesBetween
+    def namesAndListFeatures(self):
+           return {'plateauSensorValues': np.array(self.plateauSensorValues),
+                   'restPointsX': np.array([cp.x.item() for cp in self.restPoints]),
+                   'restPointsY': np.array([cp.y.item() for cp in self.restPoints]),
+                   'extensionPointsX': np.array([cp.x.item() for cp in self.extensionPoints]),
+                   'extensionPointsY': np.array([cp.y.item() for cp in self.extensionPoints]),
+                   'vectorsBetweenX': np.array([cp.x.item() for cp in self.vectorsBetween]),      
+                   'vectorsBetweenY': np.array([cp.y.item() for cp in self.vectorsBetween]),
+                   'anglesBetween': np.array(self.anglesBetween)
                    }
                               
-           
+    def namesAndSingleFeatures(self):
+        # Maybe these point values should be represented in a np list fashion [x, y] ?? Might make some things easier later.
+        return {'meanPoint': self.meanPoint,
+                'meanRestPoint': self.meanRestPoint
+                }
+                   
    
     def extractData6Values(self, plateaus):
         returnList = []
@@ -122,7 +124,7 @@ class Participant(object):
             elif len(platList) > 0:
                 # List comp is used because it will copy by value a new array,
                 # but just assigning platList was appending a reference to a list that's then cleared so returnList was empty.
-                returnList.append([[plat[0],plat[1],plat[2],plat[3]] for plat in platList])
+                returnList.append([[int(plat[0]),int(plat[1]),int(plat[2]),int(plat[3])] for plat in platList])
                 platList.clear()
         
         return returnList
@@ -151,8 +153,8 @@ class Participant(object):
             else:
                 plateaus.append(0)
         
-        self.plateaus = np.array(plateaus)
-        return self.plateaus
+        
+        return np.array(plateaus)
        
     '''
     Should give 1 value for each plateau area. These values will be part of the ML Model
@@ -198,8 +200,8 @@ class Participant(object):
 
 
     def splitDataAboveBelowMean(self, npIn, n_tests, returnType, cullValues = False):
-        above = np.array([])
-        below = np.array([])
+        above = []
+        below = []
         mean = 0
         
         if returnType == 'm':
@@ -215,7 +217,7 @@ class Participant(object):
         if cullValues:
             above, below = above[:n_tests], below[:n_tests]
 
-        return above, below, Point.averagePoints(np.append(above,below))
+        return np.array(above), np.array(below), Point.averagePoints(np.append(above,below))
         
 #    def formatAboveBelowIntoNEach(self, avgPlateaus, n_tests):
 #        '''
@@ -252,11 +254,7 @@ class Participant(object):
 #        return 0
 #    
 #
-#    def fillPlateauTargets(self, aboveTarget, belowTarget):
-#        
-#        return 0
-    
-       
+
     def plotAvgHighLows(self, avgPlateauValues, show = False):
                 
         axisX = np.arange(len(avgPlateauValues))

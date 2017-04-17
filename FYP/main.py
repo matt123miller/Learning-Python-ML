@@ -148,14 +148,18 @@ def main():
     # Should this go before or after the following bundle section? Should it replace it? Who knows.
    
     
-    bundleMatrix = {}
+    bundleMatrixOfLists = {}
+    bundleMatrixOfSingleValues = {}
 
-    for p in participants[:2]:
-        partDict = p.namesAndFeatures()
+    for p in participants[:]:
+        featuresDict = p.namesAndListFeatures()
+        key = p.participantName + ' ' + p.trialName
+        bundleMatrixOfLists[key] = featuresDict
+        bundleMatrixOfSingleValues[key] = p.namesAndSingleFeatures()
     
+    print(bundleMatrixOfSingleValues['mm Trial1a'])   
         
-        
-        
+    return 
     print('All data manipulation is hopefully done now. \nNow to make graphs and things out of each participant')
 
 
@@ -182,7 +186,7 @@ def main():
             bundle = Helper.constructBigDataBundle(participant)
 #            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
             bundles.append(bundle)
-        
+        2
         ''' 
         Is it a good idea to make more bundles with different chosenData before stacking them? 
         Lets try
