@@ -23,25 +23,28 @@ class Participant(object):
     participantName and filetype aren't case sensitive
     '''
     def __init__(self, date, participantName = '', trialName = '', fileType = ".mat", dataKey = 'data6', createCSV = False):
-        self.participantName = participantName
-        self.trialName = trialName
-        self.dataBlob = None
-        self.copX = np.array([]).astype(float)
-        self.copY = np.array([]).astype(float)
-        self.copPoints = np.array([]).astype(Point) # will hold points
-        self.data6 = np.array([[]]).astype(int)
-        self.plateaus = []
-        self.avgPlateaus = np.array([]).astype(Point) # The average Points for each plateau section, later split into rest and extension
-        self.plateauSensorValues = [] # Becomes a np array later
-        self.meanPoint = Point()
-        self.extensionPoints = np.array([])
-        self.restPoints = np.array([])
-        self.meanRestPoint = Point(0,0)
-        self.vectorsBetween = np.array([])
-        self.anglesBetween = np.array([]).astype(float)
+        self.participantName = participantName # The participants intials
+        self.trialName = trialName # The name of the trail set being performed
+        self.dataBlob = {} # Contains the whole data object loaded from the file
+        self.data6 = np.array([[]]).astype(int) # The main dictionary in the loaded file containing most data
+        # Used for finding the beginning and end of meaningful participant data
         self.beginIndex = 0
         self.endIndex = 0
-        self.movement = ''
+        #### Features ####
+        self.copX = np.array([]).astype(float) # The time series X values from the force plate
+        self.copY = np.array([]).astype(float) # The time series Y values from the force plate
+        self.copPoints = np.array([]).astype(Point) # Cartesian points created from the copX and copY lists
+        self.plateaus = [] # Markers for where plateaus in the data are, 1 for a plateau value, otherwise 0
+        self.plateauPoints = np.array([]).astype(Point) # The average Points for each plateau section, later split into rest and extension
+        self.plateauSensorValues = [] # Contains lists of the 4 sensor values when the data plateaus
+        self.plateauSensorAverages = [] # The 4 sensor values averaged for each plateau
+        self.meanPoint = Point() # The average cartesian point of all plateau averages
+        self.extensionPoints = np.array([]) # The points from extension plateaus, assumed to be above the meanPoint
+        self.restPoints = np.array([]) # The points from rest plateaus, assumed to be below the meanPoint
+        self.meanRestPoint = Point(0,0) # The mean of restPoints
+        self.vectorsBetween = np.array([]) # The vectors between each restPoint and extensionPoint
+        self.anglesBetween = np.array([]).astype(float) # The angles between each restPoint and extensionPoint
+        
         
         self.filename = date + ' ' + trialName + ' ' + participantName + fileType
         self.dataKey = dataKey
@@ -74,17 +77,21 @@ class Participant(object):
         
         self.plateaus = self.lookAheadForPlateau(by = byValue, varianceThreshold = threshold)
         
-        self.avgPlateaus = self.averagePlateauSections(self.plateaus, 'p')
+        self.plateauPoints = self.averagePlateauSections(self.plateaus, 'p')
         
         self.plateauSensorValues = self.extractData6Values(self.plateaus)
+        self.plateauSensorAverages = self.avgSensorValues(self.plateauSensorValues)
         
-        self.extensionPoints, self.restPoints, self.meanPoint = self.splitDataAboveBelowMean(self.avgPlateaus, n_tests = 10, returnType = 'p', cullValues = True) 
+        self.extensionPoints, self.restPoints, self.meanPoint = self.splitDataAboveBelowMean(self.plateauPoints, returnType = 'p') 
         
         # Make my above and below arrays each 10 values long for the 10 tests, hopefully
 #        print('There are {} extension point values and {} rest point values'.format(len(self.extensionPoints), len(self.restPoints)))
         
-#        self.formatAboveBelowIntoNEach(self.avgPlateaus, n_tests = 10)
-        
+        restLength, extLength = len(self.restPoints), len(self.extensionPoints)
+            # Cull some values so everything is the length of the lowest common denominator
+        if restLength != extLength:
+            pass
+            
         self.meanRestPoint = Point.averagePoints(self.restPoints)
         
         '''
@@ -99,6 +106,7 @@ class Participant(object):
                               
     def namesAndListFeatures(self):
            return {'plateauSensorValues': np.array(self.plateauSensorValues),
+                   'plateauSensorAverages': np.array(self.plateauSensorAverages),
                    'restPointsX': np.array([cp.x.item() for cp in self.restPoints]),
                    'restPointsY': np.array([cp.y.item() for cp in self.restPoints]),
                    'extensionPointsX': np.array([cp.x.item() for cp in self.extensionPoints]),
@@ -129,7 +137,20 @@ class Participant(object):
         
         return returnList
 
-        
+    def avgSensorValues(self, plateaus):
+        returnList = []
+
+        for i, arr in enumerate(plateaus):
+#            if np.shape(arr)[0] < 5 : # This value is an attempt to remove tiny plateaus
+#                continue
+            arr = np.array(arr)
+            v1 = np.mean(arr[:,0]).astype(int)
+            v2 = np.mean(arr[:,1]).astype(int)
+            v3 = np.mean(arr[:,2]).astype(int)
+            v4 = np.mean(arr[:,3]).astype(int)
+            returnList.append([v1,v2,v3,v4])
+
+        return returnList
     '''
     Returns an array of length data6.count containing zeroes or an index where a flat point is.
     '''
@@ -199,7 +220,7 @@ class Participant(object):
         return np.array(returnArray)
 
 
-    def splitDataAboveBelowMean(self, npIn, n_tests, returnType, cullValues = False):
+    def splitDataAboveBelowMean(self, npIn, returnType, n_tests = -1):
         above = []
         below = []
         mean = 0
@@ -214,12 +235,13 @@ class Participant(object):
             above = [p for p in npIn if p.sqrMagnitude() > mean]
             below = [p for p in npIn if p.sqrMagnitude() < mean]
         
-        if cullValues:
+        if n_tests >= 1:
+            print("n_tests is used!")
             above, below = above[:n_tests], below[:n_tests]
 
         return np.array(above), np.array(below), Point.averagePoints(np.append(above,below))
         
-#    def formatAboveBelowIntoNEach(self, avgPlateaus, n_tests):
+#    def formatAboveBelowIntoNEach(self, plateauPoints, n_tests):
 #        '''
 #        loop through the array
 #            is this value the same side of the meanpoint as the prevous valiue?
@@ -230,14 +252,14 @@ class Participant(object):
 #        returnAbove, returnBelow = [], []
 #        avgList = []
 #        midMag = self.meanPoint.magnitude()     
-#        isAbove = avgPlateaus[0].magnitude() > midMag
+#        isAbove = plateauPoints[0].magnitude() > midMag
 #
 #        prevMag = 0.0
 #        
 #        def avg(inList):
 #            return 0
 #        
-#        for i, point in enumerate(avgPlateaus):
+#        for i, point in enumerate(plateauPoints):
 #            if i == 0: # Skip the first iteration
 #                prevMag = point.magnitude()
 #                continue

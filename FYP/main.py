@@ -7,8 +7,10 @@ import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 from enum import Enum
+from sklearn import preprocessing
 from sklearn.feature_selection import SelectKBest, chi2, f_classif as anova
 from sklearn.svm import SVC
+from sklearn.cross_validation import cross_val_score, cross_val_predict, ShuffleSplit
 
 
 # My code
@@ -24,14 +26,15 @@ from kernels import *
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, dir_path + "/../utils")
 from data_manipulation import train_test_split, shuffle_data, normalize
-from data_operation import accuracy_score
-sys.path.insert(0, dir_path + "/../unsupervised_learning/")
-
-sys.path.insert(0, dir_path + "/../supervised_learning/")
 from decision_tree import ClassificationTree
 
 
-#from kernels import *
+
+class MLType(Enum):
+    SVM = 0
+    KMEANS = 1
+    # Add more types as necessary
+
 
 """
 variables
@@ -52,15 +55,8 @@ threshold = 0.45
 returnType = 'p'
 
 
-class MLType(Enum):
-    SVM = 0
-    KMEANS = 1
-    # Add more types as necessary
-
-
-
 ''' Choose what algorithm you wanna do '''
-chosenAlgorithm = MLType.SVM
+chosenAlgorithm = MLType.KMEANS
     
 
 """
@@ -108,13 +104,11 @@ def main():
     '''
     Create my features
     '''
-    for p in participants[:]:
+    for p in participants[:3]:
         p.generateFeatures(byValue, threshold)
-
-#    I can cull the participant with 8 above values, but should i?
-#    Maybe we should just deal with there being some participants having less than 10 above and belows? Will it matter?
-#    participants = [p for p in participants if len(p.aboveMean) + len(p.belowMean) >= 20]
-   
+        print(np.shape(p.plateauSensorAverages))
+    return
+#  
     
     '''
     MAYBE
@@ -157,10 +151,10 @@ def main():
         bundleMatrixOfLists[key] = featuresDict
         bundleMatrixOfSingleValues[key] = p.namesAndSingleFeatures()
     
-    print(bundleMatrixOfSingleValues['mm Trial1a'])   
+    print(bundleMatrixOfLists['mm Trial1a']['plateauSensorAverages']) 
         
-    return 
-    print('All data manipulation is hopefully done now. \nNow to make graphs and things out of each participant')
+#    return 
+    print('All data manipulation is hopefully done now. \nNow to make graphs and things out of each participant. \n##########')
 
 
 
@@ -242,7 +236,8 @@ def main():
         print('The target values are flipped to be 0 for hinge movement or 1 for pendulum movement')
 
         # Cluster the data using K-Means
-        kmeans = KMeans(k=2)
+        K = 2
+        kmeans = KMeans(k = K)
         yPred = kmeans.predict(X)
         
         '''
@@ -252,8 +247,8 @@ def main():
         predColours = ['green' if l == 1 else 'red' for l in yPred]
     
         # Project the data onto the 2 primary principal components
-        kmeans.plot_in_2d(X, predColours, ['Predicted clusters for leaning right extension lengths', xCopLabel, yCopLabel])
-        kmeans.plot_in_2d(X, colours, ['Defined clusters for leaning right extension lengths', xCopLabel, yCopLabel])
+        kmeans.plot_in_2d(X, predColours, K, ['Predicted clusters for leaning right extension lengths', xCopLabel, yCopLabel])
+        kmeans.plot_in_2d(X, colours, K, ['Defined clusters for leaning right extension lengths', xCopLabel, yCopLabel])
      
         
     elif chosenAlgorithm == MLType.SVM:

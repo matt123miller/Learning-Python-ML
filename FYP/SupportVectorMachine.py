@@ -12,6 +12,8 @@ import matplotlib.patches as mpatches
 
 ''' My code '''
 from participant import Participant
+from kernels import *
+from principal_component_analysis import PCA
 
 ''' OS stuff '''
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -19,9 +21,6 @@ sys.path.insert(0, dir_path + "/../utils")
 from data_manipulation import train_test_split, normalize
 from data_operation import accuracy_score, calculate_covariance_matrix
 
-from kernels import *
-sys.path.insert(0, dir_path + "/../unsupervised_learning/")
-from principal_component_analysis import PCA
 
 redPatch = mpatches.Patch(color='red', label='Hinge movement')
 greenPatch = mpatches.Patch(color='green', label='Pendulum movement')
@@ -65,7 +64,7 @@ class SupportVectorMachine(object):
         print('')
         pass
     
-    
+    # Can only be used on Mac
 #    def computeLagrangeMultipliers(self, X, y, kernelMatrix, n_samples):
 #        # Define the quadratic optimization problem
 #        # This shit is gibberish
