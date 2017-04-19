@@ -39,6 +39,8 @@ class Participant(object):
         self.plateauPoints = np.array([]).astype(Point) # The average Points for each plateau section, later split into rest and extension
         self.plateauSensorValues = [] # Contains lists of the 4 sensor values when the data plateaus
         self.plateauSensorAverages = [] # The 4 sensor values averaged for each plateau
+        self.restSensors = []
+        self.extensionSensors = []
         self.meanPoint = Point() # The average cartesian point of all plateau averages
         self.extensionPoints = np.array([]) # The points from extension plateaus, assumed to be above the meanPoint
         self.restPoints = np.array([]) # The points from rest plateaus, assumed to be below the meanPoint
@@ -71,7 +73,7 @@ class Participant(object):
         '''
         self.data6 = self.dataBlob[dataKey]
         
-        self.stripOutEnds(minimumSensorThreshold = 600)
+        self.stripOutEnds(minimumSensorThreshold = 400)
         self.removeJunkData()    
         
         self.copPoints = [Point(x = self.copX[i], y = self.copY[i]) for i in range(len(self.copX))]
@@ -85,48 +87,41 @@ class Participant(object):
         # Returns numpy arrays where possible
         
         self.plateaus = self.lookAheadForPlateau(by = byValue, varianceThreshold = threshold)
-        print(len([p for p in self.plateaus if p > 0]))
-        self.plateaus = self.removeSmallPlateaus(10, self.plateaus)
-        print(len([p for p in self.plateaus if p > 0]))
+#        print(len([p for p in self.plateaus if p == 1]))
+        # Maybe we still need this method, I'll leave this as a reminder for now. 
+#        self.plateaus = self.removeSmallPlateaus(5, self.plateaus)
+#        print(len([p for p in self.plateaus if p > 0]))
 
         self.plateauPoints = self.averagePlateauSections(self.plateaus, 'p')
-        
+
         self.plateauSensorValues = self.extractData6Values(self.plateaus)
         self.plateauSensorAverages = self.avgSensorValues(self.plateauSensorValues)
         
-        self.extensionPoints, self.restPoints, self.meanPoint = self.splitDataAboveBelowMean(self.plateauPoints, returnType = 'p') 
+        self.extensionPoints, self.restPoints, self.meanPoint, self.extensionSensors, self.restSensors = self.splitDataAboveBelowMean(self.plateauPoints, self.plateauSensorAverages, returnType = 'p') 
         
-        # Make my above and below arrays each 10 values long for the 10 tests, hopefully
-#        print('There are {} extension point values and {} rest point values'.format(len(self.extensionPoints), len(self.restPoints)))
-        
-        restLength, extLength = len(self.restPoints), len(self.extensionPoints)
-        print('{} rest points, {} extension points'.format(restLength, extLength))
-            # Cull some values so everything is the length of the lowest common denominator
-        if restLength != extLength:
-            pass
-            
         self.meanRestPoint = Point.averagePoints(self.restPoints)
         
-        '''
-        Now that I've got a somewhat normalised value for each plateau above the 
-        mean rest point I can graph each participant for their differences between 
-        tests a and b for each direction. Then SVM that to get an actual project?
-        '''
-        return
-        self.vectorsBetween = [self.extensionPoints[i] - self.restPoints[i] for i in range(len(self.restPoints))]
-        self.anglesBetween = [Point.angleBetween(self.restPoints[i], self.extensionPoints[i]) for i in range(len(self.restPoints))]
+        self.trimLists()                  
 
-                              
+        self.vectorsBetween = [self.extensionPoints[i] - self.restPoints[i] for i, val in enumerate(self.restPoints)]
+                                                   # Does argument order matter?
+        self.anglesBetween = [Point.angleBetween(self.restPoints[i], self.extensionPoints[i]) for i, val in enumerate(self.restPoints)]
+           
+
+                          
+    # I'm too lazy to check if there's a reference ro value issue so I'm just copying everything . Lazy is lazy.
     def namesAndListFeatures(self):
-           return {'plateauSensorValues': np.array(self.plateauSensorValues),
-                   'plateauSensorAverages': np.array(self.plateauSensorAverages),
-                   'restPointsX': np.array([cp.x.item() for cp in self.restPoints]),
-                   'restPointsY': np.array([cp.y.item() for cp in self.restPoints]),
-                   'extensionPointsX': np.array([cp.x.item() for cp in self.extensionPoints]),
-                   'extensionPointsY': np.array([cp.y.item() for cp in self.extensionPoints]),
-                   'vectorsBetweenX': np.array([cp.x.item() for cp in self.vectorsBetween]),      
-                   'vectorsBetweenY': np.array([cp.y.item() for cp in self.vectorsBetween]),
-                   'anglesBetween': np.array(self.anglesBetween)
+           return {'trialType':self.movement,
+                   'features':{'restSensorValues': np.array(self.restSensors),
+                               'extensionSensorValues': np.array(self.extensionSensors),
+                               'restPointsX': np.array([cp.x.item() for cp in self.restPoints]),
+                               'restPointsY': np.array([cp.y.item() for cp in self.restPoints]),
+                               'extensionPointsX': np.array([cp.x.item() for cp in self.extensionPoints]),
+                               'extensionPointsY': np.array([cp.y.item() for cp in self.extensionPoints]),
+                               'vectorsBetweenX': np.array([cp.x.item() for cp in self.vectorsBetween]),      
+                               'vectorsBetweenY': np.array([cp.y.item() for cp in self.vectorsBetween]),
+                               'anglesBetween': np.array(self.anglesBetween)
+                               }
                    }
                               
     def namesAndSingleFeatures(self):
@@ -135,12 +130,24 @@ class Participant(object):
                 'meanRestPoint': self.meanRestPoint
                 }
     
-    def trimDataBundle(self, bundle):            
-        # Each participants bundle at this point is a matrix of a non uniform shape. Make it uniform
+    def trimLists(self):            
+        # Each participants data at this point is a list of a non uniform shape. Make it uniform
         # This will make the length of all features lists be the same as the shortest list.
         # A bunch of min(len()) magic, can you do min with many arguments? Looks like you can.
         # Is there a cool numpy method for this?
+        
+        restLength, extLength, restSensorLength, extSensorLength = len(self.restPoints), len(self.extensionPoints), len(self.restSensors), len(self.extensionSensors)
+#        print('{} rest points, {} extension points, {} rest sensors, {} extensions sensors'.format(restLength, extLength, restSensorLength, extSensorLength))
+        
+        # Cull some values so everything is the length of the lowest common denominator
+        minLength = min(restLength, extLength, restSensorLength, extSensorLength)
+        
+        self.restPoints = self.restPoints[:minLength]
+        self.extensionPoints = self.extensionPoints[:minLength]
+        self.restSensors = self.restSensors[:minLength]
+        self.extensionSensors = self.extensionSensors[:minLength]
         return 0
+        
     '''
     Returns an array of length data6.count containing zeroes or an index where a flat point is.
     '''

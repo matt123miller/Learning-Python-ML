@@ -104,29 +104,13 @@ def main():
     '''
     Create my features
     '''
-    for p in participants[:5]:
+    for p in participants[:]:
         p.generateFeatures(byValue, threshold)
-#        p.compoundScatterLine(p.plateaus)
-#        print('\n \n \n')
-#        print(p.data6)
-#        print(np.shape(p.plateauSensorAverages))
-    return
-#  
-    
-    '''
-    MAYBE
-    Introduce a loop here that will create graphs and whatnot out of each individual Participant
-    Much cleaner
-      
-        for i, obj in enumerate(whatever):
-            do things
-            
-    When I refactor graphParticipantsAboveBelow into the Participant object make the loop I mentioned in Helper here.
-    '''     
-    
+
 
     '''
     Shows each participants difference between extension values in a and b tests
+    Would like to refactor graphParticipantsAboveBelow into the Participant object make the loop I mentioned in Helper here.
     '''
 #    Helper.graphParticipantsAboveBelow(participants, pCount, trial = 2, labels = [xCopLabel, yCopLabel])
 #    Helper.saveFigures(participants, 'x & y over time', xCopLabel, yCopLabel)
@@ -144,6 +128,9 @@ def main():
     # Pack those smaller bundles into a dict, with the keys being the combined feature names
     # Should this go before or after the following bundle section? Should it replace it? Who knows.
    
+    return
+    # This is the next step! Prepare to brute force it.
+    
     
     bundleMatrixOfLists = {}
     bundleMatrixOfSingleValues = {}
@@ -159,7 +146,7 @@ def main():
 #    return 
     print('All data manipulation is hopefully done now. \nNow to make graphs and things out of each participant. \n##########')
 
-
+    return
 
     
     ''' different slices '''
