@@ -27,6 +27,7 @@ class Participant(object):
         self.trialName = trialName # The name of the trail set being performed
         self.dataBlob = {} # Contains the whole data object loaded from the file
         self.data6 = np.array([[]]).astype(int) # The main dictionary in the loaded file containing most data
+        self.movement = ''
         # Used for finding the beginning and end of meaningful participant data
         self.beginIndex = 0
         self.endIndex = 0
@@ -48,6 +49,14 @@ class Participant(object):
         
         self.fileName = date + ' ' + trialName + ' ' + participantName
         self.dataKey = dataKey
+        
+        # Is it a hinge or pendulum trial participant?
+        pendulumTrials = ('1a','2a','3a')
+        if any(s in trialName.lower() for s in pendulumTrials):
+            self.movement = 'pendulum'
+        else:
+            self.movement = 'hinge'
+        
         
         if fileType == ".mat":
             matlab = io.loadmat(self.fileName + fileType)
