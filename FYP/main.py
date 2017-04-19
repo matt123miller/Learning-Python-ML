@@ -124,12 +124,25 @@ def main():
     make many bundles using a 2 loops to combine every combo of features
     '''
  
-    # create an array out of each participants features and loop that that to create many small bundles
-    # Pack those smaller bundles into a dict, with the keys being the combined feature names
-    # Should this go before or after the following bundle section? Should it replace it? Who knows.
    
     return
-    # This is the next step! Prepare to brute force it.
+    # This is the next step! Prepare to brute force it.    
+    # Should this go before or after the following bundle section? Should it replace it? Who knows.
+
+    # Here's the plan I wrote out
+    
+    # Loop through 3 movement directions
+        # Make bundles containing both movement types, given targets appripriate for ML type.
+        
+        # Somehow loop to make every combination of features, somehow include the feature names of the combo
+            # That's probably nested x y style
+                # Make KMeans for the combo
+                # Make SVM for the combo
+                # Measure the accuracy/performance and record that and the name of the combo
+                    # This can probably be saved to a dict here, keys are the combo name, values are the performance
+                
+    # The dict recording performance can later be translated into a csv file for uploading as an appendix to the project.
+    
     
     
     bundleMatrixOfLists = {}
