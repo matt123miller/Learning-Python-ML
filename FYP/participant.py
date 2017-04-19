@@ -46,11 +46,11 @@ class Participant(object):
         self.anglesBetween = np.array([]).astype(float) # The angles between each restPoint and extensionPoint
         
         
-        self.filename = date + ' ' + trialName + ' ' + participantName + fileType
+        self.fileName = date + ' ' + trialName + ' ' + participantName
         self.dataKey = dataKey
         
         if fileType == ".mat":
-            matlab = io.loadmat(self.filename)
+            matlab = io.loadmat(self.fileName + fileType)
             # atm I use data6 as that's what's in the files I was given
             self.dataBlob = matlab
         '''
@@ -62,7 +62,7 @@ class Participant(object):
         '''
         self.data6 = self.dataBlob[dataKey]
         
-        self.stripOutEnds(minimumSensorThreshold = 400)
+        self.stripOutEnds(minimumSensorThreshold = 600)
         self.removeJunkData()    
         
         self.copPoints = [Point(x = self.copX[i], y = self.copY[i]) for i in range(len(self.copX))]
@@ -76,7 +76,10 @@ class Participant(object):
         # Returns numpy arrays where possible
         
         self.plateaus = self.lookAheadForPlateau(by = byValue, varianceThreshold = threshold)
-        
+        print(len([p for p in self.plateaus if p > 0]))
+        self.plateaus = self.removeSmallPlateaus(10, self.plateaus)
+        print(len([p for p in self.plateaus if p > 0]))
+
         self.plateauPoints = self.averagePlateauSections(self.plateaus, 'p')
         
         self.plateauSensorValues = self.extractData6Values(self.plateaus)
@@ -88,6 +91,7 @@ class Participant(object):
 #        print('There are {} extension point values and {} rest point values'.format(len(self.extensionPoints), len(self.restPoints)))
         
         restLength, extLength = len(self.restPoints), len(self.extensionPoints)
+        print('{} rest points, {} extension points'.format(restLength, extLength))
             # Cull some values so everything is the length of the lowest common denominator
         if restLength != extLength:
             pass
@@ -99,7 +103,7 @@ class Participant(object):
         mean rest point I can graph each participant for their differences between 
         tests a and b for each direction. Then SVM that to get an actual project?
         '''
-
+        return
         self.vectorsBetween = [self.extensionPoints[i] - self.restPoints[i] for i in range(len(self.restPoints))]
         self.anglesBetween = [Point.angleBetween(self.restPoints[i], self.extensionPoints[i]) for i in range(len(self.restPoints))]
 
@@ -121,43 +125,20 @@ class Participant(object):
         return {'meanPoint': self.meanPoint,
                 'meanRestPoint': self.meanRestPoint
                 }
-                   
-   
-    def extractData6Values(self, plateaus):
-        returnList = []
-        platList = []
-        for i, arr in enumerate(plateaus):
-            if arr != 0:
-                platList.append(self.data6[i])
-            elif len(platList) > 0:
-                # List comp is used because it will copy by value a new array,
-                # but just assigning platList was appending a reference to a list that's then cleared so returnList was empty.
-                returnList.append([[int(plat[0]),int(plat[1]),int(plat[2]),int(plat[3])] for plat in platList])
-                platList.clear()
-        
-        return returnList
-
-    def avgSensorValues(self, plateaus):
-        returnList = []
-
-        for i, arr in enumerate(plateaus):
-#            if np.shape(arr)[0] < 5 : # This value is an attempt to remove tiny plateaus
-#                continue
-            arr = np.array(arr)
-            v1 = np.mean(arr[:,0]).astype(int)
-            v2 = np.mean(arr[:,1]).astype(int)
-            v3 = np.mean(arr[:,2]).astype(int)
-            v4 = np.mean(arr[:,3]).astype(int)
-            returnList.append([v1,v2,v3,v4])
-
-        return returnList
+    
+    def trimDataBundle(self, bundle):            
+        # Each participants bundle at this point is a matrix of a non uniform shape. Make it uniform
+        # This will make the length of all features lists be the same as the shortest list.
+        # A bunch of min(len()) magic, can you do min with many arguments? Looks like you can.
+        # Is there a cool numpy method for this?
+        return 0
     '''
     Returns an array of length data6.count containing zeroes or an index where a flat point is.
     '''
     def lookAheadForPlateau(self, by = 30, varianceThreshold = 0.5):
         
         length = len(self.copPoints)
-        plateaus = []
+        plateaus = [0 for _ in range(length)]
         sqrVar = varianceThreshold ** 2
         
         for i in range(length):
@@ -170,13 +151,27 @@ class Participant(object):
             diff = (nextItem - self.copPoints[i]).sqrMagnitude()
             
             if diff < sqrVar and diff > -sqrVar:
-                plateaus.append(i)
+                plateaus[i] = 1
             else:
-                plateaus.append(0)
+                plateaus[i] = 0
         
         
         return np.array(plateaus)
-       
+    
+    def removeSmallPlateaus(self, smallLength, plateaus):
+        platCounter = 0
+        returnPlat = np.array([i for i in plateaus])
+        for i, num in enumerate(returnPlat):
+            
+            if num > 0:
+                platCounter += 1
+            elif platCounter > 0 and platCounter <= smallLength:
+                returnPlat[i - platCounter : i + 1] = 0
+                platCounter = 0
+            else:
+                platCounter = 0
+        
+        return returnPlat
     '''
     Should give 1 value for each plateau area. These values will be part of the ML Model
     returnTypes: m is magnitudes, p is points
@@ -219,6 +214,35 @@ class Participant(object):
         
         return np.array(returnArray)
 
+    def extractData6Values(self, plateaus):
+        returnList = []
+        platList = []
+        for i, arr in enumerate(plateaus):
+            if arr != 0:
+                platList.append(self.data6[i])
+            elif len(platList) > 0:
+                # List comp is used because it will copy by value a new array,
+                # but just assigning platList was appending a reference to a list that's then cleared so returnList was empty.
+                returnList.append([[int(plat[0]),int(plat[1]),int(plat[2]),int(plat[3])] for plat in platList])
+                platList.clear()
+        
+        return returnList
+
+    def avgSensorValues(self, plateaus):
+        returnList = []
+
+        for i, arr in enumerate(plateaus):
+#            if np.shape(arr)[0] < 5 : # This value is an attempt to remove tiny plateaus
+#                continue
+            arr = np.array(arr)
+            v1 = np.mean(arr[:,0]).astype(int)
+            v2 = np.mean(arr[:,1]).astype(int)
+            v3 = np.mean(arr[:,2]).astype(int)
+            v4 = np.mean(arr[:,3]).astype(int)
+            returnList.append([v1,v2,v3,v4])
+
+        return returnList
+   
 
     def splitDataAboveBelowMean(self, npIn, returnType, n_tests = -1):
         above = []
@@ -281,7 +305,7 @@ class Participant(object):
                 
         axisX = np.arange(len(avgPlateauValues))
         
-        plt.title(self.name)
+        plt.title(self.fileName)
         plt.scatter(axisX, avgPlateauValues)
         if show:
             plt.show()
@@ -289,13 +313,13 @@ class Participant(object):
     def plotCopHighLows(self):
         plt.scatter([c.x for c in self.extensionPoints], [c.y for c in self.extensionPoints], color = 'r')
         plt.scatter([c.x for c in self.restPoints], [c.y for c in self.restPoints], color = 'g')
-        plt.title(self.name)
+        plt.title(self.fileName)
         plt.show()
     
     def plotCopLine(self, show = True):
         
         plt.plot(self.copX, self.copY)
-        plt.title(self.name)
+        plt.title(self.fileName)
         if show:
             plt.show()
         
@@ -317,7 +341,7 @@ class Participant(object):
         axisX = np.arange(len(data))
         plt.xlim([-50, len(data) + 50])
     
-        plt.title(self.name)
+        plt.title(self.fileName)
         
         plt.plot(axisX, tl, color = 'b')
         plt.plot(axisX, tr, color = 'c')
@@ -343,7 +367,7 @@ class Participant(object):
         axisX = np.arange(len(data))
         plt.xlim([-50, len(data) + 50])
     
-        plt.title(self.name)
+        plt.title(self.fileName)
     #    
         plt.scatter(axisX, tl, color = 'b')
         plt.scatter(axisX, tr, color = 'c')
@@ -372,7 +396,7 @@ class Participant(object):
         save the file
         'w' parameter will write and overwrite if it exists already 
         '''
-        with open('{}{}'.format(self.name, '.csv'), 'w') as file:
+        with open('{}{}'.format(self.fileName, '.csv'), 'w') as file:
             writer = csv.writer(file, dialect='excel')
             for cp in self.copPoints:
                 writer.writerow([cp.printForUnity()])

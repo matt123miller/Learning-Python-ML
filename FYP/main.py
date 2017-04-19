@@ -104,9 +104,12 @@ def main():
     '''
     Create my features
     '''
-    for p in participants[:3]:
+    for p in participants[:5]:
         p.generateFeatures(byValue, threshold)
-        print(np.shape(p.plateauSensorAverages))
+#        p.compoundScatterLine(p.plateaus)
+#        print('\n \n \n')
+#        print(p.data6)
+#        print(np.shape(p.plateauSensorAverages))
     return
 #  
     
@@ -190,7 +193,7 @@ def main():
         
             chosenData = participant.vectorsBetween
             
-#            bundle = Helper.constructSmallDataBundle(participant.name, chosenData, target = 1, key = 'cop')
+#            bundle = Helper.constructSmallDataBundle(participant.fileName, chosenData, target = 1, key = 'cop')
             bundle = Helper.constructBigDataBundle(participant)
 #            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
             bundles.append(bundle)   
