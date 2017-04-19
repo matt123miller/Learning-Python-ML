@@ -147,7 +147,7 @@ class Participant(object):
     def lookAheadForPlateau(self, by = 30, varianceThreshold = 0.5):
         
         length = len(self.copPoints)
-        plateaus = [0 for _ in range(length)]
+        plateaus = np.array([0 for _ in range(length)])
         sqrVar = varianceThreshold ** 2
         
         for i in range(length):
@@ -158,12 +158,9 @@ class Participant(object):
             
             nextItem = self.copPoints[nextIndex]
             diff = (nextItem - self.copPoints[i]).sqrMagnitude()
-            
+
             if diff < sqrVar and diff > -sqrVar:
-                plateaus[i] = 1
-            else:
-                plateaus[i] = 0
-        
+                plateaus[i:nextIndex] = 1
         
         return np.array(plateaus)
     
@@ -200,8 +197,8 @@ class Participant(object):
         '''
         avgFlat, returnArray = [],[]
         
-        for i in plateaus:
-            if i == 0:
+        for i, num in enumerate(plateaus):
+            if num == 0:
                 if len(avgFlat) != 0: #we've reached the end of a plateau
                     if returnType == 'm':
                         returnArray.append(np.mean(avgFlat))
@@ -223,6 +220,39 @@ class Participant(object):
         
         return np.array(returnArray)
 
+        
+    def splitDataAboveBelowMean(self, npIn, sensorsIn, returnType, n_tests = -1):
+        above = []
+        below = []
+        restSensors = []
+        extSensors = []
+        mean = 0
+        
+        if returnType == 'm':
+            mean = np.mean(npIn)
+            above = npIn[npIn > mean]
+            below = npIn[npIn < mean]
+        else: #it's for points
+            mean = Point.averagePoints(npIn).sqrMagnitude()
+            
+            for i, p in enumerate(npIn):
+                if p.sqrMagnitude() > mean:
+                    above.append(p)
+                    extSensors.append(sensorsIn[i])
+                else:
+                    below.append(p)
+                    restSensors.append(sensorsIn[i])
+                    
+#            above = [p for p in npIn if p.sqrMagnitude() > mean]
+#            below = [p for p in npIn if p.sqrMagnitude() < mean]
+        
+        if n_tests >= 1:
+            print("n_tests is used!")
+            above, below, restSensors, extSensors = above[:n_tests], below[:n_tests], restSensors[:n_tests], extSensors[:n_tests]
+
+        return np.array(above), np.array(below), Point.averagePoints(np.append(above,below)), np.array(extSensors), np.array(restSensors)
+        
+        
     def extractData6Values(self, plateaus):
         returnList = []
         platList = []
@@ -253,63 +283,6 @@ class Participant(object):
         return returnList
    
 
-    def splitDataAboveBelowMean(self, npIn, returnType, n_tests = -1):
-        above = []
-        below = []
-        mean = 0
-        
-        if returnType == 'm':
-            mean = np.mean(npIn)
-            above = npIn[npIn > mean]
-            below = npIn[npIn < mean]
-        else: #it's for points
-            mean = Point.averagePoints(npIn).sqrMagnitude()
-            
-            above = [p for p in npIn if p.sqrMagnitude() > mean]
-            below = [p for p in npIn if p.sqrMagnitude() < mean]
-        
-        if n_tests >= 1:
-            print("n_tests is used!")
-            above, below = above[:n_tests], below[:n_tests]
-
-        return np.array(above), np.array(below), Point.averagePoints(np.append(above,below))
-        
-#    def formatAboveBelowIntoNEach(self, plateauPoints, n_tests):
-#        '''
-#        loop through the array
-#            is this value the same side of the meanpoint as the prevous valiue?
-#                add it to an array
-#                average that array
-#                add it to a return list
-#        '''
-#        returnAbove, returnBelow = [], []
-#        avgList = []
-#        midMag = self.meanPoint.magnitude()     
-#        isAbove = plateauPoints[0].magnitude() > midMag
-#
-#        prevMag = 0.0
-#        
-#        def avg(inList):
-#            return 0
-#        
-#        for i, point in enumerate(plateauPoints):
-#            if i == 0: # Skip the first iteration
-#                prevMag = point.magnitude()
-#                continue
-#            greaterThan = point.magnitude() > midMag:
-#            
-#            if isAbove and greaterThan:
-#                avgList.append(point)
-#            elif isAbove and not greaterThan:
-#                returnAbove.append(point)
-#            elif not isAbove and greaterThan:
-#                
-#            elif not isAbove and not greaterThan:
-#                pass
-#        return 0
-#    
-#
-
     def plotAvgHighLows(self, avgPlateauValues, show = False):
                 
         axisX = np.arange(len(avgPlateauValues))
@@ -322,7 +295,7 @@ class Participant(object):
     def plotCopHighLows(self):
         plt.scatter([c.x for c in self.extensionPoints], [c.y for c in self.extensionPoints], color = 'r')
         plt.scatter([c.x for c in self.restPoints], [c.y for c in self.restPoints], color = 'g')
-        plt.title(self.fileName)
+        plt.title(self.fileName + ' plot of the rest and extension points ')
         plt.show()
     
     def plotCopLine(self, show = True):
@@ -377,7 +350,7 @@ class Participant(object):
         plt.xlim([-50, len(data) + 50])
     
         plt.title(self.fileName)
-    #    
+
         plt.scatter(axisX, tl, color = 'b')
         plt.scatter(axisX, tr, color = 'c')
         plt.scatter(axisX, bl, color = 'r')
@@ -386,7 +359,7 @@ class Participant(object):
         if show:
             plt.show()
            
-    
+    # HINT Doesnt really work since I improved plateau generation
     def compoundScatterLine(self, plateaus = []):
         self.scatterTimeSeriesFrom(modifiedData = self.data6[plateaus], show = False)
         self.lineTimeSeriesFrom(show = False)
