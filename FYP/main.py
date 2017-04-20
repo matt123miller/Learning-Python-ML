@@ -109,23 +109,13 @@ def main():
 
 
     '''
-    Shows each participants difference between extension values in a and b tests
-    Would like to refactor graphParticipantsAboveBelow into the Participant object make the loop I mentioned in Helper here.
-    '''
-#    Helper.graphParticipantsAboveBelow(participants, pCount, trial = 2, labels = [xCopLabel, yCopLabel])
-#    Helper.saveFigures(participants, 'x & y over time', xCopLabel, yCopLabel)
-#    return
-
-
-    '''
     Try to bruteforce feature selection here?
     sklearn.feature_selection 
     chi squared
     make many bundles using a 2 loops to combine every combo of features
     '''
  
-   
-    return
+
     # This is the next step! Prepare to brute force it.    
     # Should this go before or after the following bundle section? Should it replace it? Who knows.
 
@@ -143,29 +133,81 @@ def main():
                 
     # The dict recording performance can later be translated into a csv file for uploading as an appendix to the project.
     
+    ''' different index slices '''
+    beginOne, endOne = 0, pCount * 2
+    beginTwo, endTwo = pCount * 2, pCount * 4
+    beginThree, endThree = pCount * 4, pCount * 6
     
+    directionSlices = [[beginOne, endOne], [beginTwo, endTwo], [beginThree, endThree]]
+    featureLabels = []
+    dataInstances = []
+    directionBundles = []
     
-    bundleMatrixOfLists = {}
-    bundleMatrixOfSingleValues = {}
+    for dSlice in directionSlices:
+        
+        participantbundleforslice = {'data':[],
+                                     'target':[],
+                                     'featureLabels':[]
+                                     }
+        
+        for p in participants[dSlice[0] : dSlice[1]]:
+            listDict = p.listFeaturesDict()
+            
+            features = listDict['features']
+            labels = listDict['featureNames']
+            flength = len(features[0])
+            
+            for i in range(flength):
+                dataRow = []
+                for value in features:
+                    dataRow.append(value[i])
+                    
+                participantbundleforslice['data'].append(dataRow)
+                
+                # What target does this row 
+                if chosenAlgorithm == MLType.SVM:
+                    if p.movement == 'pendulum':
+                        participantbundleforslice['target'].append(1)
+                    if p.movement == 'hinge':
+                        participantbundleforslice['target'].append(-1) 
+                                                 
+                elif chosenAlgorithm == MLType.KMEANS:
+                    if p.movement == 'pendulum':
+                        participantbundleforslice['target'].append(1)
+                    if p.movement == 'hinge':
+                        participantbundleforslice['target'].append(0)  
+       
 
-    for p in participants[:]:
-        featuresDict = p.namesAndListFeatures()
-        key = p.participantName + ' ' + p.trialName
-        bundleMatrixOfLists[key] = featuresDict
-        bundleMatrixOfSingleValues[key] = p.namesAndSingleFeatures()
+        directionBundles.append(participantbundleforslice)
+        # Validate for myself.
+        print(np.shape(participantbundleforslice['data'])) 
+        print(participantbundleforslice['target'])     
+        
+        print(participantbundleforslice['data'][100][5]) # You can access the data like this, 'data', row (instance), column (feature) 
+    # directionBundles should now contain 3 dictionaries,
+    # each one containing all rows of data for a direction and a target value dependent on movement type.
     
-    print(bundleMatrixOfLists['mm Trial1a']['plateauSensorAverages']) 
+    return
+
+
+#    bundleMatrixOfLists = {}
+#    bundleMatrixOfSingleValues = {}
+#
+#    for p in participants[:]:
+#        featuresDict = p.namesAndListFeatures()
+#        key = p.participantName + ' ' + p.trialName
+#        bundleMatrixOfLists[key] = featuresDict
+#        bundleMatrixOfSingleValues[key] = p.namesAndSingleFeatures()
+#    
+#    print(bundleMatrixOfLists['mm Trial1a']['plateauSensorAverages']) 
         
 #    return 
-    print('All data manipulation is hopefully done now. \nNow to make graphs and things out of each participant. \n##########')
+    print('All data manipulation is hopefully done now. \nNow to make graphs and things out of each participant. \n \n ##########')
 
     return
 
     
-    ''' different slices '''
-    beginOne, endOne = 0, pCount * 2
-    beginTwo, endTwo = pCount * 2, pCount * 4
-    beginThree, endThree = pCount * 4, pCount * 6
+    
 
     chosenSlice = participants[beginOne:endOne]
 
@@ -183,7 +225,7 @@ def main():
             bundle = Helper.constructBigDataBundle(participant)
 #            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
             bundles.append(bundle)
-        2
+        
         ''' 
         Is it a good idea to make more bundles with different chosenData before stacking them? 
         Lets try
@@ -300,6 +342,15 @@ def main():
 #        svm.plot_in_2d(X_test, colours, ['',xCopLabel,yCopLabel])
        
 
+
+
+    '''
+    Shows each participants difference between extension values in a and b tests
+    Would like to refactor graphParticipantsAboveBelow into the Participant object make the loop I mentioned in Helper here.
+    '''
+#    Helper.graphParticipantsAboveBelow(participants, pCount, trial = 2, labels = [xCopLabel, yCopLabel])
+#    Helper.saveFigures(participants, 'x & y over time', xCopLabel, yCopLabel)
+#    return
 
 '''
 Finally a section for making any graphics out of ALL data
