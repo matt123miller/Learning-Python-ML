@@ -53,7 +53,7 @@ tCount = len(trialNames)
 byValue = 25
 threshold = 0.45
 returnType = 'p'
-
+consoleSeparator = '\n ######## \n'
 
 ''' Choose what algorithm you wanna do '''
 chosenAlgorithm = MLType.KMEANS
@@ -85,7 +85,59 @@ def loadParticipants(trials, names):
     
     return outParticipants
 
- 
+def generateDirectionBundles(directionSlices, participants):
+    
+    returnList = []
+
+    for dSlice in directionSlices:
+        
+        participantbundleforslice = {'data':[],
+                                     'target':[],
+                                     'featureNames':[]
+                                     }
+        
+        # Cheekily set the featureNames here before the loop
+        participantbundleforslice['featureNames'] = participants[0].listFeaturesDict()['featureNames']
+        
+        for p in participants[dSlice[0] : dSlice[1]]:
+            listDict = p.listFeaturesDict()
+            
+            features = listDict['features']
+            flength = len(features[0])
+            
+            for i in range(flength):
+                dataRow = []
+                for value in features:
+                    dataRow.append(value[i])
+                    
+                participantbundleforslice['data'].append(dataRow)
+                
+                # What target does this row 
+                if chosenAlgorithm == MLType.SVM:
+                    if p.movement == 'pendulum':
+                        participantbundleforslice['target'].append(1)
+                    if p.movement == 'hinge':
+                        participantbundleforslice['target'].append(-1) 
+                                                 
+                elif chosenAlgorithm == MLType.KMEANS:
+                    if p.movement == 'pendulum':
+                        participantbundleforslice['target'].append(1)
+                    if p.movement == 'hinge':
+                        participantbundleforslice['target'].append(0)  
+       
+        participantbundleforslice['data'] = np.array(participantbundleforslice['data'])
+        participantbundleforslice['target'] = np.array(participantbundleforslice['target'])
+        participantbundleforslice['featureNames'] = np.array(participantbundleforslice['featureNames'])
+        
+        returnList.append(participantbundleforslice)
+        # Validate for myself.
+        print('The feature matrix for slice {} is shaped {}'.format(dSlice, np.shape(participantbundleforslice['data'])))
+        print('It has {} targets for pendulum motion and {} targets for hinge motion'.format(len([i for i in participantbundleforslice['target'] if i == 1]), len([i for i in participantbundleforslice['target'] if i != 1])))
+        print(consoleSeparator)
+
+    # Does it need to be numpy?        
+    return returnList
+
 def main():
     
     
@@ -100,6 +152,7 @@ def main():
     
   
     print('The plateaus were computed by looking {0} values ahead and saving values below {1}'.format(byValue, threshold))
+    print(consoleSeparator)
 
     '''
     Create my features
@@ -139,123 +192,77 @@ def main():
     beginThree, endThree = pCount * 4, pCount * 6
     
     directionSlices = [[beginOne, endOne], [beginTwo, endTwo], [beginThree, endThree]]
-    featureLabels = []
-    dataInstances = []
+    featureNames = []
     directionBundles = []
     
-    for dSlice in directionSlices:
+    directionBundles = generateDirectionBundles(directionSlices, participants)
+    
+    featureNames = directionBundles[0]['featureNames']
         
-        participantbundleforslice = {'data':[],
-                                     'target':[],
-                                     'featureLabels':[]
-                                     }
         
-        for p in participants[dSlice[0] : dSlice[1]]:
-            listDict = p.listFeaturesDict()
-            
-            features = listDict['features']
-            labels = listDict['featureNames']
-            flength = len(features[0])
-            
-            for i in range(flength):
-                dataRow = []
-                for value in features:
-                    dataRow.append(value[i])
-                    
-                participantbundleforslice['data'].append(dataRow)
-                
-                # What target does this row 
-                if chosenAlgorithm == MLType.SVM:
-                    if p.movement == 'pendulum':
-                        participantbundleforslice['target'].append(1)
-                    if p.movement == 'hinge':
-                        participantbundleforslice['target'].append(-1) 
-                                                 
-                elif chosenAlgorithm == MLType.KMEANS:
-                    if p.movement == 'pendulum':
-                        participantbundleforslice['target'].append(1)
-                    if p.movement == 'hinge':
-                        participantbundleforslice['target'].append(0)  
-       
-
-        directionBundles.append(participantbundleforslice)
-        # Validate for myself.
-        print(np.shape(participantbundleforslice['data'])) 
-        print(participantbundleforslice['target'])     
-        
-        print(participantbundleforslice['data'][100][5]) # You can access the data like this, 'data', row (instance), column (feature) 
     # directionBundles should now contain 3 dictionaries,
     # each one containing all rows of data for a direction and a target value dependent on movement type.
-    
-    return
+    # print(participantbundleforslice['data'][100][5]) # You can access the data like this, 'data', row (instance), column (feature) 
 
 
-#    bundleMatrixOfLists = {}
-#    bundleMatrixOfSingleValues = {}
-#
-#    for p in participants[:]:
-#        featuresDict = p.namesAndListFeatures()
-#        key = p.participantName + ' ' + p.trialName
-#        bundleMatrixOfLists[key] = featuresDict
-#        bundleMatrixOfSingleValues[key] = p.namesAndSingleFeatures()
-#    
-#    print(bundleMatrixOfLists['mm Trial1a']['plateauSensorAverages']) 
-        
-#    return 
     print('All data manipulation is hopefully done now. \nNow to make graphs and things out of each participant. \n \n ##########')
-
-    return
-
-    
+    print(consoleSeparator)
     
 
-    chosenSlice = participants[beginOne:endOne]
+    
 
-    
-    ''' Create each bundle using the chosenSlice '''
-    bundles = []
-    
-    if chosenAlgorithm == MLType.KMEANS:
-        
-        for participant in chosenSlice[:pCount]: #First half
-            
-            chosenData = participant.vectorsBetween
-                
-#            bundle = Helper.constructSmallDataBundle(participant.trialName, chosenData, target = 0, key = 'cop')
-            bundle = Helper.constructBigDataBundle(participant)
-#            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
-            bundles.append(bundle)
-        
-        ''' 
-        Is it a good idea to make more bundles with different chosenData before stacking them? 
-        Lets try
-        '''
-        
-        for participant in chosenSlice[pCount:]: #Second half
-        
-            chosenData = participant.vectorsBetween
-            
-#            bundle = Helper.constructSmallDataBundle(participant.fileName, chosenData, target = 1, key = 'cop')
-            bundle = Helper.constructBigDataBundle(participant)
-#            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
-            bundles.append(bundle)   
-    
-    
-    elif chosenAlgorithm == MLType.SVM:
-    
-        for participant in chosenSlice[:]: # Whole slice
-            
-            chosenData = participant.vectorsBetween
-                
-            bundle = Helper.constructBigDataBundle(participant, key = 'cop')
-#            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
-            bundles.append(bundle)
-    
+    return 
+
     ''' 
-    Create a big bundle combining all the individual bundles
+    This section is hopefully replace by a brute forced matrix of feature combinations created above
     '''
-    
-    bigBundle = Helper.appendDataBundles(bundles[:])
+#    ''' Create each bundle using the chosenSlice '''
+#    chosenSlice = participants[beginOne:endOne]
+#    bundles = []
+
+#    
+#    if chosenAlgorithm == MLType.KMEANS:
+#        
+#        for participant in chosenSlice[:pCount]: #First half
+#            
+#            chosenData = participant.vectorsBetween
+#                
+##            bundle = Helper.constructSmallDataBundle(participant.trialName, chosenData, target = 0, key = 'cop')
+#            bundle = Helper.constructBigDataBundle(participant)
+##            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
+#            bundles.append(bundle)
+#        
+#        ''' 
+#        Is it a good idea to make more bundles with different chosenData before stacking them? 
+#        Lets try
+#        '''
+#        
+#        for participant in chosenSlice[pCount:]: #Second half
+#        
+#            chosenData = participant.vectorsBetween
+#            
+##            bundle = Helper.constructSmallDataBundle(participant.fileName, chosenData, target = 1, key = 'cop')
+#            bundle = Helper.constructBigDataBundle(participant)
+##            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
+#            bundles.append(bundle)   
+#    
+#    
+#    elif chosenAlgorithm == MLType.SVM:
+#    
+#        for participant in chosenSlice[:]: # Whole slice
+#            
+#            chosenData = participant.vectorsBetween
+#                
+#            bundle = Helper.constructBigDataBundle(participant, key = 'cop')
+##            print('length {} vs bundle length {}'.format(len(chosenData), np.shape(bundle['data'])))
+#            bundles.append(bundle)
+#    
+#    ''' 
+#    Create a big bundle combining all the individual bundles
+#    '''
+#    
+#    bigBundle = Helper.appendDataBundles(bundles[:])
+
 
      # Load the dataset
     
