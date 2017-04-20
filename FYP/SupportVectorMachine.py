@@ -9,6 +9,7 @@ from sklearn import datasets # Used as a test in main below
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+from sklearn.svm import SVC
 
 ''' My code '''
 from participant import Participant
@@ -195,7 +196,7 @@ def main():
     y[y == 2] = 1
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
     
-    svm = SupportVectorMachine(kernel=polynomial_kernel, power=4, coef=1)
+    svm = SVC()
     svm.fit(X_train, y_train)
     y_pred = svm.predict(X_test)
     

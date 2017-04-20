@@ -4,10 +4,12 @@ import sys
 import os
 import math
 import random
-from sklearn import datasets
 import numpy as np
 from point import Point
 
+from sklearn import datasets
+from sklearn.cluster import KMeans
+from sklearn.cross_validation import train_test_split
 
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
@@ -83,6 +85,7 @@ class KMeansClustering():
 
     # Do K-Means clustering and return cluster indices
     def predict(self, X):
+        print(np.shape(X))
         # Initialize centroids
         centroids = self._initRandomCentroids(X)
 
@@ -152,15 +155,21 @@ def main():
     data = datasets.load_iris()
 #    X = normalize(data.data)
     X = data.data
+    print(np.shape(X))
     y = data.target
     k = 3
-    # Cluster the data using K-Means
-    kmeans = KMeansClustering(k=k)
-    y_pred = kmeans.predict(X)
     
+    X_train, y_train, X_test, y_test = train_test_split(X, y, test_size=0.33)
+    print(np.shape(X_train))
+    # Cluster the data using K-Means
+#    kmeans = KMeansClustering(k=k)
+    kmeans = KMeans(k)
+    kmeans.fit(X_train)
+    pred_clusters = kmeans.predict(X_test)
+#    print(kmeans.score(X_test, y_pred))
     # Plot that shit
-    kmeans.plot_in_2d(X, y_pred, k, ['Predicted clusters','',''])
-    kmeans.plot_in_2d(X, y, k, ['Defined clusters','',''])
+#    kmeans.plot_in_2d(X, y_pred, k, ['Predicted clusters','',''])
+#    kmeans.plot_in_2d(X, y, k, ['Defined clusters','',''])
     
 
 if __name__ == "__main__":
