@@ -28,6 +28,7 @@ class Participant(object):
         self.dataBlob = {} # Contains the whole data object loaded from the file
         self.data6 = np.array([[]]).astype(int) # The main dictionary in the loaded file containing most data
         self.movement = ''
+        self.direction = ''
         # Used for finding the beginning and end of meaningful participant data
         self.beginIndex = 0
         self.endIndex = 0
@@ -59,6 +60,13 @@ class Participant(object):
         else:
             self.movement = 'hinge'
         
+        # What direction are we extending?
+        if '1' in trialName:
+            self.direction = 'right'
+        elif '2' in trialName:
+            self.direction = 'forward'
+        elif '3' in trialName:
+            self.direction = 'backward'
         
         if fileType == ".mat":
             matlab = io.loadmat(self.fileName + fileType)
