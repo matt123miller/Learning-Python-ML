@@ -138,6 +138,12 @@ def generateDirectionBundles(directionSlices, participants):
     # Does it need to be numpy?        
     return returnList
 
+def makeSVM():
+    pass
+
+def makeKMeans():
+    pass
+
 def main():
     
     
@@ -208,10 +214,9 @@ def main():
 
     print('All data manipulation is hopefully done now. \nNow to make graphs and things out of each participant.')
     print(consoleSeparator)
-#    
-#    print(featureNames)
-#    print(totalFeatures)
 
+
+    # Make a matrix of indexes to access features with
     featureCombinations = []
     nameCombinations = []
     
@@ -222,9 +227,21 @@ def main():
             featureCombinations.append([i, j])
             nameCombinations.append([featureNames[i], featureNames[j]])
 
-    print(featureCombinations)
-    print()
-    print(nameCombinations)
+    
+    # Loop through all 3 directions
+    for direction in directionBundles:
+        # Use the featureCombinations list to index 
+        for i, combo in enumerate(featureCombinations):
+            
+            X = [[ x for x in direction['data'][combo[0]] ]  , [ x for x in direction['data'][combo[1]] ]]
+            print(X)
+            currentNames = nameCombinations[i]
+#            y = get targets somehow
+
+#            Do some ML!!!
+            return
+            
+        
     return 
 
     ''' 
