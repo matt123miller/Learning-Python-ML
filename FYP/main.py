@@ -198,6 +198,7 @@ def main():
     directionBundles = generateDirectionBundles(directionSlices, participants)
     
     featureNames = directionBundles[0]['featureNames']
+    totalFeatures = np.shape(directionBundles[0]['data'])[1]
         
         
     # directionBundles should now contain 3 dictionaries,
@@ -205,12 +206,25 @@ def main():
     # print(participantbundleforslice['data'][100][5]) # You can access the data like this, 'data', row (instance), column (feature) 
 
 
-    print('All data manipulation is hopefully done now. \nNow to make graphs and things out of each participant. \n \n ##########')
+    print('All data manipulation is hopefully done now. \nNow to make graphs and things out of each participant.')
     print(consoleSeparator)
-    
+#    
+#    print(featureNames)
+#    print(totalFeatures)
 
+    featureCombinations = []
+    nameCombinations = []
     
+    for i in range(totalFeatures):
+        for j in range(totalFeatures):
+            if i == j:
+                continue
+            featureCombinations.append([i, j])
+            nameCombinations.append([featureNames[i], featureNames[j]])
 
+    print(featureCombinations)
+    print()
+    print(nameCombinations)
     return 
 
     ''' 
