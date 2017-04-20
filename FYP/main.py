@@ -267,18 +267,33 @@ def main():
     
     # Loop through all 3 directions
     for direction in directionBundles:
+        
+        data = direction['data']
+
         # Use the featureCombinations list to index 
         for i, combo in enumerate(featureCombinations):
             
-            X = [[ x for x in direction['data'][combo[0]] ]  , [ x for x in direction['data'][combo[1]] ]]
-            print(X)
             currentNames = nameCombinations[i]
-#            y = get targets somehow
-
-#            Do some ML!!!
-            return
             
-        
+            # Every row, certain columns
+            x1 = data[:, combo[0]]
+            x2 = data[:, combo[1]]
+
+            X = np.column_stack((x1, x2))
+            y = direction['target']
+
+
+            # Do some ML!!!
+            if chosenAlgorithm == MLType.KMEANS:
+                makeKMeans(X, y, currentNames)
+            elif chosenAlgorithm == MLType.SVM:
+                makeSVM(X, y, currentNames)
+            
+            # Do we wanna do the whole set for this direction or not?
+#            return
+        # Lets just start with moving right   
+        return
+    
     return 
 
     ''' 
