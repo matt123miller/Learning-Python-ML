@@ -121,8 +121,8 @@ class Participant(object):
     def listFeaturesDict(self):
            return {'trialType':self.movement,
                    'direction':self.direction,
-                   'features':[np.array(self.restSensors),
-                               np.array(self.extensionSensors),
+                   'features':[np.array([sum(arr) for arr in self.restSensors]),
+                               np.array([sum(arr) for arr in self.extensionSensors]),
                                np.array([cp.x.item() for cp in self.restPoints]),
                                np.array([cp.y.item() for cp in self.restPoints]),
                                np.array([cp.x.item() for cp in self.extensionPoints]),

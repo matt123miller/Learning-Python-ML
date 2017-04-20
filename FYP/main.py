@@ -3,21 +3,25 @@
 # Libraries
 import sys
 import os
+from time import time
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 from enum import Enum
-from sklearn import preprocessing
+from sklearn import preprocessing, metrics
 from sklearn.feature_selection import SelectKBest, chi2, f_classif as anova
+from sklearn.cross_validation import cross_val_score, cross_val_predict, ShuffleSplit, train_test_split
 from sklearn.svm import SVC
-from sklearn.cross_validation import cross_val_score, cross_val_predict, ShuffleSplit
+from sklearn.cluster import KMeans
+from sklearn.metrics.cluster import completeness_score
+
 
 
 # My code
 from point import Point
 from HelperFile import Helper
 from SupportVectorMachine import SupportVectorMachine as MySVM
-from KMeansClustering import KMeansClustering as KMeans
+from KMeansClustering import KMeansClustering
 from participant import Participant
 from kernels import *
 
@@ -25,8 +29,8 @@ from kernels import *
 # Some helper functions
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, dir_path + "/../utils")
-from data_manipulation import train_test_split, shuffle_data, normalize
-from decision_tree import ClassificationTree
+#from data_manipulation import train_test_split, shuffle_data, normalize
+#from decision_tree import ClassificationTree
 
 
 
@@ -56,24 +60,18 @@ returnType = 'p'
 consoleSeparator = '\n ######## \n'
 
 ''' Choose what algorithm you wanna do '''
-chosenAlgorithm = MLType.KMEANS
+chosenAlgorithm = MLType.SVM
     
 
 """
+The 4 sensor values are arrange as follows
 TL = front left = data6[[:,0]] = b
 TR = front right = data6[[:,1]] = c
 BL = back left = data6[[:,2]] = r
 BR = back right = data6[[:,3]] = y
 """
 
-'''
-Bundle format
 
-bundle = {'data':np.array([[ 4 float values ]]), 
-          'targets':np.array([ 0 or 1 ]), 
-          'target_names':np.array(['pendulum', 'hinge']),
-          'data_feature_names':np.array([ 'Depends on what's stored in the data array'])}
-'''
 
 def loadParticipants(trials, names):
     outParticipants = []
@@ -138,11 +136,54 @@ def generateDirectionBundles(directionSlices, participants):
     # Does it need to be numpy?        
     return returnList
 
-def makeSVM():
-    pass
+def makeSVM(X, y, names):
+    
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+    '''
+    Using sklearn SVM.SVC - Support Vector Classifier 
+    '''
+    clf = SVC(probability=True, verbose=True)
+    clf.fit(X_train, y_train) 
+    y_pred = clf.predict(X_test)
+    score = clf.score(X_test, y_test)
+    print('The SVM using {} and {} scored {} \n'.format(names[0], names[1], score))
+    return score
+    
+def makeKMeans(X, y, names):
+    
+    # Cluster the data using K-Means
+    K = 2
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-def makeKMeans():
-    pass
+    kmeans = KMeans(n_clusters = K).fit(X_train)
+    yPred = kmeans.predict(X_test)
+    
+                               
+    print('The KMeans score for {} and {} is:'.format(names[0], names[1]))
+    
+    # Useful benchmarking found at http://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_digits.html
+    print(79 * '_')
+    print('% 9s' % 'init'
+      '    time  inertia    homo   compl  v-meas     ARI AMI')
+    t0 = time()
+    print('% 6s %.2fs    %i   %.3f    %.3f     %.3f     %.3f     %.3f'
+          % ('', (time() - t0), kmeans.inertia_,
+             metrics.homogeneity_score(y_test, yPred),
+             metrics.completeness_score(y_test, yPred),
+             metrics.v_measure_score(y_test, yPred),
+             metrics.adjusted_rand_score(y_test, yPred),
+             metrics.adjusted_mutual_info_score(y_test, yPred)
+             ))
+    print()
+    '''
+    Green points will hopefully show pendulum movement, red for hinge
+    '''
+    colours = ['green' if l == 1 else 'red' for l in y]
+    predColours = ['green' if l == 1 else 'red' for l in yPred]
+
+    # Project the data onto the 2 primary principal components
+    KMeansClustering().plot_in_2d(X, predColours, K, labels = ['Predicted clusters for leaning right using {} {}'.format(names[0], names[1]), xCopLabel, yCopLabel])
+    KMeansClustering().plot_in_2d(X, colours, K, labels = ['Defined clusters for leaning right using {} {}'.format(names[0], names[1]), xCopLabel, yCopLabel])
 
 def main():
     
@@ -210,10 +251,6 @@ def main():
     # directionBundles should now contain 3 dictionaries,
     # each one containing all rows of data for a direction and a target value dependent on movement type.
     # print(participantbundleforslice['data'][100][5]) # You can access the data like this, 'data', row (instance), column (feature) 
-
-
-    print('All data manipulation is hopefully done now. \nNow to make graphs and things out of each participant.')
-    print(consoleSeparator)
 
 
     # Make a matrix of indexes to access features with
@@ -295,6 +332,9 @@ def main():
 #    bigBundle = Helper.appendDataBundles(bundles[:])
 
 
+    print('All data manipulation is hopefully done now. \nNow to make graphs and things out of each participant.')
+    print(consoleSeparator)
+    
      # Load the dataset
     
 #    X = normalize( bigBundle['data'], 0 ) # Normalising over the 0th axis seems good. The 1st axis is awful though
@@ -317,21 +357,7 @@ def main():
         Trying some KMeans because I can see clusters myself and I'm desperate for something
         '''
         print('The target values are flipped to be 0 for hinge movement or 1 for pendulum movement')
-
-        # Cluster the data using K-Means
-        K = 2
-        kmeans = KMeans(k = K)
-        yPred = kmeans.predict(X)
-        
-        '''
-        Green points will hopefully show pendulum movement, red for hinge
-        '''
-        colours = ['green' if l == 1 else 'red' for l in y]
-        predColours = ['green' if l == 1 else 'red' for l in yPred]
-    
-        # Project the data onto the 2 primary principal components
-        kmeans.plot_in_2d(X, predColours, K, ['Predicted clusters for leaning right extension lengths', xCopLabel, yCopLabel])
-        kmeans.plot_in_2d(X, colours, K, ['Defined clusters for leaning right extension lengths', xCopLabel, yCopLabel])
+        makeKMeans()
      
         
     elif chosenAlgorithm == MLType.SVM:
@@ -340,30 +366,10 @@ def main():
         Make an SVM out of ALL with bigbundle or a SUBSET OF participants data using bundles?
         Maybe pass a slice of bundles to appendDataBundles
         '''
-        
-        y[y == 0] = -1
-        print('Target values are the default -1 for hinge movement or 1 for pendulum movement')
-     
-        ''' 
-        Data is all read and processed sequentially by file up until this point
-        The train_test_split method shuffles the data before splitting it
-        '''
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
-    #
-        print('xtrain length {} \nytrain length {} \nxtest length {}\nytest length {}'.format(len(X_train), len(y_train), len(X_test), len(y_test)))
+        makeSVM()
         
         '''
-        Using sklearn SVM.SVC - Support Vector Classifier 
-        '''
-    
-        clf = SVC(probability=True, verbose=True)
-        clf.fit(X_train, y_train) 
-        y_pred = clf.predict(X_test)
-        print(y_pred)
-        score = clf.score(X_test, y_test)
-        print(score)
-        '''
-        Using my SVM stuff, this can go die.
+        My SVM stuff, this can go die.
         '''
         # What kernel would you like to use? Make sure I'm importing the right kernel file.
 #        chosenKernel = linear_kernel
