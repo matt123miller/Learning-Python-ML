@@ -112,30 +112,37 @@ class Participant(object):
         self.trimLists()                  
 
         self.vectorsBetween = [self.extensionPoints[i] - self.restPoints[i] for i, val in enumerate(self.restPoints)]
-                                                   # Does argument order matter?
-        self.anglesBetween = [Point.angleBetween(self.restPoints[i], self.extensionPoints[i]) for i, val in enumerate(self.restPoints)]
+        # Does argument order matter for the angles?? nope!!
+        self.anglesBetween = [Point.angleBetween(self.extensionPoints[i] ,self.restPoints[i] ) for i, val in enumerate(self.restPoints)]
            
 
                           
     # I'm too lazy to check if there's a reference ro value issue so I'm just copying everything . Lazy is lazy.
-    def namesAndListFeatures(self):
+    def listFeaturesDict(self):
            return {'trialType':self.movement,
-                   'features':{'restSensorValues': np.array(self.restSensors),
-                               'extensionSensorValues': np.array(self.extensionSensors),
-                               'restPointsX': np.array([cp.x.item() for cp in self.restPoints]),
-                               'restPointsY': np.array([cp.y.item() for cp in self.restPoints]),
-                               'extensionPointsX': np.array([cp.x.item() for cp in self.extensionPoints]),
-                               'extensionPointsY': np.array([cp.y.item() for cp in self.extensionPoints]),
-                               'vectorsBetweenX': np.array([cp.x.item() for cp in self.vectorsBetween]),      
-                               'vectorsBetweenY': np.array([cp.y.item() for cp in self.vectorsBetween]),
-                               'anglesBetween': np.array(self.anglesBetween)
-                               }
+                   'direction':self.direction,
+                   'features':[np.array(self.restSensors),
+                               np.array(self.extensionSensors),
+                               np.array([cp.x.item() for cp in self.restPoints]),
+                               np.array([cp.y.item() for cp in self.restPoints]),
+                               np.array([cp.x.item() for cp in self.extensionPoints]),
+                               np.array([cp.y.item() for cp in self.extensionPoints]),
+                               np.array([cp.x.item() for cp in self.vectorsBetween]),      
+                               np.array([cp.y.item() for cp in self.vectorsBetween]),
+                               np.array(self.anglesBetween) ],
+                   'featureNames':['restSensorValues','extensionSensorValues','restPointsX','restPointsY','extensionPointsX',
+                                   'extensionPointsY','vectorsBetweenX', 'vectorsBetweenY', 'anglesBetween'],
+                   'participant':self # Just in case we need the whole thing!
                    }
                               
-    def namesAndSingleFeatures(self):
+    def singleFeaturesDict(self):
         # Maybe these point values should be represented in a np list fashion [x, y] ?? Might make some things easier later.
-        return {'meanPoint': self.meanPoint,
-                'meanRestPoint': self.meanRestPoint
+        return {'trialType':self.movement,
+                'direction':self.direction,
+                'features':{'meanPoint': self.meanPoint,
+                            'meanRestPoint': self.meanRestPoint
+                            },
+                'participant':self
                 }
     
     def trimLists(self):            
@@ -145,7 +152,6 @@ class Participant(object):
         # Is there a cool numpy method for this?
         
         restLength, extLength, restSensorLength, extSensorLength = len(self.restPoints), len(self.extensionPoints), len(self.restSensors), len(self.extensionSensors)
-#        print('{} rest points, {} extension points, {} rest sensors, {} extensions sensors'.format(restLength, extLength, restSensorLength, extSensorLength))
         
         # Cull some values so everything is the length of the lowest common denominator
         minLength = min(restLength, extLength, restSensorLength, extSensorLength)
