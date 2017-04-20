@@ -3,6 +3,7 @@
 # Libraries
 import sys
 import os
+import csv
 from time import time
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
@@ -307,6 +308,14 @@ def main():
             scores['scores'].append(averagedScore)
             # Do we wanna do the whole set for this direction or not?
 #            return
+        
+       
+        # Save this directions data to it's own CSV file
+        with open('{}{}'.format('SVM_' + scores['direction'], '.csv'), 'w') as file:
+            writer = csv.writer(file, dialect='excel')
+            for i in range(len(scores['features'])):
+                writer.writerow([ scores['features'][i] , scores['scores'][i] ])
+        
         
     return 
 
