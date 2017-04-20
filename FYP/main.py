@@ -48,6 +48,7 @@ plateLength = 100
 participantNames = ['ac', 'an', 'gd', 'gp', 'hm', 'lh', 'mb', 'mm', 'te', 'wy', 'xd', 'yz'] # Not case sensitive
 trialNames = ['Trial1a','Trial1b','Trial2a','Trial2b','Trial3a','Trial3b'] # not case sensitive
 trialDescriptions = ['Leaning right in a pendulum movement', 'Leaning right in a hinge movement','Leaning forward in a pendulum movement', 'Leaning forward in a hinge movement','Leaning backward in a pendulum movement', 'Leaning backward in a hinge movement']
+directionNames = ['Right', 'Forward', 'Backward']
 date = "170306"
 dataKey = 'data6'
 xCopLabel = 'Anteroposterior weight distribution'
@@ -60,7 +61,7 @@ returnType = 'p'
 consoleSeparator = '\n ######## \n'
 
 ''' Choose what algorithm you wanna do '''
-chosenAlgorithm = MLType.SVM
+chosenAlgorithm = MLType.KMEANS
     
 
 """
@@ -94,7 +95,7 @@ def generateDirectionBundles(directionSlices, participants):
                                      'featureNames':[]
                                      }
         
-        # Cheekily set the featureNames here before the loop
+        # Cheekily set the featureNames here before the loop, YOLO
         participantbundleforslice['featureNames'] = participants[0].listFeaturesDict()['featureNames']
         
         for p in participants[dSlice[0] : dSlice[1]]:
@@ -136,7 +137,7 @@ def generateDirectionBundles(directionSlices, participants):
     # Does it need to be numpy?        
     return returnList
 
-def makeSVM(X, y, names):
+def makeSVM(X, y, names, direction):
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
     '''
@@ -146,10 +147,10 @@ def makeSVM(X, y, names):
     clf.fit(X_train, y_train) 
     y_pred = clf.predict(X_test)
     score = clf.score(X_test, y_test)
-    print('The SVM using {} and {} scored {} \n'.format(names[0], names[1], score))
+    print('The SVM, moving in the {} direction, using {} and {} scored {} \n'.format(direction, names[0], names[1], score))
     return score
     
-def makeKMeans(X, y, names):
+def makeKMeans(X, y, names, direction):
     
     # Cluster the data using K-Means
     K = 2
@@ -159,14 +160,14 @@ def makeKMeans(X, y, names):
     yPred = kmeans.predict(X_test)
     
                                
-    print('The KMeans score for {} and {} is:'.format(names[0], names[1]))
+    print('The KMeans score, moving in the {} direction, for {} and {} is:'.format(direction, names[0], names[1]))
     
     # Useful benchmarking found at http://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_digits.html
     print(79 * '_')
     print('% 9s' % 'init'
-      '    time  inertia    homo   compl  v-meas     ARI AMI')
+      '    time     inertia    homo   compl     v-meas     ARI        AMI')
     t0 = time()
-    print('% 6s %.2fs    %i   %.3f    %.3f     %.3f     %.3f     %.3f'
+    print('% 6s %.6fs    %i   %.3f    %.3f     %.3f     %.3f     %.3f'
           % ('', (time() - t0), kmeans.inertia_,
              metrics.homogeneity_score(y_test, yPred),
              metrics.completeness_score(y_test, yPred),
@@ -182,8 +183,8 @@ def makeKMeans(X, y, names):
     predColours = ['green' if l == 1 else 'red' for l in yPred]
 
     # Project the data onto the 2 primary principal components
-    KMeansClustering().plot_in_2d(X, predColours, K, labels = ['Predicted clusters for leaning right using {} {}'.format(names[0], names[1]), xCopLabel, yCopLabel])
-    KMeansClustering().plot_in_2d(X, colours, K, labels = ['Defined clusters for leaning right using {} {}'.format(names[0], names[1]), xCopLabel, yCopLabel])
+#    KMeansClustering().plot_in_2d(X, predColours, K, labels = ['Predicted clusters for leaning right using {} {}'.format(names[0], names[1]), xCopLabel, yCopLabel])
+#    KMeansClustering().plot_in_2d(X, colours, K, labels = ['Defined clusters for leaning right using {} {}'.format(names[0], names[1]), xCopLabel, yCopLabel])
 
 def main():
     
@@ -266,10 +267,11 @@ def main():
 
     
     # Loop through all 3 directions
-    for direction in directionBundles:
+    for i, direction in enumerate(directionBundles):
         
         data = direction['data']
-
+        directionName = directionNames[i]
+        
         # Use the featureCombinations list to index 
         for i, combo in enumerate(featureCombinations):
             
@@ -285,14 +287,15 @@ def main():
 
             # Do some ML!!!
             if chosenAlgorithm == MLType.KMEANS:
-                makeKMeans(X, y, currentNames)
+                makeKMeans(X, y, currentNames, directionName)
             elif chosenAlgorithm == MLType.SVM:
-                makeSVM(X, y, currentNames)
+                makeSVM(X, y, currentNames, directionName)
             
             # Do we wanna do the whole set for this direction or not?
 #            return
-        # Lets just start with moving right   
-        return
+
+        # Lets just start with moving right, comment it out to do EVERYTHING!
+#        return
     
     return 
 
