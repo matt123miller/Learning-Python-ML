@@ -59,9 +59,10 @@ byValue = 25
 threshold = 0.45
 returnType = 'p'
 consoleSeparator = '\n ######## \n'
+nIterations = 5
 
 ''' Choose what algorithm you wanna do '''
-chosenAlgorithm = MLType.KMEANS
+chosenAlgorithm = MLType.SVM
     
 
 """
@@ -143,12 +144,16 @@ def makeSVM(X, y, names, direction):
     '''
     Using sklearn SVM.SVC - Support Vector Classifier 
     '''
-    clf = SVC(probability=True, verbose=True)
-    clf.fit(X_train, y_train) 
-    y_pred = clf.predict(X_test)
-    score = clf.score(X_test, y_test)
-    print('The SVM, moving in the {} direction, using {} and {} scored {} \n'.format(direction, names[0], names[1], score))
-    return score
+    clf = SVC(probability=True, verbose=False)
+    scores = cross_val_score(clf, X, y, cv=nIterations) # K-fold cross valildation, K = nIterations
+    avgScore = np.mean(scores)
+    # unnecessary because of cross_val_score magic!!!! AMAZING
+#    clf.fit(X_train, y_train) 
+#    y_pred = clf.predict(X_test)
+#    score = clf.score(X_test, y_test)
+
+    print('The SVM, moving in the {} direction, using {} and {} scored an average of {} \n'.format(direction, names[0], names[1], avgScore))
+    return avgScore
     
 def makeKMeans(X, y, names, direction):
     
@@ -188,6 +193,7 @@ def makeKMeans(X, y, names, direction):
 
 def main():
     
+    # Maybe add a quick user input to choose the algorithm?
     
     if chosenAlgorithm == MLType.KMEANS:
         print("We're doing K-Means Clustering!")
@@ -248,7 +254,9 @@ def main():
     featureNames = directionBundles[0]['featureNames']
     totalFeatures = np.shape(directionBundles[0]['data'])[1]
         
-        
+    print('All data manipulation is hopefully done now. \nNow to make graphs and things out of each participant.')
+    print(consoleSeparator)
+    
     # directionBundles should now contain 3 dictionaries,
     # each one containing all rows of data for a direction and a target value dependent on movement type.
     # print(participantbundleforslice['data'][100][5]) # You can access the data like this, 'data', row (instance), column (feature) 
@@ -271,7 +279,10 @@ def main():
         
         data = direction['data']
         directionName = directionNames[i]
-        
+        scores = {'direction':directionName,
+                  'features':[],
+                  'scores':[]
+                  }
         # Use the featureCombinations list to index 
         for i, combo in enumerate(featureCombinations):
             
@@ -284,19 +295,19 @@ def main():
             X = np.column_stack((x1, x2))
             y = direction['target']
 
-
+            averagedScore = None
+            
             # Do some ML!!!
             if chosenAlgorithm == MLType.KMEANS:
                 makeKMeans(X, y, currentNames, directionName)
             elif chosenAlgorithm == MLType.SVM:
-                makeSVM(X, y, currentNames, directionName)
+                averagedScore = makeSVM(X, y, currentNames, directionName)
             
+            scores['features'].append( [currentNames[0] + ' and ' + currentNames[1]] )
+            scores['scores'].append(averagedScore)
             # Do we wanna do the whole set for this direction or not?
 #            return
-
-        # Lets just start with moving right, comment it out to do EVERYTHING!
-#        return
-    
+        
     return 
 
     ''' 
