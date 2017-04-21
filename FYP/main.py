@@ -16,8 +16,6 @@ from sklearn.svm import SVC
 from sklearn.cluster import KMeans
 from sklearn.metrics.cluster import completeness_score
 
-
-
 # My code
 from point import Point
 from HelperFile import Helper
@@ -26,13 +24,9 @@ from KMeansClustering import KMeansClustering
 from participant import Participant
 from kernels import *
 
-
 # Some helper functions
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, dir_path + "/../utils")
-#from data_manipulation import train_test_split, shuffle_data, normalize
-#from decision_tree import ClassificationTree
-
 
 
 class MLType(Enum):
