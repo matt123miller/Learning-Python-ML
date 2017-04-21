@@ -63,7 +63,7 @@ consoleSeparator = '\n ######## \n'
 nIterations = 5
 
 ''' Choose what algorithm you wanna do '''
-chosenAlgorithm = MLType.SVM
+chosenAlgorithm = MLType.KMEANS
     
 
 """
@@ -156,7 +156,7 @@ def makeSVM(X, y, names, direction):
     print('The SVM, moving in the {} direction, using {} and {} scored an average of {} \n'.format(direction, names[0], names[1], avgScore))
     return avgScore
     
-def makeKMeans(X, y, names, direction):
+def makeKMeans(X, y, names, direction, show = False):
     
     # Cluster the data using K-Means
     K = 2
@@ -170,28 +170,28 @@ def makeKMeans(X, y, names, direction):
     
     # Useful benchmarking found at http://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_digits.html
     print(79 * '_')
-    print('% 9s' % 'init'
-      '    time     inertia    homo   compl     v-meas     ARI        AMI')
+    print('% 9s' % 'init   time     inertia    homo   compl     v-meas     ARI        AMI')
+    
     t0 = time()
+    scores = [(time() - t0), kmeans.inertia_, metrics.homogeneity_score(y_test, yPred), metrics.completeness_score(y_test, yPred), 
+              metrics.v_measure_score(y_test, yPred), metrics.adjusted_rand_score(y_test, yPred), metrics.adjusted_mutual_info_score(y_test, yPred)]
     print('% 6s %.6fs    %i   %.3f    %.3f     %.3f     %.3f     %.3f'
-          % ('', (time() - t0), kmeans.inertia_,
-             metrics.homogeneity_score(y_test, yPred),
-             metrics.completeness_score(y_test, yPred),
-             metrics.v_measure_score(y_test, yPred),
-             metrics.adjusted_rand_score(y_test, yPred),
-             metrics.adjusted_mutual_info_score(y_test, yPred)
-             ))
+          % ('', scores[0], scores[1], scores[2], scores[3], scores[4], scores[5], scores[6] ))
     print()
-    '''
-    Green points will hopefully show pendulum movement, red for hinge
-    '''
-    colours = ['green' if l == 1 else 'red' for l in y]
-    predColours = ['green' if l == 1 else 'red' for l in yPred]
-
-    # Project the data onto the 2 primary principal components
-#    KMeansClustering().plot_in_2d(X, predColours, K, labels = ['Predicted clusters for leaning right using {} {}'.format(names[0], names[1]), xCopLabel, yCopLabel])
-#    KMeansClustering().plot_in_2d(X, colours, K, labels = ['Defined clusters for leaning right using {} {}'.format(names[0], names[1]), xCopLabel, yCopLabel])
-
+    if show == True:
+        '''
+        Green points will hopefully show pendulum movement, red for hinge
+        '''
+        colours = ['green' if l == 1 else 'red' for l in y]
+        predColours = ['green' if l == 1 else 'red' for l in yPred]
+    
+        # Project the data onto the 2 primary principal components
+        KMeansClustering().plot_in_2d(X, predColours, K, labels = ['Predicted clusters for leaning right using {} {}'.format(names[0], names[1]), xCopLabel, yCopLabel])
+        KMeansClustering().plot_in_2d(X, colours, K, labels = ['Defined clusters for leaning right using {} {}'.format(names[0], names[1]), xCopLabel, yCopLabel])
+    
+    return scores
+    
+    
 def main():
     
     # Maybe add a quick user input to choose the algorithm?
@@ -296,27 +296,33 @@ def main():
             X = np.column_stack((x1, x2))
             y = direction['target']
 
-            averagedScore = None
+            algorithmScores = None
             
             # Do some ML!!!
             if chosenAlgorithm == MLType.KMEANS:
-                makeKMeans(X, y, currentNames, directionName)
+                algorithmScores = makeKMeans(X, y, currentNames, directionName)
             elif chosenAlgorithm == MLType.SVM:
-                averagedScore = makeSVM(X, y, currentNames, directionName)
+                algorithmScores = makeSVM(X, y, currentNames, directionName)
             
             scores['features'].append( [currentNames[0] + ' and ' + currentNames[1]] )
-            scores['scores'].append(averagedScore)
+            scores['scores'].append(algorithmScores)
             # Do we wanna do the whole set for this direction or not?
 #            return
         
        
         # Save this directions data to it's own CSV file
-        with open('{}{}'.format('SVM_' + scores['direction'], '.csv'), 'w') as file:
+        with open('{}{}'.format('KMEANS_' + scores['direction'], '.csv'), 'w') as file:
             writer = csv.writer(file, dialect='excel')
+            if chosenAlgorithm == MLType.KMEANS:
+                writer.writerow([ 'Feature Combination', 'time', 'inertia', 'homogeneity_score', 'completeness_score', 'v_measure_score', 'adjusted_rand_score', 'adjusted_mutual_info_score' ])
             for i in range(len(scores['features'])):
-                writer.writerow([ scores['features'][i] , scores['scores'][i] ])
+                if chosenAlgorithm == MLType.KMEANS:
+                    arr = scores['scores'][i]
+                    writer.writerow([ scores['features'][i] , arr[0], arr[1], arr[2], arr[3], arr[4], arr[5], arr[6] ])
+                elif chosenAlgorithm == MLType.SVM:
+                    writer.writerow([ scores['features'][i] , scores['scores'][i] ])
         
-        
+     
     return 
 
     ''' 
