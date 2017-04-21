@@ -195,6 +195,20 @@ def makeKMeans(X, y, names, direction, show = False):
 def main():
     
     # Maybe add a quick user input to choose the algorithm?
+    print(consoleSeparator)
+    print('Please choose an algorithm to compare the data.')
+    print('Enter 0 for Support Vector Machine or enter 1 for KMeans')
+    
+    inputChoice = input()
+    if inputChoice == '0':
+        chosenAlgorithm = MLType.SVM
+    elif inputChoice == '1':
+        chosenAlgorithm = MLType.KMEANS
+    else:
+        print('Please type 0 for SVM or 1 for KMeans. Rerun the program now to try again')
+        return
+    
+    print(consoleSeparator)
     
     if chosenAlgorithm == MLType.KMEANS:
         print("We're doing K-Means Clustering!")
@@ -318,10 +332,13 @@ def main():
             for i in range(len(scores['features'])):
                 if chosenAlgorithm == MLType.KMEANS:
                     arr = scores['scores'][i]
-                    writer.writerow([ scores['features'][i] , arr[0], arr[1], arr[2], arr[3], arr[4], arr[5], arr[6] ])
+                    writer.writerow([ scores['features'][i], arr[0], arr[1], arr[2], arr[3], arr[4], arr[5], arr[6] ])
                 elif chosenAlgorithm == MLType.SVM:
                     writer.writerow([ scores['features'][i] , scores['scores'][i] ])
-        
+     
+    print(consoleSeparator)
+    print('All of this information was saved to a CSV file in the FYP folder of this project.')
+    print('There 3 of them, each named your chosen algorithm + a direction')
      
     return 
 
