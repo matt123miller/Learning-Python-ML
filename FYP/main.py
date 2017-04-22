@@ -137,7 +137,8 @@ def makeSVM(X, y, names, direction):
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
     '''
-    Using sklearn SVM.SVC - Support Vector Classifier 
+    Using sklearn SVM.SVC - Support Vector Classifier
+    If no kernel is supplied then it defaults to the RBF kernel
     '''
     clf = SVC(probability=True, verbose=False)
     scores = cross_val_score(clf, X, y, cv=nIterations) # K-fold cross valildation, K = nIterations
@@ -279,8 +280,6 @@ def main():
     
     for i in range(totalFeatures):
         for j in range(totalFeatures):
-#            if i == j:
-#                continue
             featureCombinations.append([i, j])
             nameCombinations.append([featureNames[i], featureNames[j]])
 
