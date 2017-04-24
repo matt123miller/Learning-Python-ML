@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+
+'''
+This file will only work on a mac with Anaconda for Python 3.6 installed.
+To do so please uncomment line 13 and computeLagrangeMultipliers on starting line 75
+
+'''
 ''' Included libraries'''
 import math
 import sys
@@ -10,6 +16,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from sklearn.svm import SVC
+from sklearn.cross_validation import cross_val_score, cross_val_predict, ShuffleSplit, train_test_split
+
 
 ''' My code '''
 from participant import Participant
@@ -17,9 +25,9 @@ from kernels import *
 from principal_component_analysis import PCA
 
 ''' OS stuff '''
-dir_path = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, dir_path + "/../utils")
-from data_manipulation import train_test_split, normalize
+dirPath = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, dirPath + "/../utils")
+from data_manipulation import normalize
 from data_operation import accuracy_score, calculate_covariance_matrix
 
 
@@ -57,32 +65,32 @@ class SupportVectorMachine(object):
         self.coef = coef
         self.lagrMultipliers = None
         self.supportVectors = None
-        self.supportVectorLabels = None
+        self.supportVectorTargets = None
         self.intercept = None
         
         
-        print('My SVM reporting for duty!')
+        print('SVM reporting for duty!')
         print('')
         pass
     
     # Can only be used on Mac
-#    def computeLagrangeMultipliers(self, X, y, kernelMatrix, n_samples):
+#    def computeLagrangeMultipliers(self, X, y, kernelMatrix, nSamples):
 #        # Define the quadratic optimization problem
-#        # This shit is gibberish
+#        # Honestly, this function is gibberish 
 #        P = cvxopt.matrix(np.outer(y, y) * kernelMatrix, tc='d')
-#        q = cvxopt.matrix(np.ones(n_samples) * -1)
-#        A = cvxopt.matrix(y, (1, n_samples), tc='d')
+#        q = cvxopt.matrix(np.ones(nSamples) * -1)
+#        A = cvxopt.matrix(y, (1, nSamples), tc='d')
 #        b = cvxopt.matrix(0, tc='d')
 #        
 #        if not self.C:
-#            G = cvxopt.matrix(np.identity(n_samples) * -1)
-#            h = cvxopt.matrix(np.zeros(n_samples))
+#            G = cvxopt.matrix(np.identity(nSamples) * -1)
+#            h = cvxopt.matrix(np.zeros(nSamples))
 #        else:
-#            G_max = np.identity(n_samples) * -1
-#            G_min = np.identity(n_samples)
+#            G_max = np.identity(nSamples) * -1
+#            G_min = np.identity(nSamples)
 #            G = cvxopt.matrix(np.vstack((G_max, G_min)))
-#            h_max = cvxopt.matrix(np.zeros(n_samples))
-#            h_min = cvxopt.matrix(np.ones(n_samples) * self.C)
+#            h_max = cvxopt.matrix(np.zeros(nSamples))
+#            h_min = cvxopt.matrix(np.ones(nSamples) * self.C)
 #            h = cvxopt.matrix(np.vstack((h_max, h_min)))
 #        
 #        # Solve the quadratic optimization problem using cvxopt
@@ -90,70 +98,76 @@ class SupportVectorMachine(object):
 #        
 #        # Lagrange multipliers
 #        return np.ravel(minimization['x'])
-        
+     
+    def createKernelMatrix(self, X, nSamples):
+         # Calculate a matrix of values that came through the kernel
+        # Fill it with zeroes first
+        matrixOfKernelValues = np.zeros((nSamples, nSamples))
+        # Replace each cell with it's values passed through the kernel
+        for i in range(nSamples):
+            for j in range(nSamples):
+                # Set the matrix value to be the X data passed through the chosen kernel operation
+                matrixOfKernelValues[i, j] = self.kernel(X[i], X[j])
+                
+    # Train the classifier            
     def fit(self, X, y):
-
-        n_samples, n_features = np.shape(X)
         
-        # Set gamma to 1/n_features by default
+        nSamples, nFeatures = np.shape(X) 
+        
+        # The gamma will 1/nFeatures by default, unless something else is supplied
         if not self.gamma:
-            self.gamma = 1 / n_features
+            self.gamma = 1 / nFeatures
         
-        # Initialize kernel method with parameters
+        # Initialize the chosen kernel method with the arguments provided
         self.kernel = self.kernel(
             power=self.power,
             gamma=self.gamma,
             coef=self.coef)
         
-        # Calculate a matrix of values that came through the kernel
-        # Fill it with zeroes first
-        kernel_matrix = np.zeros((n_samples, n_samples))
-        # Replace each cell with it's values passed through the kernel
-        for i in range(n_samples):
-            for j in range(n_samples):
-                kernel_matrix[i, j] = self.kernel(X[i], X[j])
+        matrixOfKernelValues = self.createKernelMatrix(X, nSamples)
         
-        lagrMult = self.computeLagrangeMultipliers(X, y, kernel_matrix, n_samples)
+        lagrMult = self.computeLagrangeMultipliers(X, y, matrixOfKernelValues, nSamples)
         
-        print('Lagrange Multipliers {}\n'.format(lagrMult))
         # Extract support vectors
+        print('Lagrange Multipliers {}\n'.format(lagrMult))
         # Get indexes of non-zero lagr. multipiers
-        idx = lagrMult > 1e-7 # this means 0.00000001 
+        lagrangeIndexes = lagrMult > 0.000001 # I read that this is better than > 0
         # Get the corresponding lagr. multipliers
-        self.lagrMultipliers = lagrMult[idx]
+        self.lagrMultipliers = lagrMult[lagrangeIndexes]
         print('Multipliers > 0 {}\n'.format(self.lagrMultipliers))
-        # Get the samples that will act as support vectors
-        self.supportVectors = X[idx]
+        # Find the samples that correspond as support vectors
+        self.supportVectors = X[lagrangeIndexes]
         print('I have {} support vectors {}\n'.format(len(self.supportVectors),self.supportVectors))
-        # Get the corresponding labels
-        self.supportVectorLabels = y[idx]
-        print('And their corresponding labels {}\n'.format(self.supportVectorLabels))
+        # Get their corresponding target labels
+        self.supportVectorTargets = y[lagrangeIndexes]
+        print('And their corresponding labels {}\n'.format(self.supportVectorTargets))
 
         
         # Calculate intercept with first support vector
-        self.intercept = self.supportVectorLabels[0]
+        self.intercept = self.supportVectorTargets[0]
         for i in range(len(self.lagrMultipliers)):
-            self.intercept -= self.lagrMultipliers[i] * self.supportVectorLabels[
-                i] * self.kernel(self.supportVectors[i], self.supportVectors[0])
+            supportVectorsThroughKernel = self.kernel(self.supportVectors[i], self.supportVectors[0])
+            self.intercept -= self.lagrMultipliers[i] * self.supportVectorTargets[i] * supportVectorsThroughKernel
 
     def predict(self, X):
-        y_pred = []
+        yPred = []
         # Iterate through list of samples and make predictions
         for sample in X:
             prediction = 0
             # Determine the label of the sample by the support vectors
             for i in range(len(self.lagrMultipliers)):
-                prediction += self.lagrMultipliers[i] * self.supportVectorLabels[
-                    i] * self.kernel(self.supportVectors[i], sample)
+                supportVecKernelVal = self.kernel(self.supportVectors[i], sample)
+                prediction += self.lagrMultipliers[i] * self.supportVectorTargets[i] * supportVecKernelVal
             prediction += self.intercept
-            y_pred.append(np.sign(prediction))
-        return np.array(y_pred)
+            yPred.append(np.sign(prediction))
+            
+        return np.array(yPred)
     
 
     
     
     # Plot the dataset X and the corresponding labels y in 2D using PCA.
-    def plot_in_2d(self, X, y=None, labels = []):
+    def plotIn2D(self, X, y=None, labels = []):
         X_transformed = PCA().transform(X, n_components=2)
         x1 = X_transformed[:, 0]
         x2 = X_transformed[:, 1]
@@ -165,7 +179,7 @@ class SupportVectorMachine(object):
         plt.show()
 
     # Plot the dataset X and the corresponding labels y in 3D using PCA.
-    def plot_in_3d(self, X, y=None, labels = []):
+    def plotIn3D(self, X, y=None, labels = []):
         X_transformed = PCA().transform(X, n_components=3)
         x1 = X_transformed[:, 0]
         x2 = X_transformed[:, 1]
@@ -189,23 +203,23 @@ For easy testing
 
 def main():
     
+    # Testing functionality with the iris data for now.
     data = datasets.load_iris()
     X = normalize(data.data[data.target != 0])
     y = data.target[data.target != 0]
+    # Make the targets in range -1 and 1
     y[y == 1] = -1
     y[y == 2] = 1
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
     
-    svm = SVC()
+    svm = SupportVectorMachine()
     svm.fit(X_train, y_train)
-    y_pred = svm.predict(X_test)
+    yPred = svm.predict(X_test)
     
-    print ("Accuracy:", accuracy_score(y_test, y_pred))
+    print ("Accuracy:", accuracy_score(y_test, yPred))
     
-    # Reduce dimension to two using PCA.transform and plot the results
-    pca = PCA()
-    pca.plot_in_2d(X_test, y_pred, ['','',''])
-#    svm.plot_in_2d(X_test, y_pred, features = [0,1,2,3], featureLabels = ['a','b'])
+    svm.plotIn2D(X_test, yPred, ['','',''])
+#    svm.plotIn2D(X_test, yPred, features = [0,1,2,3], featureLabels = ['a','b'])
 
 
 if __name__ == "__main__":

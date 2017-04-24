@@ -1,3 +1,8 @@
+'''
+This file originally came from https://github.com/eriklindernoren/ML-From-Scratch/blob/master/unsupervised_learning/principal_component_analysis.py
+It has been adapted a lot and most of the original was removed. This file is basically used only for the Transform method.
+'''
+
 import sys
 import os
 from sklearn import datasets

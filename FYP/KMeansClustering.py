@@ -13,13 +13,12 @@ from sklearn.cross_validation import train_test_split
 
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-import matplotlib.cm as cm
+import matplotlib.patches as mpatches # This will make the legends of graphs.
+import matplotlib.cm as cm # Colormaps are cool
 
-# Import helper functions
-dir_path = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, dir_path + "/../utils")
-from data_manipulation import normalize
+# Import some helper functions
+pathOfCurrentDirectory = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, pathOfCurrentDirectory + "/../utils")
 from principal_component_analysis import PCA
 
 redPatch = mpatches.Patch(color='red', label='Hinge movement')
@@ -32,41 +31,40 @@ class KMeansClustering():
         self.k = k
         self.maxIterations = maxIterations
 
-    # Initialize the centroids as random samples
-    def _initRandomCentroids(self, X):
+    # Initialize the centroids as random samples from all the points
+    def createRandomClusters(self, X):
         nSamples, nFeatures = np.shape(X)
-        # Preallocate an array of the X shape
+        # Initialise an array of equal shape to {K,X}
         centroids = np.zeros((self.k, nFeatures))
-        # A random item in X will be chosen as a centroid for each K cluster
+        # A random index in X will be chosen to become the first centroid for each cluster K
         for i in range(self.k):
             centroids[i] = X[np.random.choice(range(nSamples))]
         return centroids
 
-    # Return the index of the closest centroid to the sample
-    def _closestCentroid(self, sample, centroids):
+    # Find index of the closest centroid to the provided sample
+    def closestCentroidToExample(self, sample, centroids):
         # i is the row in X
-        closest_i = None
+        closestIndex = None
         closestDistance = float("inf")
         for i, centroid in enumerate(centroids):
             distance = Point.distance(sample, centroid)
             if distance < closestDistance:
-                closest_i = i
+                closestIndex = i
                 closestDistance = distance
-        return closest_i
+        return closestIndex
 
-    # Assign the samples to the closest centroids to create clusters
-    def _createClusters(self, centroids, X):
+    # Assign the samples to the closest centroids, this becomes the clusters
+    def createClustersFromCentroids(self, centroids, X):
         nSamples = np.shape(X)[0]
         #Creates a 2d array with 1 row and k columns
         clusters = [[] for _ in range(self.k)]
-        for sample_i, sample in enumerate(X):
-            centroid_i = self._closestCentroid(sample, centroids)
-            clusters[centroid_i].append(sample_i)
+        for i, sample in enumerate(X):
+            centroidForIndex = self.closestCentroidToExample(sample, centroids)
+            clusters[centroidForIndex].append(i)
         return clusters
 
-    # Calculate new centroids as the means of the samples
-    # in each cluster
-    def _calculateCentroids(self, clusters, X):
+    # Calculate new centroids as the mean of all samples found in each cluster
+    def calculateCentroidsFromClusters(self, clusters, X):
         nFeatures = np.shape(X)[1]
         centroids = np.zeros((self.k, nFeatures))
         for i, cluster in enumerate(clusters):
@@ -74,41 +72,41 @@ class KMeansClustering():
             centroids[i] = centroid
         return centroids
 
-    # Classify samples as the index of their clusters
-    def _getClusterLabels(self, clusters, X):
+    # Classify the provdied samples as the index of their clusters
+    def getLabelsOfClusters(self, clusters, X):
         # One prediction for each sample
-        y_pred = np.zeros(np.shape(X)[0])
-        for cluster_i, cluster in enumerate(clusters):
-            for sample_i in cluster:
-                y_pred[sample_i] = cluster_i
-        return y_pred
+        yPred = np.zeros(np.shape(X)[0])
+        for i, cluster in enumerate(clusters):
+            for j in cluster:
+                yPred[j] = i
+        return yPred
 
     # Do K-Means clustering and return cluster indices
     def predict(self, X):
         print(np.shape(X))
         # Initialize centroids
-        centroids = self._initRandomCentroids(X)
+        centroids = self.createRandomClusters(X)
 
         # Iterate until convergence or for max iterations
         for i in range(self.maxIterations):
             # Assign samples to closest centroids (create clusters)
-            clusters = self._createClusters(centroids, X)
-            prev_centroids = centroids
+            clusters = self.createClustersFromCentroids(centroids, X)
+            previousCentroids = centroids
             # Calculate new centroids from the clusters
-            centroids = self._calculateCentroids(clusters, X)
+            centroids = self.calculateCentroidsFromClusters(clusters, X)
 
             # If no centroids have changed then it's reached convergence
-            diff = centroids - prev_centroids
+            diff = centroids - previousCentroids
             if not diff.any():
                 print('KMeans converged after {} iterations'.format(i))
                 break
         print('Cluster shape: {}'.format(np.shape(clusters)))
 #        print('Clusters: {}'.format(clusters))
-        return self._getClusterLabels(clusters, X)
+        return self.getLabelsOfClusters(clusters, X)
 
 
     # Plot the dataset X and the corresponding labels y in 2D using PCA.
-    def plot_in_2d(self, X, y=None, k = 1, labels = []):
+    def plotIn2D(self, X, y=None, k = 1, labels = []):
         X_transformed = PCA().transform(X, n_components=2)
         x1 = X_transformed[:, 0]
         x2 = X_transformed[:, 1]
@@ -126,7 +124,7 @@ class KMeansClustering():
         plt.show()
 
     # Plot the dataset X and the corresponding labels y in 3D using PCA.
-    def plot_in_3d(self, X, y=None, k=1, labels = []):
+    def plotIn3D(self, X, y=None, k=1, labels = []):
         X_transformed = PCA().transform(X, n_components=3)
         x1 = X_transformed[:, 0]
         x2 = X_transformed[:, 1]
@@ -150,26 +148,26 @@ class KMeansClustering():
         
 def main():
     # Load the dataset
-#    X, y = datasets.make_blobs()
-    
     data = datasets.load_iris()
+    
+    # Is it worth normalising the data? Probably...
 #    X = normalize(data.data)
     X = data.data
     print(np.shape(X))
     y = data.target
     k = 3
     
-    X_train, y_train, X_test, y_test = train_test_split(X, y, test_size=0.33)
+    X_train, y_train, X_test, y_test = train_test_split(X, y, test_size=0.2)
     print(np.shape(X_train))
     # Cluster the data using K-Means
 #    kmeans = KMeansClustering(k=k)
     kmeans = KMeans(k)
     kmeans.fit(X_train)
-    pred_clusters = kmeans.predict(X_test)
-#    print(kmeans.score(X_test, y_pred))
+    predictedClusters = kmeans.predict(X_test)
+#    print(kmeans.score(X_test, yPred))
     # Plot that shit
-#    kmeans.plot_in_2d(X, y_pred, k, ['Predicted clusters','',''])
-#    kmeans.plot_in_2d(X, y, k, ['Defined clusters','',''])
+#    kmeans.plotIn2D(X, yPred, k, ['Predicted clusters','',''])
+#    kmeans.plotIn2D(X, y, k, ['Defined clusters','',''])
     
 
 if __name__ == "__main__":
