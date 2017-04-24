@@ -40,14 +40,14 @@ class Participant(object):
         self.plateauPoints = np.array([]).astype(Point) # The average Points for each plateau section, later split into rest and extension
         self.plateauSensorValues = [] # Contains lists of the 4 sensor values when the data plateaus
         self.plateauSensorAverages = [] # The 4 sensor values averaged for each plateau
-        self.restSensors = []
-        self.extensionSensors = []
+        self.restSensors = [] # Sensor values found to be in rest plateaus
+        self.extensionSensors = [] # Sensor values found to be in extension plateaus
         self.meanPoint = Point() # The average cartesian point of all plateau averages
         self.extensionPoints = np.array([]) # The points from extension plateaus, assumed to be above the meanPoint
         self.restPoints = np.array([]) # The points from rest plateaus, assumed to be below the meanPoint
         self.meanRestPoint = Point(0,0) # The mean of restPoints
         self.vectorsBetween = np.array([]) # The vectors between each restPoint and extensionPoint
-        self.anglesBetween = np.array([]).astype(float) # The angles between each restPoint and extensionPoint
+        self.anglesBetween = np.array([]).astype(float) # The radians between each restPoint and extensionPoint
         
         
         self.fileName = date + ' ' + trialName + ' ' + participantName
@@ -95,29 +95,20 @@ class Participant(object):
         # Returns numpy arrays where possible
         
         self.plateaus = self.lookAheadForPlateau(by = byValue, varianceThreshold = threshold)
-#        print(len([p for p in self.plateaus if p == 1]))
-        # Maybe we still need this method, I'll leave this as a reminder for now. 
-#        self.plateaus = self.removeSmallPlateaus(5, self.plateaus)
-#        print(len([p for p in self.plateaus if p > 0]))
-
         self.plateauPoints = self.averagePlateauSections(self.plateaus, 'p')
-
         self.plateauSensorValues = self.extractData6Values(self.plateaus)
         self.plateauSensorAverages = self.avgSensorValues(self.plateauSensorValues)
-        
         self.extensionPoints, self.restPoints, self.meanPoint, self.extensionSensors, self.restSensors = self.splitDataAboveBelowMean(self.plateauPoints, self.plateauSensorAverages, returnType = 'p') 
-        
         self.meanRestPoint = Point.averagePoints(self.restPoints)
         
         self.trimLists()                  
 
         self.vectorsBetween = [self.extensionPoints[i] - self.restPoints[i] for i, val in enumerate(self.restPoints)]
-        # Does argument order matter for the angles?? nope!!
         self.anglesBetween = [Point.angleBetween(self.extensionPoints[i] ,self.restPoints[i] ) for i, val in enumerate(self.restPoints)]
            
 
                           
-    # I'm too lazy to check if there's a reference ro value issue so I'm just copying everything . Lazy is lazy.
+    # I'm too lazy to check if there's a reference vs value issue so I'm just copying everything. Lazy is lazy.
     def listFeaturesDict(self):
            return {'trialType':self.movement,
                    'direction':self.direction,
@@ -163,7 +154,7 @@ class Participant(object):
         return 0
         
     '''
-    Returns an array of length data6.count containing zeroes or an index where a flat point is.
+    Returns an array of length data6.count containing zeroes or 1 denoting an area of flat.
     '''
     def lookAheadForPlateau(self, by = 30, varianceThreshold = 0.5):
         

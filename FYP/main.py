@@ -16,8 +16,6 @@ from sklearn.svm import SVC
 from sklearn.cluster import KMeans
 from sklearn.metrics.cluster import completeness_score
 
-
-
 # My code
 from point import Point
 from HelperFile import Helper
@@ -26,13 +24,9 @@ from KMeansClustering import KMeansClustering
 from participant import Participant
 from kernels import *
 
-
 # Some helper functions
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, dir_path + "/../utils")
-#from data_manipulation import train_test_split, shuffle_data, normalize
-#from decision_tree import ClassificationTree
-
 
 
 class MLType(Enum):
@@ -143,7 +137,8 @@ def makeSVM(X, y, names, direction):
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
     '''
-    Using sklearn SVM.SVC - Support Vector Classifier 
+    Using sklearn SVM.SVC - Support Vector Classifier
+    If no kernel is supplied then it defaults to the RBF kernel
     '''
     clf = SVC(probability=True, verbose=False)
     scores = cross_val_score(clf, X, y, cv=nIterations) # K-fold cross valildation, K = nIterations
@@ -154,6 +149,7 @@ def makeSVM(X, y, names, direction):
 #    score = clf.score(X_test, y_test)
 
     print('The SVM, moving in the {} direction, using {} and {} scored an average of {} \n'.format(direction, names[0], names[1], avgScore))
+    print(79 * '_')
     return avgScore
     
 def makeKMeans(X, y, names, direction, show = False):
@@ -166,9 +162,10 @@ def makeKMeans(X, y, names, direction, show = False):
     yPred = kmeans.predict(X_test)
     
                                
-    print('The KMeans score, moving in the {} direction, for {} and {} is:'.format(direction, names[0], names[1]))
+    print('The KMeans scores, moving in the {} direction, for {} and {} are:'.format(direction, names[0], names[1]))
     
     # Useful benchmarking found at http://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_digits.html
+    # Edited it to be more readable and to save the scores
     print(79 * '_')
     print('% 9s' % 'init   time     inertia    homo   compl     v-meas     ARI        AMI')
     
@@ -283,8 +280,6 @@ def main():
     
     for i in range(totalFeatures):
         for j in range(totalFeatures):
-            if i == j:
-                continue
             featureCombinations.append([i, j])
             nameCombinations.append([featureNames[i], featureNames[j]])
 
@@ -325,10 +320,18 @@ def main():
         
        
         # Save this directions data to it's own CSV file
-        with open('{}{}'.format('KMEANS_' + scores['direction'], '.csv'), 'w') as file:
+        csvfilename = 'KMEANS_'
+        if chosenAlgorithm == MLType.SVM:
+            csvfilename = 'SVM_'
+            
+        with open('{}{}'.format(csvfilename + scores['direction'], '.csv'), 'w') as file:
             writer = csv.writer(file, dialect='excel')
+            
             if chosenAlgorithm == MLType.KMEANS:
                 writer.writerow([ 'Feature Combination', 'time', 'inertia', 'homogeneity_score', 'completeness_score', 'v_measure_score', 'adjusted_rand_score', 'adjusted_mutual_info_score' ])
+            elif chosenAlgorithm == MLType.SVM:
+                writer.writerow([ 'Feature Combination', 'Score'])
+                
             for i in range(len(scores['features'])):
                 if chosenAlgorithm == MLType.KMEANS:
                     arr = scores['scores'][i]
@@ -336,9 +339,14 @@ def main():
                 elif chosenAlgorithm == MLType.SVM:
                     writer.writerow([ scores['features'][i] , scores['scores'][i] ])
      
-    print(consoleSeparator)
+        print(consoleSeparator)
+        print('Data for direction {} was saved to a CSV file'.format(directionName))
+        print(consoleSeparator)
+    
+    print(consoleSeparator)    
     print('All of this information was saved to a CSV file in the FYP folder of this project.')
     print('There 3 of them, each named your chosen algorithm + a direction')
+    print('If you wish to try this again, using either of the algorithms, then please run the Main.py file again')
      
     return 
 
