@@ -157,17 +157,19 @@ def main():
     y = data.target
     k = 3
     
-    X_train, y_train, X_test, y_test = train_test_split(X, y, test_size=0.2)
-    print(np.shape(X_train))
     # Cluster the data using K-Means
-#    kmeans = KMeansClustering(k=k)
-    kmeans = KMeans(k)
-    kmeans.fit(X_train)
-    predictedClusters = kmeans.predict(X_test)
-#    print(kmeans.score(X_test, yPred))
+    kmeans = KMeansClustering(k=k)
+    yPred = kmeans.predict(X)
     # Plot that shit
-#    kmeans.plotIn2D(X, yPred, k, ['Predicted clusters','',''])
-#    kmeans.plotIn2D(X, y, k, ['Defined clusters','',''])
+    kmeans.plotIn2D(X, yPred, k, ['Predicted clusters','',''])
+    kmeans.plotIn2D(X, y, k, ['Defined clusters','',''])
+    
+    # This is the sklearn stuff.
+#    kmeans = KMeans(k)
+#    X_train, y_train, X_test, y_test = train_test_split(X, y, test_size=0.2)
+#    print(np.shape(X_train))
+#    predictedClusters = kmeans.predict(X_test)
+#    print(kmeans.score(X_test, yPred))
     
 
 if __name__ == "__main__":

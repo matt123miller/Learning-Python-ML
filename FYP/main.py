@@ -324,20 +324,20 @@ def main():
         if chosenAlgorithm == MLType.SVM:
             csvfilename = 'SVM_'
             
-        with open('{}{}'.format(csvfilename + scores['direction'], '.csv'), 'w') as file:
-            writer = csv.writer(file, dialect='excel')
-            
-            if chosenAlgorithm == MLType.KMEANS:
-                writer.writerow([ 'Feature Combination', 'time', 'inertia', 'homogeneity_score', 'completeness_score', 'v_measure_score', 'adjusted_rand_score', 'adjusted_mutual_info_score' ])
-            elif chosenAlgorithm == MLType.SVM:
-                writer.writerow([ 'Feature Combination', 'Score'])
-                
-            for i in range(len(scores['features'])):
-                if chosenAlgorithm == MLType.KMEANS:
-                    arr = scores['scores'][i]
-                    writer.writerow([ scores['features'][i], arr[0], arr[1], arr[2], arr[3], arr[4], arr[5], arr[6] ])
-                elif chosenAlgorithm == MLType.SVM:
-                    writer.writerow([ scores['features'][i] , scores['scores'][i] ])
+#        with open('{}{}'.format(csvfilename + scores['direction'], '.csv'), 'w') as file:
+#            writer = csv.writer(file, dialect='excel')
+#            
+#            if chosenAlgorithm == MLType.KMEANS:
+#                writer.writerow([ 'Feature Combination', 'time', 'inertia', 'homogeneity_score', 'completeness_score', 'v_measure_score', 'adjusted_rand_score', 'adjusted_mutual_info_score' ])
+#            elif chosenAlgorithm == MLType.SVM:
+#                writer.writerow([ 'Feature Combination', 'Score'])
+#                
+#            for i in range(len(scores['features'])):
+#                if chosenAlgorithm == MLType.KMEANS:
+#                    arr = scores['scores'][i]
+#                    writer.writerow([ scores['features'][i], arr[0], arr[1], arr[2], arr[3], arr[4], arr[5], arr[6] ])
+#                elif chosenAlgorithm == MLType.SVM:
+#                    writer.writerow([ scores['features'][i] , scores['scores'][i] ])
      
         print(consoleSeparator)
         print('Data for direction {} was saved to a CSV file'.format(directionName))
